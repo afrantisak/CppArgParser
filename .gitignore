@@ -1,0 +1,46 @@
+# Compiled Object files
+*.slo
+*.lo
+*.o
+
+# Compiled Dynamic libraries
+*.so
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.opensdf
+*.ipch
+*.user
+*.sdf
+*.pdb
+*.tlog
+*.lastbuildstate
+*.obj
+*.idb
+*.log
+*.sbr
+*.lib
+*.manifest
+*.pch
+*.res
+*.bsc
+*.exe
+*.ilk
+*.cache
+*.suo
+*.exe
+*.vcxproj.user
+*.unsuccessfulbuild
+*.autogen.cpp
+*.dmp
+*.enc
+*.aps
+
+# cmake
+build/*
+
+# tempoutput files
+*.tmp
+*.tgz
