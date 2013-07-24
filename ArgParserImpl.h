@@ -69,7 +69,7 @@ namespace CppArgParser
             ConvertSwitch m_convertSwitch;
 
             template<typename T>
-            void type();
+            void handleType();
         };
 
     };//namespace Private

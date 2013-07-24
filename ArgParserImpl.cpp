@@ -63,7 +63,7 @@ namespace CppArgParser
         }
         
         template<typename T>
-        void ArgParserImpl::type()
+        void ArgParserImpl::handleType()
         {
             m_addSwitch.insert(std::make_pair(&typeid(T), &CppArgParser::Private::optionAddImpl<T>));
             m_convertSwitch.insert(std::make_pair(&typeid(T), &CppArgParser::Private::optionConvertImpl<T>));
@@ -85,19 +85,19 @@ ArgParserImpl::ArgParserImpl(Name desc)
     m_addSwitch(),
     m_convertSwitch()
 {
-    type<Type::B>();
-    type<Type::C>();
-    type<Type::UC>();
-    type<Type::S>();
-    type<Type::US>();
-    type<Type::N>();
-    type<Type::UN>();
-    type<Type::L>();
-    type<Type::UL>();
-    type<Type::LL>();
-    type<Type::ULL>();
-    type<Type::Size>();
-    type<Type::Str>();
+    handleType<Type::B>();
+    handleType<Type::C>();
+    handleType<Type::UC>();
+    handleType<Type::S>();
+    handleType<Type::US>();
+    handleType<Type::N>();
+    handleType<Type::UN>();
+    handleType<Type::L>();
+    handleType<Type::UL>();
+    handleType<Type::LL>();
+    handleType<Type::ULL>();
+    handleType<Type::Size>();
+    handleType<Type::Str>();
 }
 
 void ArgParserImpl::optionAdd(boost::program_options::options_description& desc, const Option& option, Name name)
