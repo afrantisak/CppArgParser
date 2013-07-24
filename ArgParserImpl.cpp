@@ -94,56 +94,49 @@ ArgParserImpl::ArgParserImpl(Name desc)
     m_po_required("Required parameters"),
     m_po_all("All options"),
     m_po_positional(),
-    m_po_map()
+    m_po_map(),
+    m_addSwitch(),
+    m_convertSwitch()
 {
+    type<Type::B>();
+    type<Type::C>();
+    type<Type::UC>();
+    type<Type::S>();
+    type<Type::US>();
+    type<Type::N>();
+    type<Type::UN>();
+    type<Type::L>();
+    type<Type::UL>();
+    type<Type::LL>();
+    type<Type::ULL>();
+    type<Type::Size>();
+    type<Type::Str>();
 }
 
 void ArgParserImpl::optionAdd(boost::program_options::options_description& desc, const Option& option, Name name)
 {
-    if      (optionAddImpl<Type::B>   (option, desc, name)) {}
-    else if (optionAddImpl<Type::C>   (option, desc, name)) {}
-    else if (optionAddImpl<Type::UC>  (option, desc, name)) {}
-    else if (optionAddImpl<Type::S>   (option, desc, name)) {}
-    else if (optionAddImpl<Type::US>  (option, desc, name)) {}
-    else if (optionAddImpl<Type::N>   (option, desc, name)) {}
-    else if (optionAddImpl<Type::UN>  (option, desc, name)) {}
-    else if (optionAddImpl<Type::L>   (option, desc, name)) {}
-    else if (optionAddImpl<Type::UL>  (option, desc, name)) {}
-    else if (optionAddImpl<Type::LL>  (option, desc, name)) {}
-    else if (optionAddImpl<Type::ULL> (option, desc, name)) {}
-    else if (optionAddImpl<Type::Size>(option, desc, name)) {}
-    else if (optionAddImpl<Type::Str> (option, desc, name)) {}
-    else
+    auto funcIter = m_addSwitch.find(option.m_infoPtr);
+    if (funcIter == m_addSwitch.end())
     {
         std::cout << "ERROR: ArgParser unsupported type ";
         std::cout << "(" << option.m_infoPtr->name() << ") ";
         std::cout << "for option \"" << option.m_name << "\"" << std::endl;
         throw 1;
     }
+    funcIter->second(option, desc, name);
 }
 
-void ArgParserImpl::optionConvert(const Option& option, Name name)
+void ArgParserImpl::optionConvert(Option& option, Name name)
 {
-    if      (optionConvertImpl<Type::B>   (option, value(name))) {}
-    else if (optionConvertImpl<Type::C>   (option, value(name))) {}
-    else if (optionConvertImpl<Type::UC>  (option, value(name))) {}
-    else if (optionConvertImpl<Type::S>   (option, value(name))) {}
-    else if (optionConvertImpl<Type::US>  (option, value(name))) {}
-    else if (optionConvertImpl<Type::N>   (option, value(name))) {}
-    else if (optionConvertImpl<Type::UN>  (option, value(name))) {}
-    else if (optionConvertImpl<Type::L>   (option, value(name))) {}
-    else if (optionConvertImpl<Type::UL>  (option, value(name))) {}
-    else if (optionConvertImpl<Type::LL>  (option, value(name))) {}
-    else if (optionConvertImpl<Type::ULL> (option, value(name))) {}
-    else if (optionConvertImpl<Type::Size>(option, value(name))) {}
-    else if (optionConvertImpl<Type::Str> (option, value(name))) {}
-    else
+    auto funcIter = m_convertSwitch.find(option.m_infoPtr);
+    if (funcIter == m_convertSwitch.end())
     {
         std::cout << "ERROR: ArgParser unsupported conversion ";
         std::cout << "(" << option.m_infoPtr->name() << ") ";
         std::cout << "for option \"" << option.m_name << "\"" << std::endl;
         throw 1;
     }
+    funcIter->second(option, value(name));
 }
 
 void ArgParserImpl::parse(int argc, char* argv[])

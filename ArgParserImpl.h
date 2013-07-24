@@ -1,5 +1,7 @@
 #pragma once
 #include <string>
+#include <map>
+#include <functional>
 #include <boost/program_options.hpp>
 
 namespace CppArgParser
@@ -54,7 +56,7 @@ namespace CppArgParser
                 
             void optionAdd(boost::program_options::options_description& desc, const Option& option, Name name);
             
-            void optionConvert(const Option& option, Name name);
+            void optionConvert(Option& option, Name name);
             
             Name m_name;
             Name m_desc;
@@ -67,6 +69,19 @@ namespace CppArgParser
             boost::program_options::options_description m_po_all;
             boost::program_options::positional_options_description m_po_positional;
             boost::program_options::variables_map m_po_map;
+            
+            typedef std::map<const std::type_info* , std::function<void(const Option& option, boost::program_options::options_description& desc, const std::string& name)>> AddSwitch;
+            AddSwitch m_addSwitch;
+
+            typedef std::map<const std::type_info* , std::function<void(Option& option, const boost::program_options::variable_value& value)>> ConvertSwitch;
+            ConvertSwitch m_convertSwitch;
+
+            template<typename T>
+            void type()
+            {
+                m_addSwitch.insert(std::make_pair(&typeid(T), &optionAddImpl<T>));
+                m_convertSwitch.insert(std::make_pair(&typeid(T), &optionConvertImpl<T>));
+            }
         };
 
     };//namespace Private
