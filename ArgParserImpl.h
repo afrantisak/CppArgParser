@@ -25,7 +25,6 @@ namespace CppArgParser
             // process the arguments and check for errors
             void parse(int argc, char* argv[]);
             
-        private:
             struct Option
             {
                 Option(Name name, Name abbrev, void* valuePtr, const std::type_info* infoPtr, Name desc)
@@ -39,15 +38,8 @@ namespace CppArgParser
                 const std::type_info* m_infoPtr;
                 Name m_desc;
             };
-            
-            template<typename T>
-            friend bool optionAddImpl(const Option& option, 
-                                      boost::program_options::options_description& desc, const Name& name);
-                
-            template<typename T>
-            friend bool optionConvertImpl(const Option& option, 
-                                          const boost::program_options::variable_value& value);
 
+        private:            
             const boost::program_options::variable_value& value(const Name& name) const;
             
             // if this is an optional argument (i.e. the name begins with "-" or "--")
@@ -77,11 +69,7 @@ namespace CppArgParser
             ConvertSwitch m_convertSwitch;
 
             template<typename T>
-            void type()
-            {
-                m_addSwitch.insert(std::make_pair(&typeid(T), &optionAddImpl<T>));
-                m_convertSwitch.insert(std::make_pair(&typeid(T), &optionConvertImpl<T>));
-            }
+            void type();
         };
 
     };//namespace Private

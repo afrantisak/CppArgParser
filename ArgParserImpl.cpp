@@ -30,58 +30,45 @@ namespace CppArgParser
     {
     
         template<typename T>
-        bool optionAddImpl(const ArgParserImpl::Option& option, po::options_description& desc, const std::string& name)
+        void optionAddImpl(const ArgParserImpl::Option& option, po::options_description& desc, const std::string& name)
         {
-            if (*option.m_infoPtr == typeid(T))
-            {
-                desc.add_options()(name.c_str(), po::value<T>(), option.m_desc.c_str());    
-                return true;
-            }
-            return false;
+            desc.add_options()(name.c_str(), po::value<T>(), option.m_desc.c_str());    
         }
 
         template<>
-        bool optionAddImpl<bool>(const ArgParserImpl::Option& option, po::options_description& desc, const std::string& name)
+        void optionAddImpl<bool>(const ArgParserImpl::Option& option, po::options_description& desc, const std::string& name)
         {
-            if (*option.m_infoPtr == typeid(bool))
-            {
-                desc.add_options()(name.c_str(), option.m_desc.c_str());    
-                return true;
-            }
-            return false;
+            desc.add_options()(name.c_str(), option.m_desc.c_str());    
         }
 
         template<typename T>
-        bool optionConvertImpl(const ArgParserImpl::Option& option, const po::variable_value& value)
+        void optionConvertImpl(const ArgParserImpl::Option& option, const po::variable_value& value)
         {
-            if (*option.m_infoPtr == typeid(T))
+            if (!value.empty())
             {
-                if (!value.empty())
-                {
-                    *reinterpret_cast<T*>(option.m_valuePtr) = value.as<T>();
-                }
-                return true;
+                *reinterpret_cast<T*>(option.m_valuePtr) = value.as<T>();
             }
-            return false;
         }
 
         template<>
-        bool optionConvertImpl<bool>(const ArgParserImpl::Option& option, const po::variable_value& value)
+        void optionConvertImpl<bool>(const ArgParserImpl::Option& option, const po::variable_value& value)
         {
-            if (*option.m_infoPtr == typeid(bool))
+            if (!value.empty())
             {
-                if (!value.empty())
-                {
-                    if (value.as<std::string>().size())
-                        *reinterpret_cast<bool*>(option.m_valuePtr) = boost::lexical_cast<bool>(value.as<std::string>());
-                    else
-                        *reinterpret_cast<bool*>(option.m_valuePtr) = true;
-                }
-                return true;
+                if (value.as<std::string>().size())
+                    *reinterpret_cast<bool*>(option.m_valuePtr) = boost::lexical_cast<bool>(value.as<std::string>());
+                else
+                    *reinterpret_cast<bool*>(option.m_valuePtr) = true;
             }
-            return false;
         }
         
+        template<typename T>
+        void ArgParserImpl::type()
+        {
+            m_addSwitch.insert(std::make_pair(&typeid(T), &CppArgParser::Private::optionAddImpl<T>));
+            m_convertSwitch.insert(std::make_pair(&typeid(T), &CppArgParser::Private::optionConvertImpl<T>));
+        }
+
     };//namespace Private
 
 };//namespace CppArgParser
