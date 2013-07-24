@@ -16,8 +16,7 @@ namespace CppArgParser
     public:  
         typedef std::string Name;
         
-        // TODO: use command-line arg[0] for default name?
-        ArgParser(Name name, Name description = Name());
+        ArgParser(Name description = Name());
         ~ArgParser();
         
         template<typename T>

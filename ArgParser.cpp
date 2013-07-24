@@ -3,8 +3,8 @@
 
 using namespace CppArgParser;
 
-ArgParser::ArgParser(Name name, Name description)
-    :   m_implPtr(new Private::ArgParserImpl(name, description))
+ArgParser::ArgParser(Name description)
+    :   m_implPtr(new Private::ArgParserImpl(description))
 {    
 }
 

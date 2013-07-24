@@ -86,8 +86,8 @@ namespace CppArgParser
 
 };//namespace CppArgParser
 
-ArgParserImpl::ArgParserImpl(Name name, Name desc)
-:   m_name(name),
+ArgParserImpl::ArgParserImpl(Name desc)
+:   m_name(),
     m_desc(desc),
     m_options(),
     m_po_visible("Allowed options"),
@@ -150,6 +150,8 @@ void ArgParserImpl::parse(int argc, char* argv[])
 {
     m_po_all.add_options()("help", "show this help message");
     m_po_visible.add_options()("help", "show this help message");
+    
+    m_name = argv[0];
     
     // Declare the supported options.
     for (auto option: m_options)

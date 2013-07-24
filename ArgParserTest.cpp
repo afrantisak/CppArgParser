@@ -41,7 +41,7 @@ int main(int argc, char* argv[])
         ArgParserType::Str  str  = "";
 
         // define arguments
-        CppArgParser::ArgParser args("ArgParserTest");
+        CppArgParser::ArgParser args("Test the CppArgParser");
         args.add("--b",      b,    "bool");
         args.add("--c",      c,    "char");
         args.add("--uc",     uc,   "unsigned char");

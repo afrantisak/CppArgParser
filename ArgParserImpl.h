@@ -13,7 +13,7 @@ namespace CppArgParser
         public:  
             typedef std::string Name;
             
-            ArgParserImpl(Name name, Name description);
+            ArgParserImpl(Name description);
             
             void add(Name name, void* valuePtr, const std::type_info* typePtr, Name desc)
             {
