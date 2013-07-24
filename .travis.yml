@@ -2,9 +2,4 @@ language: cpp
 compiler:
     - gcc
 
-install: make get-deps
-
 script:  mkdir -p build; cd build; cmake ..; make; cd ..
-
-compiler:
-    
