@@ -2,4 +2,6 @@ language: cpp
 compiler:
     - gcc
 
+install: libboost-dev
+
 script:  mkdir -p build; cd build; cmake ..; make; cd ..
