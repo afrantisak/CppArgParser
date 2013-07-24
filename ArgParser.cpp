@@ -1,9 +1,6 @@
 #include "ArgParser.h"
 #include "ArgParserImpl.h"
-#include <typeinfo>
-#include <boost/lexical_cast.hpp>
 
-namespace po = boost::program_options;
 using namespace CppArgParser;
 
 ArgParser::ArgParser(Name name, Name description)
@@ -24,6 +21,7 @@ void ArgParser::addImpl(Name name, void* valuePtr, const std::type_info* typePtr
 {
     m_implPtr->add(name, valuePtr, typePtr, desc);
 }
+
 /*
 Copyright (c) 2013 Aaron Frantisak
 
