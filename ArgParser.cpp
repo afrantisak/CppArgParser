@@ -1,7 +1,9 @@
 #include "ArgParser.h"
+#include <typeinfo>
 #include <boost/lexical_cast.hpp>
 
 namespace po = boost::program_options;
+using namespace CppArgParser;
 
 // shortcuts
 struct Type
@@ -21,58 +23,63 @@ struct Type
     typedef std::string        Str;
 };
 
-template<typename T>
-bool optionAddImpl(const ArgParser::Option& option, po::options_description& desc, const std::string& name)
+namespace CppArgParser
 {
-    if (*option.m_infoPtr == typeid(T))
+    
+    template<typename T>
+    bool optionAddImpl(const ArgParser::Option& option, po::options_description& desc, const std::string& name)
     {
-        desc.add_options()(name.c_str(), po::value<T>(), option.m_desc.c_str());    
-        return true;
-    }
-    return false;
-}
-
-template<>
-bool optionAddImpl<bool>(const ArgParser::Option& option, po::options_description& desc, const std::string& name)
-{
-    if (*option.m_infoPtr == typeid(bool))
-    {
-        desc.add_options()(name.c_str(), option.m_desc.c_str());    
-        return true;
-    }
-    return false;
-}
-
-template<typename T>
-bool optionConvertImpl(const ArgParser::Option& option, const po::variable_value& value)
-{
-    if (*option.m_infoPtr == typeid(T))
-    {
-        if (!value.empty())
+        if (*option.m_infoPtr == typeid(T))
         {
-            *reinterpret_cast<T*>(option.m_valuePtr) = value.as<T>();
+            desc.add_options()(name.c_str(), po::value<T>(), option.m_desc.c_str());    
+            return true;
         }
-        return true;
+        return false;
     }
-    return false;
-}
 
-template<>
-bool optionConvertImpl<bool>(const ArgParser::Option& option, const po::variable_value& value)
-{
-    if (*option.m_infoPtr == typeid(bool))
+    template<>
+    bool optionAddImpl<bool>(const ArgParser::Option& option, po::options_description& desc, const std::string& name)
     {
-        if (!value.empty())
+        if (*option.m_infoPtr == typeid(bool))
         {
-            if (value.as<std::string>().size())
-                *reinterpret_cast<bool*>(option.m_valuePtr) = boost::lexical_cast<bool>(value.as<std::string>());
-            else
-                *reinterpret_cast<bool*>(option.m_valuePtr) = true;
+            desc.add_options()(name.c_str(), option.m_desc.c_str());    
+            return true;
         }
-        return true;
+        return false;
     }
-    return false;
-}
+
+    template<typename T>
+    bool optionConvertImpl(const ArgParser::Option& option, const po::variable_value& value)
+    {
+        if (*option.m_infoPtr == typeid(T))
+        {
+            if (!value.empty())
+            {
+                *reinterpret_cast<T*>(option.m_valuePtr) = value.as<T>();
+            }
+            return true;
+        }
+        return false;
+    }
+
+    template<>
+    bool optionConvertImpl<bool>(const ArgParser::Option& option, const po::variable_value& value)
+    {
+        if (*option.m_infoPtr == typeid(bool))
+        {
+            if (!value.empty())
+            {
+                if (value.as<std::string>().size())
+                    *reinterpret_cast<bool*>(option.m_valuePtr) = boost::lexical_cast<bool>(value.as<std::string>());
+                else
+                    *reinterpret_cast<bool*>(option.m_valuePtr) = true;
+            }
+            return true;
+        }
+        return false;
+    }
+
+};//namespace CppArgParser
 
 ArgParser::ArgParser(Name name, Name desc)
 :   m_name(name),
