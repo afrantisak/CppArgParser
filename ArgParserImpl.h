@@ -49,10 +49,6 @@ namespace CppArgParser
             // then return the name WITHOUT the dashes.  If it is a required argument, return empty string.
             Name getOptional(const Name& name);
                 
-            void optionAdd(boost::program_options::options_description& desc, const Option& option, Name name);
-            
-            void optionConvert(Option& option, Name name);
-            
             Name m_name;
             Name m_desc;
             
@@ -65,11 +61,8 @@ namespace CppArgParser
             boost::program_options::positional_options_description m_po_positional;
             boost::program_options::variables_map m_po_map;
             
-            typedef MapSwitch<std::type_index, const Option&, boost::program_options::options_description&, const std::string&> AddSwitch;
-            AddSwitch m_addSwitch;
-            
-            typedef MapSwitch<std::type_index, Option&, const boost::program_options::variable_value&> ConvertSwitch;
-            ConvertSwitch m_convertSwitch;
+            MapSwitch<std::type_index, const Option&, boost::program_options::options_description&, const std::string&> m_addSwitch;
+            MapSwitch<std::type_index, Option&, const boost::program_options::variable_value&> m_convertSwitch;
 
             template<typename T>
             void handleType();

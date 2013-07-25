@@ -100,16 +100,6 @@ ArgParserImpl::ArgParserImpl(Name desc)
     m_convertSwitch.def(&Private::optionConvertUnsupported);
 }
 
-void ArgParserImpl::optionAdd(boost::program_options::options_description& desc, const Option& option, Name name)
-{
-    m_addSwitch(option.m_type, option, desc, name);
-}
-
-void ArgParserImpl::optionConvert(Option& option, Name name)
-{
-    m_convertSwitch(option.m_type, option, value(name));
-}
-
 void ArgParserImpl::parse(int argc, char* argv[])
 {
     m_po_all.add_options()("help", "show this help message");
@@ -123,8 +113,8 @@ void ArgParserImpl::parse(int argc, char* argv[])
         Name name = getOptional(option.m_name);
         if (name.size())
         {
-            optionAdd(m_po_all, option, name);
-            optionAdd(m_po_visible, option, name);
+            m_addSwitch(option.m_type, option, m_po_all, name);
+            m_addSwitch(option.m_type, option, m_po_visible, name);
         }
         else
         {
@@ -187,7 +177,7 @@ void ArgParserImpl::parse(int argc, char* argv[])
         {
             if (name.size() == 0)
                 name = option.m_name;
-            optionConvert(option, name);
+            m_convertSwitch(option.m_type, option, value(name));
         }
         catch (boost::bad_any_cast)
         {
