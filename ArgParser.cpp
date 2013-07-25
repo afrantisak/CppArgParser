@@ -17,9 +17,9 @@ void ArgParser::parse(int argc, char* argv[])
     m_implPtr->parse(argc, argv);
 }
 
-void ArgParser::addImpl(Name name, void* valuePtr, const std::type_info* typePtr, Name desc)
+void ArgParser::addImpl(Name name, void* valuePtr, std::type_index type, Name desc)
 {
-    m_implPtr->add(name, valuePtr, typePtr, desc);
+    m_implPtr->add(name, valuePtr, type, desc);
 }
 
 /*

@@ -85,7 +85,5 @@ int main(int argc, char* argv[])
         return 127;
     }
     
-    std::cout << sizeof(std::type_info) << std::endl;
-
     return 0;
 }

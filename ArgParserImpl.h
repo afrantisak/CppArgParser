@@ -1,6 +1,7 @@
 #pragma once
-#include <string>
 #include <map>
+#include <string>
+#include <typeindex>
 #include <functional>
 #include <unordered_map>
 #include <boost/program_options.hpp>
@@ -19,9 +20,9 @@ namespace CppArgParser
             
             ArgParserImpl(Name description);
             
-            void add(Name name, void* valuePtr, const std::type_info* typePtr, Name desc)
+            void add(Name name, void* valuePtr, std::type_index type, Name desc)
             {
-                m_options.push_back(Option(name, "", valuePtr, typePtr, desc));
+                m_options.push_back(Option(name, "", valuePtr, type, desc));
             }
 
             // process the arguments and check for errors
@@ -29,15 +30,15 @@ namespace CppArgParser
             
             struct Option
             {
-                Option(Name name, Name abbrev, void* valuePtr, const std::type_info* infoPtr, Name desc)
-                :   m_name(name), m_abbrev(abbrev), m_valuePtr(valuePtr), m_infoPtr(infoPtr), m_desc(desc)
+                Option(Name name, Name abbrev, void* valuePtr, std::type_index type, Name desc)
+                :   m_name(name), m_abbrev(abbrev), m_valuePtr(valuePtr), m_type(type), m_desc(desc)
                 {
                 }
                 
                 Name m_name;
                 Name m_abbrev;
                 void* m_valuePtr;
-                const std::type_info* m_infoPtr;
+                std::type_index m_type;
                 Name m_desc;
             };
 
@@ -64,10 +65,10 @@ namespace CppArgParser
             boost::program_options::positional_options_description m_po_positional;
             boost::program_options::variables_map m_po_map;
             
-            typedef MapSwitch<const std::type_info*, const Option&, boost::program_options::options_description&, const std::string&> AddSwitch;
+            typedef MapSwitch<std::type_index, const Option&, boost::program_options::options_description&, const std::string&> AddSwitch;
             AddSwitch m_addSwitch;
             
-            typedef MapSwitch<const std::type_info*, Option&, const boost::program_options::variable_value&> ConvertSwitch;
+            typedef MapSwitch<std::type_index, Option&, const boost::program_options::variable_value&> ConvertSwitch;
             ConvertSwitch m_convertSwitch;
 
             template<typename T>

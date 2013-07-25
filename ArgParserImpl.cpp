@@ -26,7 +26,7 @@ namespace CppArgParser
         void optionAddUnsupported(const ArgParserImpl::Option& option, po::options_description& desc, const std::string& name)
         {
             std::cout << "ERROR: ArgParser unsupported type ";
-            std::cout << "(" << option.m_infoPtr->name() << ") ";
+            std::cout << "(" << option.m_type.name() << ") ";
             std::cout << "for option \"" << option.m_name << "\"" << std::endl;
             throw 1;
         }
@@ -55,7 +55,7 @@ namespace CppArgParser
         void optionConvertUnsupported(const ArgParserImpl::Option& option, const po::variable_value& value)
         {
             std::cout << "ERROR: ArgParser unsupported conversion ";
-            std::cout << "(" << option.m_infoPtr->name() << ") ";
+            std::cout << "(" << option.m_type.name() << ") ";
             std::cout << "for option \"" << option.m_name << "\"" << std::endl;
             throw 1;
         }
@@ -63,8 +63,8 @@ namespace CppArgParser
         template<typename T>
         void ArgParserImpl::handleType()
         {
-            m_addSwitch.add(&typeid(T), &CppArgParser::Private::optionAddImpl<T>);
-            m_convertSwitch.add(&typeid(T), &CppArgParser::Private::optionConvertImpl<T>);
+            m_addSwitch.add(typeid(T), &CppArgParser::Private::optionAddImpl<T>);
+            m_convertSwitch.add(typeid(T), &CppArgParser::Private::optionConvertImpl<T>);
         }
 
     };//namespace Private
@@ -102,12 +102,12 @@ ArgParserImpl::ArgParserImpl(Name desc)
 
 void ArgParserImpl::optionAdd(boost::program_options::options_description& desc, const Option& option, Name name)
 {
-    m_addSwitch(option.m_infoPtr, option, desc, name);
+    m_addSwitch(option.m_type, option, desc, name);
 }
 
 void ArgParserImpl::optionConvert(Option& option, Name name)
 {
-    m_convertSwitch(option.m_infoPtr, option, value(name));
+    m_convertSwitch(option.m_type, option, value(name));
 }
 
 void ArgParserImpl::parse(int argc, char* argv[])
@@ -193,7 +193,7 @@ void ArgParserImpl::parse(int argc, char* argv[])
         {
             std::cout << "ERROR: ArgParser failed conversion ";
             std::cout << "from value \"" << value(name).as<std::string>() << "\" ";
-            std::cout << "to type \"" << option.m_infoPtr->name() << "\" ";
+            std::cout << "to type \"" << option.m_type.name() << "\" ";
             std::cout << "for option \"" << option.m_name << "\"" << std::endl;
             throw 1;
         }

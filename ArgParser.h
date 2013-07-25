@@ -2,6 +2,7 @@
 #include <string>
 #include <memory>
 #include <typeinfo>
+#include <typeindex>
 
 namespace CppArgParser
 {
@@ -22,7 +23,7 @@ namespace CppArgParser
         template<typename T>
         void add(Name name, T& value, Name desc = Name())
         {
-            addImpl(name, &value, &typeid(T), desc);
+            addImpl(name, &value, typeid(T), desc);
         }
 
         // process the arguments and check for errors
@@ -31,7 +32,7 @@ namespace CppArgParser
     private:
         std::unique_ptr<Private::ArgParserImpl> m_implPtr;
         
-        void addImpl(Name name, void* valuePtr, const std::type_info* typePtr, Name desc);
+        void addImpl(Name name, void* valuePtr, std::type_index type, Name desc);
     };
 
 };// namespace CppArgParser
