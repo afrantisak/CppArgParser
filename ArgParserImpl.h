@@ -2,7 +2,49 @@
 #include <string>
 #include <map>
 #include <functional>
+#include <unordered_map>
 #include <boost/program_options.hpp>
+
+template<typename Key, typename... Args>
+class Switch
+{
+public:
+    typedef std::function<void(const Args&... args)> Func;
+    
+    Switch()
+        :   m_impl(),
+            m_default()
+    {
+    }
+    
+    void add(Key key, Func func)
+    {
+        m_impl.insert(std::make_pair(key, func));
+    }
+
+    void def(Func func)
+    {
+        m_default = func;
+    }
+
+    void operator()(Key key, const Args&... args)
+    {
+        auto iFunc = m_impl.find(key);
+        if (iFunc != m_impl.end())
+        {
+            iFunc->second(args...);
+        }
+        else
+        {
+            m_default(args...);
+        }
+    }
+
+private:
+    typedef std::unordered_map<Key, Func> Impl;
+    Impl m_impl;
+    Func m_default;
+};
 
 namespace CppArgParser
 {
@@ -62,10 +104,10 @@ namespace CppArgParser
             boost::program_options::positional_options_description m_po_positional;
             boost::program_options::variables_map m_po_map;
             
-            typedef std::map<const std::type_info* , std::function<void(const Option& option, boost::program_options::options_description& desc, const std::string& name)>> AddSwitch;
+            typedef Switch<const std::type_info*, const Option&, boost::program_options::options_description&, const std::string&> AddSwitch;
             AddSwitch m_addSwitch;
-
-            typedef std::map<const std::type_info* , std::function<void(Option& option, const boost::program_options::variable_value& value)>> ConvertSwitch;
+            
+            typedef Switch<const std::type_info*, Option&, const boost::program_options::variable_value&> ConvertSwitch;
             ConvertSwitch m_convertSwitch;
 
             template<typename T>

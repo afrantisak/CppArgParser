@@ -23,6 +23,14 @@ namespace CppArgParser
             desc.add_options()(name.c_str(), option.m_desc.c_str());    
         }
 
+        void optionAddUnsupported(const ArgParserImpl::Option& option, po::options_description& desc, const std::string& name)
+        {
+            std::cout << "ERROR: ArgParser unsupported type ";
+            std::cout << "(" << option.m_infoPtr->name() << ") ";
+            std::cout << "for option \"" << option.m_name << "\"" << std::endl;
+            throw 1;
+        }
+
         template<typename T>
         void optionConvertImpl(const ArgParserImpl::Option& option, const po::variable_value& value)
         {
@@ -31,7 +39,7 @@ namespace CppArgParser
                 *reinterpret_cast<T*>(option.m_valuePtr) = value.as<T>();
             }
         }
-
+        
         template<>
         void optionConvertImpl<bool>(const ArgParserImpl::Option& option, const po::variable_value& value)
         {
@@ -44,11 +52,19 @@ namespace CppArgParser
             }
         }
         
+        void optionConvertUnsupported(const ArgParserImpl::Option& option, const po::variable_value& value)
+        {
+            std::cout << "ERROR: ArgParser unsupported conversion ";
+            std::cout << "(" << option.m_infoPtr->name() << ") ";
+            std::cout << "for option \"" << option.m_name << "\"" << std::endl;
+            throw 1;
+        }
+        
         template<typename T>
         void ArgParserImpl::handleType()
         {
-            m_addSwitch.insert(std::make_pair(&typeid(T), &CppArgParser::Private::optionAddImpl<T>));
-            m_convertSwitch.insert(std::make_pair(&typeid(T), &CppArgParser::Private::optionConvertImpl<T>));
+            m_addSwitch.add(&typeid(T), &CppArgParser::Private::optionAddImpl<T>);
+            m_convertSwitch.add(&typeid(T), &CppArgParser::Private::optionConvertImpl<T>);
         }
 
     };//namespace Private
@@ -80,32 +96,18 @@ ArgParserImpl::ArgParserImpl(Name desc)
     handleType<unsigned long long>();
     handleType<size_t>();
     handleType<std::string>();
+    m_addSwitch.def(&Private::optionAddUnsupported);
+    m_convertSwitch.def(&Private::optionConvertUnsupported);
 }
 
 void ArgParserImpl::optionAdd(boost::program_options::options_description& desc, const Option& option, Name name)
 {
-    auto funcIter = m_addSwitch.find(option.m_infoPtr);
-    if (funcIter == m_addSwitch.end())
-    {
-        std::cout << "ERROR: ArgParser unsupported type ";
-        std::cout << "(" << option.m_infoPtr->name() << ") ";
-        std::cout << "for option \"" << option.m_name << "\"" << std::endl;
-        throw 1;
-    }
-    funcIter->second(option, desc, name);
+    m_addSwitch(option.m_infoPtr, option, desc, name);
 }
 
 void ArgParserImpl::optionConvert(Option& option, Name name)
 {
-    auto funcIter = m_convertSwitch.find(option.m_infoPtr);
-    if (funcIter == m_convertSwitch.end())
-    {
-        std::cout << "ERROR: ArgParser unsupported conversion ";
-        std::cout << "(" << option.m_infoPtr->name() << ") ";
-        std::cout << "for option \"" << option.m_name << "\"" << std::endl;
-        throw 1;
-    }
-    funcIter->second(option, value(name));
+    m_convertSwitch(option.m_infoPtr, option, value(name));
 }
 
 void ArgParserImpl::parse(int argc, char* argv[])
