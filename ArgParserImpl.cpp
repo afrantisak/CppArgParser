@@ -5,24 +5,6 @@
 namespace po = boost::program_options;
 using namespace CppArgParser::Private;
 
-// shortcuts
-struct Type
-{
-    typedef bool               B;
-    typedef char               C;
-    typedef unsigned char      UC;
-    typedef short              S;
-    typedef unsigned short     US;
-    typedef int                N;
-    typedef unsigned int       UN;
-    typedef long               L;
-    typedef unsigned long      UL;
-    typedef long long          LL;
-    typedef unsigned long long ULL;
-    typedef size_t             Size;
-    typedef std::string        Str;
-};
-
 namespace CppArgParser
 {
     
@@ -85,19 +67,19 @@ ArgParserImpl::ArgParserImpl(Name desc)
     m_addSwitch(),
     m_convertSwitch()
 {
-    handleType<Type::B>();
-    handleType<Type::C>();
-    handleType<Type::UC>();
-    handleType<Type::S>();
-    handleType<Type::US>();
-    handleType<Type::N>();
-    handleType<Type::UN>();
-    handleType<Type::L>();
-    handleType<Type::UL>();
-    handleType<Type::LL>();
-    handleType<Type::ULL>();
-    handleType<Type::Size>();
-    handleType<Type::Str>();
+    handleType<bool>();
+    handleType<char>();
+    handleType<unsigned char>();
+    handleType<short>();
+    handleType<unsigned short>();
+    handleType<int>();
+    handleType<unsigned int>();
+    handleType<long>();
+    handleType<unsigned long>();
+    handleType<long long>();
+    handleType<unsigned long long>();
+    handleType<size_t>();
+    handleType<std::string>();
 }
 
 void ArgParserImpl::optionAdd(boost::program_options::options_description& desc, const Option& option, Name name)
