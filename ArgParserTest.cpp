@@ -84,6 +84,8 @@ int main(int argc, char* argv[])
             std::cerr << "exception: " << e.what() << "\n";
         return 127;
     }
+    
+    std::cout << sizeof(std::type_info) << std::endl;
 
     return 0;
 }
