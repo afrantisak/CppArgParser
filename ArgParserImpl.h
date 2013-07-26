@@ -48,7 +48,7 @@ namespace CppArgParser
             };
 
         private:
-            const BpoVarValue& value(const Name& name) const;
+            const BpoVarValue& getArgValue(const Name& name) const;
             
             // if this is an optional argument (i.e. the name begins with "-" or "--")
             // then return the name WITHOUT the dashes.  If it is a required argument, return empty string.

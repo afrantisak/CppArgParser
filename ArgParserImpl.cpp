@@ -21,7 +21,7 @@ namespace CppArgParser
             desc.add_options()(name.c_str(), option.m_desc.c_str());    
         }
 
-        void optionAddUnsupported(const ArgParserImpl::Option& option, BpoOptsDesc& desc, const std::string& name)
+        void optionAddImplUnsupported(const ArgParserImpl::Option& option, BpoOptsDesc& desc, const std::string& name)
         {
             std::cout << "ERROR: ArgParser unsupported type ";
             std::cout << "(" << option.m_type.name() << ") ";
@@ -50,7 +50,7 @@ namespace CppArgParser
             }
         }
         
-        void optionConvertUnsupported(const ArgParserImpl::Option& option, const BpoVarValue& value)
+        void optionConvertImplUnsupported(const ArgParserImpl::Option& option, const BpoVarValue& value)
         {
             std::cout << "ERROR: ArgParser unsupported conversion ";
             std::cout << "(" << option.m_type.name() << ") ";
@@ -94,8 +94,8 @@ ArgParserImpl::ArgParserImpl(Name desc)
     handleType<unsigned long long>();
     handleType<size_t>();
     handleType<std::string>();
-    m_addSwitch.def(&Private::optionAddUnsupported);
-    m_convertSwitch.def(&Private::optionConvertUnsupported);
+    m_addSwitch.def(&Private::optionAddImplUnsupported);
+    m_convertSwitch.def(&Private::optionConvertImplUnsupported);
 }
 
 void ArgParserImpl::parse(int argc, char* argv[])
@@ -105,26 +105,30 @@ void ArgParserImpl::parse(int argc, char* argv[])
     
     m_name = argv[0];
     
-    // Declare the supported options.
+    // Declare the supported parameters
     for (auto option: m_options)
     {
         Name name = getOptional(option.m_name);
         if (name.size())
         {
+            // add optional parameters
             m_addSwitch(option.m_type, option, m_po_all, name);
             m_addSwitch(option.m_type, option, m_po_visible, name);
         }
         else
         {
+            // add required parameters
             m_po_all.add_options()(option.m_name.c_str(), option.m_desc.c_str());    
             m_po_required.add_options()(option.m_name.c_str(), option.m_desc.c_str());    
             m_po_positional.add(option.m_name.c_str(), 1);
         }
     }
     
+    // process the command line
     Bpo::store(Bpo::command_line_parser(argc, argv).options(m_po_all).positional(m_po_positional).run(), m_po_map);
     Bpo::notify(m_po_map);    
     
+    // automatically handle --help
     if (m_po_map.count("help")) {
         std::cout << "Usage: " << m_name; 
         for (auto option: m_options)
@@ -154,10 +158,7 @@ void ArgParserImpl::parse(int argc, char* argv[])
     for (auto option: m_options)
     {
         Name name = getOptional(option.m_name);
-        if (name.size())
-        {
-        }
-        else
+        if (!name.size())
         {
             if (m_po_map.count(option.m_name.c_str()) == 0)
             {
@@ -175,12 +176,12 @@ void ArgParserImpl::parse(int argc, char* argv[])
         {
             if (name.size() == 0)
                 name = option.m_name;
-            m_convertSwitch(option.m_type, option, value(name));
+            m_convertSwitch(option.m_type, option, getArgValue(name));
         }
         catch (boost::bad_any_cast)
         {
             std::cout << "ERROR: ArgParser failed conversion ";
-            std::cout << "from value \"" << value(name).as<std::string>() << "\" ";
+            std::cout << "from value \"" << getArgValue(name).as<std::string>() << "\" ";
             std::cout << "to type \"" << option.m_type.name() << "\" ";
             std::cout << "for option \"" << option.m_name << "\"" << std::endl;
             throw 1;
@@ -188,7 +189,7 @@ void ArgParserImpl::parse(int argc, char* argv[])
     }
 }
 
-const BpoVarValue& ArgParserImpl::value(const Name& name) const 
+const BpoVarValue& ArgParserImpl::getArgValue(const Name& name) const 
 {
     return m_po_map.operator[](name.c_str());
 }
