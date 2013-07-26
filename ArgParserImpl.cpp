@@ -69,7 +69,7 @@ namespace CppArgParser
 };//namespace CppArgParser
 
 template<typename T>
-void ArgParserImpl::handleType()
+void ArgParserImpl::registerType()
 {
     m_addSwitch.add(typeid(T), &CppArgParser::Private::optionAddImpl<T>);
     m_convertSwitch.add(typeid(T), &CppArgParser::Private::optionConvertImpl<T>);
@@ -87,19 +87,25 @@ ArgParserImpl::ArgParserImpl(Name desc)
     m_addSwitch(),
     m_convertSwitch()
 {
-    handleType<bool>();
-    handleType<char>();
-    handleType<unsigned char>();
-    handleType<short>();
-    handleType<unsigned short>();
-    handleType<int>();
-    handleType<unsigned int>();
-    handleType<long>();
-    handleType<unsigned long>();
-    handleType<long long>();
-    handleType<unsigned long long>();
-    handleType<size_t>();
-    handleType<std::string>();
+    // register each type that we handle
+    registerType<bool>();
+    registerType<char>();
+    registerType<unsigned char>();
+    registerType<short>();
+    registerType<unsigned short>();
+    registerType<int>();
+    registerType<unsigned int>();
+    registerType<long>();
+    registerType<unsigned long>();
+    registerType<long long>();
+    registerType<unsigned long long>();
+    registerType<size_t>();
+    registerType<std::string>();
+}
+
+void ArgParserImpl::add(Name name, void* valuePtr, std::type_index type, Name desc)
+{
+    m_parameters.push_back(Parameter(name, "", valuePtr, type, desc));
 }
 
 void ArgParserImpl::parse(int argc, char* argv[])

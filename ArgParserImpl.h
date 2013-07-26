@@ -38,10 +38,7 @@ namespace CppArgParser
         public:  
             ArgParserImpl(Name description);
             
-            void add(Name name, void* valuePtr, std::type_index type, Name desc)
-            {
-                m_parameters.push_back(Parameter(name, "", valuePtr, type, desc));
-            }
+            void add(Name name, void* valuePtr, std::type_index type, Name desc);
 
             void parse(int argc, char* argv[]);
             
@@ -51,6 +48,10 @@ namespace CppArgParser
             // if this is an optional argument (i.e. the name begins with "-" or "--")
             // then return the name WITHOUT the dashes.  If it is a required argument, return empty string.
             Name getOptional(const Name& name);
+
+            // this will add the type to both of the add and convert MapSwitches
+            template<typename T>
+            void registerType();
                 
             Name m_name;
             Name m_desc;
@@ -66,9 +67,6 @@ namespace CppArgParser
             
             MapSwitch<std::type_index, const Parameter&, BpoOptsDesc&, const std::string&> m_addSwitch;
             MapSwitch<std::type_index, Parameter&, const BpoVarValue&> m_convertSwitch;
-
-            template<typename T>
-            void handleType();
         };
 
     };//namespace Private
