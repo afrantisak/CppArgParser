@@ -149,16 +149,24 @@ void ArgParserImpl::parse(int argc, char* argv[])
             {
                 std::cout << " <" << param.m_name << ">";
             }
-        }
-        
-        std::cout << " [options]" << std::endl;
-        if (m_desc.size())
-            std::cout << m_desc << std::endl;
+        }        
+        if (m_po_visible.options().size())
+            std::cout << " [options]";
         std::cout << std::endl;
+        std::cout << std::endl;
+        
+        if (m_desc.size())
+        {
+            std::cout << m_desc << std::endl;
+            std::cout << std::endl;
+        }
 
-        std::cout << m_po_required << std::endl;
+        if (m_po_required.options().size())
+            std::cout << m_po_required << std::endl;
 
-        std::cout << m_po_visible << std::endl;
+        if (m_po_visible.options().size())
+            std::cout << m_po_visible << std::endl;
+
         throw 0;
     }
     
