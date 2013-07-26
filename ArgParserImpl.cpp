@@ -8,17 +8,9 @@ namespace CppArgParser
     
     namespace Private
     {
-        void throwUnsupportedAdd(Parameter param)
+        void throwUnsupportedType(Parameter param)
         {
             std::cout << "ERROR: ArgParser unsupported type ";
-            std::cout << "(" << param.m_type.name() << ") ";
-            std::cout << "for parameter \"" << param.m_name << "\"" << std::endl;
-            throw 1;
-        }
-        
-        void throwUnsupportedConversion(Parameter param)
-        {
-            std::cout << "ERROR: ArgParser unsupported conversion ";
             std::cout << "(" << param.m_type.name() << ") ";
             std::cout << "for parameter \"" << param.m_name << "\"" << std::endl;
             throw 1;
@@ -32,6 +24,12 @@ namespace CppArgParser
             std::cout << "for parameter \"" << param.m_name << "\"" << std::endl;
             throw 1;
         }
+        
+        void throwRequiredMissing(Parameter param)
+        {
+            std::cout << "ERROR: " << param.m_name << " is required" << std::endl;
+            throw 1;
+        }
     
         template<typename T>
         void optionAddImpl(const Parameter& param, BpoOptsDesc& desc, const std::string& name)
@@ -43,11 +41,6 @@ namespace CppArgParser
         void optionAddImpl<bool>(const Parameter& param, BpoOptsDesc& desc, const std::string& name)
         {
             desc.add_options()(name.c_str(), param.m_desc.c_str());    
-        }
-
-        void optionAddImplUnsupported(const Parameter& param, BpoOptsDesc& desc, const std::string& name)
-        {
-            throwUnsupportedAdd(param);
         }
 
         template<typename T>
@@ -71,21 +64,16 @@ namespace CppArgParser
             }
         }
         
-        void optionConvertImplUnsupported(const Parameter& param, const BpoVarValue& value)
-        {
-            throwUnsupportedConversion(param);
-        }
-        
-        template<typename T>
-        void ArgParserImpl::handleType()
-        {
-            m_addSwitch.add(typeid(T), &CppArgParser::Private::optionAddImpl<T>);
-            m_convertSwitch.add(typeid(T), &CppArgParser::Private::optionConvertImpl<T>);
-        }
-
     };//namespace Private
 
 };//namespace CppArgParser
+
+template<typename T>
+void ArgParserImpl::handleType()
+{
+    m_addSwitch.add(typeid(T), &CppArgParser::Private::optionAddImpl<T>);
+    m_convertSwitch.add(typeid(T), &CppArgParser::Private::optionConvertImpl<T>);
+}
 
 ArgParserImpl::ArgParserImpl(Name desc)
 :   m_name(),
@@ -112,8 +100,6 @@ ArgParserImpl::ArgParserImpl(Name desc)
     handleType<unsigned long long>();
     handleType<size_t>();
     handleType<std::string>();
-    m_addSwitch.def(&Private::optionAddImplUnsupported);
-    m_convertSwitch.def(&Private::optionConvertImplUnsupported);
 }
 
 void ArgParserImpl::parse(int argc, char* argv[])
@@ -130,8 +116,15 @@ void ArgParserImpl::parse(int argc, char* argv[])
         if (name.size())
         {
             // add optional parameters
-            m_addSwitch(param.m_type, param, m_po_all, name);
-            m_addSwitch(param.m_type, param, m_po_visible, name);
+            try
+            {
+                m_addSwitch(param.m_type, param, m_po_all, name);
+                m_addSwitch(param.m_type, param, m_po_visible, name);
+            }
+            catch (std::bad_function_call&)
+            {
+                throwUnsupportedType(param);
+            }
         }
         else
         {
@@ -177,8 +170,7 @@ void ArgParserImpl::parse(int argc, char* argv[])
         {
             if (m_po_map.count(param.m_name.c_str()) == 0)
             {
-                std::cout << "ERROR: " << param.m_name << " is required" << std::endl;
-                throw 1;
+                throwRequiredMissing(param);
             }
         }
     }
@@ -193,7 +185,11 @@ void ArgParserImpl::parse(int argc, char* argv[])
                 name = param.m_name;
             m_convertSwitch(param.m_type, param, getArgValue(name));
         }
-        catch (boost::bad_any_cast)
+        catch (std::bad_function_call&)
+        {
+            throwUnsupportedType(param);
+        }
+        catch (boost::bad_any_cast&)
         {
             throwFailedConversion(param, getArgValue(name).as<std::string>());
         }
