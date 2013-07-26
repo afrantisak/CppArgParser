@@ -15,38 +15,36 @@ namespace CppArgParser
         typedef boost::program_options::options_description BpoOptsDesc;
         typedef boost::program_options::positional_options_description BpoPosOptsDesc;
         typedef boost::program_options::variables_map BpoVarsMap;
-
         namespace Bpo = boost::program_options;
+
+        typedef std::string Name;
+            
+        struct Parameter
+        {
+            Parameter(Name name, Name abbrev, void* valuePtr, std::type_index type, Name desc)
+            :   m_name(name), m_abbrev(abbrev), m_valuePtr(valuePtr), m_type(type), m_desc(desc)
+            {
+            }
+            
+            Name m_name;
+            Name m_abbrev;
+            void* m_valuePtr;
+            std::type_index m_type;
+            Name m_desc;
+        };
 
         class ArgParserImpl
         {
         public:  
-            typedef std::string Name;
-            
             ArgParserImpl(Name description);
             
             void add(Name name, void* valuePtr, std::type_index type, Name desc)
             {
-                m_options.push_back(Option(name, "", valuePtr, type, desc));
+                m_parameters.push_back(Parameter(name, "", valuePtr, type, desc));
             }
 
-            // process the arguments and check for errors
             void parse(int argc, char* argv[]);
             
-            struct Option
-            {
-                Option(Name name, Name abbrev, void* valuePtr, std::type_index type, Name desc)
-                :   m_name(name), m_abbrev(abbrev), m_valuePtr(valuePtr), m_type(type), m_desc(desc)
-                {
-                }
-                
-                Name m_name;
-                Name m_abbrev;
-                void* m_valuePtr;
-                std::type_index m_type;
-                Name m_desc;
-            };
-
         private:
             const BpoVarValue& getArgValue(const Name& name) const;
             
@@ -57,8 +55,8 @@ namespace CppArgParser
             Name m_name;
             Name m_desc;
             
-            typedef std::vector<Option> Options;
-            Options m_options;
+            typedef std::vector<Parameter> Parameters;
+            Parameters m_parameters;
             
             BpoOptsDesc m_po_visible;
             BpoOptsDesc m_po_required;
@@ -66,8 +64,8 @@ namespace CppArgParser
             BpoPosOptsDesc m_po_positional;
             BpoVarsMap m_po_map;
             
-            MapSwitch<std::type_index, const Option&, BpoOptsDesc&, const std::string&> m_addSwitch;
-            MapSwitch<std::type_index, Option&, const BpoVarValue&> m_convertSwitch;
+            MapSwitch<std::type_index, const Parameter&, BpoOptsDesc&, const std::string&> m_addSwitch;
+            MapSwitch<std::type_index, Parameter&, const BpoVarValue&> m_convertSwitch;
 
             template<typename T>
             void handleType();

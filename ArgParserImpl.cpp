@@ -8,54 +8,72 @@ namespace CppArgParser
     
     namespace Private
     {
+        void throwUnsupportedAdd(Parameter param)
+        {
+            std::cout << "ERROR: ArgParser unsupported type ";
+            std::cout << "(" << param.m_type.name() << ") ";
+            std::cout << "for parameter \"" << param.m_name << "\"" << std::endl;
+            throw 1;
+        }
+        
+        void throwUnsupportedConversion(Parameter param)
+        {
+            std::cout << "ERROR: ArgParser unsupported conversion ";
+            std::cout << "(" << param.m_type.name() << ") ";
+            std::cout << "for parameter \"" << param.m_name << "\"" << std::endl;
+            throw 1;
+        }
+        
+        void throwFailedConversion(Parameter param, std::string valueStr)
+        {
+            std::cout << "ERROR: ArgParser failed conversion ";
+            std::cout << "from value \"" << valueStr << "\" ";
+            std::cout << "to type \"" << param.m_type.name() << "\" ";
+            std::cout << "for parameter \"" << param.m_name << "\"" << std::endl;
+            throw 1;
+        }
     
         template<typename T>
-        void optionAddImpl(const ArgParserImpl::Option& option, BpoOptsDesc& desc, const std::string& name)
+        void optionAddImpl(const Parameter& param, BpoOptsDesc& desc, const std::string& name)
         {
-            desc.add_options()(name.c_str(), Bpo::value<T>(), option.m_desc.c_str());    
+            desc.add_options()(name.c_str(), Bpo::value<T>(), param.m_desc.c_str());    
         }
 
         template<>
-        void optionAddImpl<bool>(const ArgParserImpl::Option& option, BpoOptsDesc& desc, const std::string& name)
+        void optionAddImpl<bool>(const Parameter& param, BpoOptsDesc& desc, const std::string& name)
         {
-            desc.add_options()(name.c_str(), option.m_desc.c_str());    
+            desc.add_options()(name.c_str(), param.m_desc.c_str());    
         }
 
-        void optionAddImplUnsupported(const ArgParserImpl::Option& option, BpoOptsDesc& desc, const std::string& name)
+        void optionAddImplUnsupported(const Parameter& param, BpoOptsDesc& desc, const std::string& name)
         {
-            std::cout << "ERROR: ArgParser unsupported type ";
-            std::cout << "(" << option.m_type.name() << ") ";
-            std::cout << "for option \"" << option.m_name << "\"" << std::endl;
-            throw 1;
+            throwUnsupportedAdd(param);
         }
 
         template<typename T>
-        void optionConvertImpl(const ArgParserImpl::Option& option, const BpoVarValue& value)
+        void optionConvertImpl(const Parameter& param, const BpoVarValue& value)
         {
             if (!value.empty())
             {
-                *reinterpret_cast<T*>(option.m_valuePtr) = value.as<T>();
+                *reinterpret_cast<T*>(param.m_valuePtr) = value.as<T>();
             }
         }
         
         template<>
-        void optionConvertImpl<bool>(const ArgParserImpl::Option& option, const BpoVarValue& value)
+        void optionConvertImpl<bool>(const Parameter& param, const BpoVarValue& value)
         {
             if (!value.empty())
             {
                 if (value.as<std::string>().size())
-                    *reinterpret_cast<bool*>(option.m_valuePtr) = boost::lexical_cast<bool>(value.as<std::string>());
+                    *reinterpret_cast<bool*>(param.m_valuePtr) = boost::lexical_cast<bool>(value.as<std::string>());
                 else
-                    *reinterpret_cast<bool*>(option.m_valuePtr) = true;
+                    *reinterpret_cast<bool*>(param.m_valuePtr) = true;
             }
         }
         
-        void optionConvertImplUnsupported(const ArgParserImpl::Option& option, const BpoVarValue& value)
+        void optionConvertImplUnsupported(const Parameter& param, const BpoVarValue& value)
         {
-            std::cout << "ERROR: ArgParser unsupported conversion ";
-            std::cout << "(" << option.m_type.name() << ") ";
-            std::cout << "for option \"" << option.m_name << "\"" << std::endl;
-            throw 1;
+            throwUnsupportedConversion(param);
         }
         
         template<typename T>
@@ -72,10 +90,10 @@ namespace CppArgParser
 ArgParserImpl::ArgParserImpl(Name desc)
 :   m_name(),
     m_desc(desc),
-    m_options(),
-    m_po_visible("Allowed options"),
+    m_parameters(),
+    m_po_visible("Optional parameters"),
     m_po_required("Required parameters"),
-    m_po_all("All options"),
+    m_po_all("All parameters"),
     m_po_positional(),
     m_po_map(),
     m_addSwitch(),
@@ -106,21 +124,21 @@ void ArgParserImpl::parse(int argc, char* argv[])
     m_name = argv[0];
     
     // Declare the supported parameters
-    for (auto option: m_options)
+    for (auto param: m_parameters)
     {
-        Name name = getOptional(option.m_name);
+        Name name = getOptional(param.m_name);
         if (name.size())
         {
             // add optional parameters
-            m_addSwitch(option.m_type, option, m_po_all, name);
-            m_addSwitch(option.m_type, option, m_po_visible, name);
+            m_addSwitch(param.m_type, param, m_po_all, name);
+            m_addSwitch(param.m_type, param, m_po_visible, name);
         }
         else
         {
             // add required parameters
-            m_po_all.add_options()(option.m_name.c_str(), option.m_desc.c_str());    
-            m_po_required.add_options()(option.m_name.c_str(), option.m_desc.c_str());    
-            m_po_positional.add(option.m_name.c_str(), 1);
+            m_po_all.add_options()(param.m_name.c_str(), param.m_desc.c_str());    
+            m_po_required.add_options()(param.m_name.c_str(), param.m_desc.c_str());    
+            m_po_positional.add(param.m_name.c_str(), 1);
         }
     }
     
@@ -131,15 +149,12 @@ void ArgParserImpl::parse(int argc, char* argv[])
     // automatically handle --help
     if (m_po_map.count("help")) {
         std::cout << "Usage: " << m_name; 
-        for (auto option: m_options)
+        for (auto param: m_parameters)
         {
-            Name name = getOptional(option.m_name);
-            if (name.size())
+            Name name = getOptional(param.m_name);
+            if (!name.size())
             {
-            }
-            else
-            {
-                std::cout << " <" << option.m_name << ">";
+                std::cout << " <" << param.m_name << ">";
             }
         }
         
@@ -155,36 +170,37 @@ void ArgParserImpl::parse(int argc, char* argv[])
     }
     
     // check for required args
-    for (auto option: m_options)
+    for (auto param: m_parameters)
     {
-        Name name = getOptional(option.m_name);
+        Name name = getOptional(param.m_name);
         if (!name.size())
         {
-            if (m_po_map.count(option.m_name.c_str()) == 0)
+            if (m_po_map.count(param.m_name.c_str()) == 0)
             {
-                std::cout << "ERROR: " << option.m_name << " is required" << std::endl;
+                std::cout << "ERROR: " << param.m_name << " is required" << std::endl;
                 throw 1;
             }
         }
     }
 
     // do the conversions
-    for (auto option: m_options)
+    for (auto param: m_parameters)
     {
-        Name name = getOptional(option.m_name);
+        Name name = getOptional(param.m_name);
         try
         {
-            if (name.size() == 0)
-                name = option.m_name;
-            m_convertSwitch(option.m_type, option, getArgValue(name));
+            if (!name.size())
+                name = param.m_name;
+            m_convertSwitch(param.m_type, param, getArgValue(name));
         }
         catch (boost::bad_any_cast)
         {
-            std::cout << "ERROR: ArgParser failed conversion ";
-            std::cout << "from value \"" << getArgValue(name).as<std::string>() << "\" ";
-            std::cout << "to type \"" << option.m_type.name() << "\" ";
-            std::cout << "for option \"" << option.m_name << "\"" << std::endl;
-            throw 1;
+            throwFailedConversion(param, getArgValue(name).as<std::string>());
+        }
+        catch (std::exception&)
+        {
+            // it seems boost actually throws this instead
+            throwFailedConversion(param, getArgValue(name).as<std::string>());
         }
     }
 }
@@ -194,7 +210,7 @@ const BpoVarValue& ArgParserImpl::getArgValue(const Name& name) const
     return m_po_map.operator[](name.c_str());
 }
     
-ArgParserImpl::Name ArgParserImpl::getOptional(const Name& name)
+Name ArgParserImpl::getOptional(const Name& name)
 {
     // TODO: convert spaces/underscores to dashes
     if (name.size() && name[0] == '-')
