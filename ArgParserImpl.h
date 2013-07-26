@@ -2,8 +2,6 @@
 #include <map>
 #include <string>
 #include <typeindex>
-#include <functional>
-#include <unordered_map>
 #include <boost/program_options.hpp>
 #include "MapSwitch.h"
 
@@ -12,6 +10,13 @@ namespace CppArgParser
     
     namespace Private
     {
+
+        typedef boost::program_options::variable_value BpoVarValue;
+        typedef boost::program_options::options_description BpoOptsDesc;
+        typedef boost::program_options::positional_options_description BpoPosOptsDesc;
+        typedef boost::program_options::variables_map BpoVarsMap;
+
+        namespace Bpo = boost::program_options;
 
         class ArgParserImpl
         {
@@ -42,8 +47,8 @@ namespace CppArgParser
                 Name m_desc;
             };
 
-        private:            
-            const boost::program_options::variable_value& value(const Name& name) const;
+        private:
+            const BpoVarValue& value(const Name& name) const;
             
             // if this is an optional argument (i.e. the name begins with "-" or "--")
             // then return the name WITHOUT the dashes.  If it is a required argument, return empty string.
@@ -55,14 +60,14 @@ namespace CppArgParser
             typedef std::vector<Option> Options;
             Options m_options;
             
-            boost::program_options::options_description m_po_visible;
-            boost::program_options::options_description m_po_required;
-            boost::program_options::options_description m_po_all;
-            boost::program_options::positional_options_description m_po_positional;
-            boost::program_options::variables_map m_po_map;
+            BpoOptsDesc m_po_visible;
+            BpoOptsDesc m_po_required;
+            BpoOptsDesc m_po_all;
+            BpoPosOptsDesc m_po_positional;
+            BpoVarsMap m_po_map;
             
-            MapSwitch<std::type_index, const Option&, boost::program_options::options_description&, const std::string&> m_addSwitch;
-            MapSwitch<std::type_index, Option&, const boost::program_options::variable_value&> m_convertSwitch;
+            MapSwitch<std::type_index, const Option&, BpoOptsDesc&, const std::string&> m_addSwitch;
+            MapSwitch<std::type_index, Option&, const BpoVarValue&> m_convertSwitch;
 
             template<typename T>
             void handleType();

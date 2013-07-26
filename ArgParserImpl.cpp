@@ -1,8 +1,6 @@
 #include "ArgParserImpl.h"
-#include <typeinfo>
 #include <boost/lexical_cast.hpp>
 
-namespace po = boost::program_options;
 using namespace CppArgParser::Private;
 
 namespace CppArgParser
@@ -12,18 +10,18 @@ namespace CppArgParser
     {
     
         template<typename T>
-        void optionAddImpl(const ArgParserImpl::Option& option, po::options_description& desc, const std::string& name)
+        void optionAddImpl(const ArgParserImpl::Option& option, BpoOptsDesc& desc, const std::string& name)
         {
-            desc.add_options()(name.c_str(), po::value<T>(), option.m_desc.c_str());    
+            desc.add_options()(name.c_str(), Bpo::value<T>(), option.m_desc.c_str());    
         }
 
         template<>
-        void optionAddImpl<bool>(const ArgParserImpl::Option& option, po::options_description& desc, const std::string& name)
+        void optionAddImpl<bool>(const ArgParserImpl::Option& option, BpoOptsDesc& desc, const std::string& name)
         {
             desc.add_options()(name.c_str(), option.m_desc.c_str());    
         }
 
-        void optionAddUnsupported(const ArgParserImpl::Option& option, po::options_description& desc, const std::string& name)
+        void optionAddUnsupported(const ArgParserImpl::Option& option, BpoOptsDesc& desc, const std::string& name)
         {
             std::cout << "ERROR: ArgParser unsupported type ";
             std::cout << "(" << option.m_type.name() << ") ";
@@ -32,7 +30,7 @@ namespace CppArgParser
         }
 
         template<typename T>
-        void optionConvertImpl(const ArgParserImpl::Option& option, const po::variable_value& value)
+        void optionConvertImpl(const ArgParserImpl::Option& option, const BpoVarValue& value)
         {
             if (!value.empty())
             {
@@ -41,7 +39,7 @@ namespace CppArgParser
         }
         
         template<>
-        void optionConvertImpl<bool>(const ArgParserImpl::Option& option, const po::variable_value& value)
+        void optionConvertImpl<bool>(const ArgParserImpl::Option& option, const BpoVarValue& value)
         {
             if (!value.empty())
             {
@@ -52,7 +50,7 @@ namespace CppArgParser
             }
         }
         
-        void optionConvertUnsupported(const ArgParserImpl::Option& option, const po::variable_value& value)
+        void optionConvertUnsupported(const ArgParserImpl::Option& option, const BpoVarValue& value)
         {
             std::cout << "ERROR: ArgParser unsupported conversion ";
             std::cout << "(" << option.m_type.name() << ") ";
@@ -124,8 +122,8 @@ void ArgParserImpl::parse(int argc, char* argv[])
         }
     }
     
-    po::store(po::command_line_parser(argc, argv).options(m_po_all).positional(m_po_positional).run(), m_po_map);
-    po::notify(m_po_map);    
+    Bpo::store(Bpo::command_line_parser(argc, argv).options(m_po_all).positional(m_po_positional).run(), m_po_map);
+    Bpo::notify(m_po_map);    
     
     if (m_po_map.count("help")) {
         std::cout << "Usage: " << m_name; 
@@ -190,7 +188,7 @@ void ArgParserImpl::parse(int argc, char* argv[])
     }
 }
 
-const po::variable_value& ArgParserImpl::value(const Name& name) const 
+const BpoVarValue& ArgParserImpl::value(const Name& name) const 
 {
     return m_po_map.operator[](name.c_str());
 }
