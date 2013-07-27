@@ -1,4 +1,5 @@
 #include "ArgParserImpl.h"
+#include <cxxabi.h>
 #include <boost/lexical_cast.hpp>
 #include <boost/program_options/errors.hpp>
 
@@ -10,10 +11,18 @@ namespace CppArgParser
     namespace Private
     {
         
+        std::string demangle(const char* mangled)
+        {
+            int status;
+            std::unique_ptr<char[], void (*)(void*)> result(
+            abi::__cxa_demangle(mangled, 0, 0, &status), std::free);
+            return result.get() ? std::string(result.get()) : "error occurred";
+        }
+
         void throwUnsupportedType(Parameter param)
         {
             std::cout << "ERROR: ArgParser unsupported type ";
-            std::cout << "(" << param.m_type.name() << ") ";
+            std::cout << "(" << demangle(param.m_type.name()) << ") ";
             std::cout << "for parameter \"" << param.m_name << "\"" << std::endl;
             throw 1;
         }
@@ -23,7 +32,7 @@ namespace CppArgParser
             std::cout << "ERROR: ArgParser failed conversion ";
             if (valueStr.size())
                 std::cout << "from value \"" << valueStr << "\" ";
-            std::cout << "to type \"" << param.m_type.name() << "\" ";
+            std::cout << "to type \"" << demangle(param.m_type.name()) << "\" ";
             std::cout << "for parameter \"" << param.m_name << "\"" << std::endl;
             throw 1;
         }
@@ -206,34 +215,32 @@ void ArgParserImpl::parse(int argc, char* argv[])
     // do the conversions
     for (auto param: m_parameters)
     {
-        Name name = getOptional(param.m_name);
         try
         {
+            Name name = getOptional(param.m_name);
+            const BpoVarValue& value = m_po_map.operator[](name.c_str());
             if (!name.size())
                 name = param.m_name;
-            m_convertSwitch(param.m_type, param, getArgValue(name));
+            m_convertSwitch(param.m_type, param, value);
         }
         catch (std::bad_function_call&)
         {
             throwUnsupportedType(param);
         }
+        /*
         catch (boost::bad_any_cast&)
         {
-            throwFailedConversion(param, getArgValue(name).as<std::string>());
+            throwFailedConversion(param, value.as<std::string>());
         }
         catch (std::exception&)
         {
             // it seems boost actually throws this instead
-            throwFailedConversion(param, getArgValue(name).as<std::string>());
+            throwFailedConversion(param, value.as<std::string>());
         }
+        */
     }
 }
 
-const BpoVarValue& ArgParserImpl::getArgValue(const Name& name) const 
-{
-    return m_po_map.operator[](name.c_str());
-}
-    
 Name ArgParserImpl::getOptional(const Name& name)
 {
     // TODO: convert spaces/underscores to dashes
