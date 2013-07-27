@@ -11,4 +11,4 @@ TARGET_LINK_LIBRARIES(ArgParserTest boost_system boost_program_options)
 
 enable_testing()
 
-ADD_DEFINITIONS("-std=c++0x") 
+ADD_DEFINITIONS("-std=c++0x -g")

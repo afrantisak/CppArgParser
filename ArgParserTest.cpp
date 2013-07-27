@@ -2,6 +2,7 @@
 #include <iostream>
 #include <iomanip>
 #include <string>
+#include <boost/exception/diagnostic_information.hpp> 
 
 // shortcuts
 struct ArgParserType
@@ -23,7 +24,9 @@ struct ArgParserType
 
 int main(int argc, char* argv[])
 {
-    try
+  std::set_terminate(__gnu_cxx::__verbose_terminate_handler);
+  
+  try
     {
         // declare and set defaults
         ArgParserType::B    b    = 0;
@@ -78,12 +81,14 @@ int main(int argc, char* argv[])
     {
         return n;
     }
-    catch (std::exception& e)
-    {
-        if (e.what())
-            std::cerr << "exception: " << e.what() << "\n";
-        return 127;
-    }
+//    catch (std::exception& e)
+//    {
+//        if (e.what())
+//            std::cerr << "exception: " << e.what() << "\n";
+//        std::cerr << "Unhandled exception!" << std::endl;
+//        std::cerr << boost::current_exception_diagnostic_information();        
+//        return 127;
+//    }
     
     return 0;
 }

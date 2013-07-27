@@ -1,5 +1,6 @@
 #include "ArgParserImpl.h"
 #include <boost/lexical_cast.hpp>
+#include <boost/program_options/errors.hpp>
 
 using namespace CppArgParser::Private;
 
@@ -8,6 +9,7 @@ namespace CppArgParser
     
     namespace Private
     {
+        
         void throwUnsupportedType(Parameter param)
         {
             std::cout << "ERROR: ArgParser unsupported type ";
@@ -16,10 +18,11 @@ namespace CppArgParser
             throw 1;
         }
         
-        void throwFailedConversion(Parameter param, std::string valueStr)
+        void throwFailedConversion(Parameter param, std::string valueStr = std::string())
         {
             std::cout << "ERROR: ArgParser failed conversion ";
-            std::cout << "from value \"" << valueStr << "\" ";
+            if (valueStr.size())
+                std::cout << "from value \"" << valueStr << "\" ";
             std::cout << "to type \"" << param.m_type.name() << "\" ";
             std::cout << "for parameter \"" << param.m_name << "\"" << std::endl;
             throw 1;
@@ -140,10 +143,21 @@ void ArgParserImpl::parse(int argc, char* argv[])
             m_po_positional.add(param.m_name.c_str(), 1);
         }
     }
-    
+
     // process the command line
-    Bpo::store(Bpo::command_line_parser(argc, argv).options(m_po_all).positional(m_po_positional).run(), m_po_map);
-    Bpo::notify(m_po_map);    
+    try
+    {
+        Bpo::store(Bpo::command_line_parser(argc, argv).options(m_po_all).positional(m_po_positional).run(), m_po_map);
+        Bpo::notify(m_po_map);    
+    }
+    catch (Bpo::validation_error& e)
+    {
+        auto paramIter = std::find_if(m_parameters.begin(), m_parameters.end(), [&](const Parameter& param)
+        {
+            return getOptional(param.m_name) == e.get_option_name();
+        });
+        throwFailedConversion(*paramIter);
+    }
     
     // automatically handle --help
     if (m_po_map.count("help")) {
