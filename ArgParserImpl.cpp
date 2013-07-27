@@ -14,9 +14,10 @@ namespace CppArgParser
         std::string demangle(const char* mangled)
         {
             int status;
-            std::unique_ptr<char[], void (*)(void*)> result(
-            abi::__cxa_demangle(mangled, 0, 0, &status), std::free);
-            return result.get() ? std::string(result.get()) : "error occurred";
+            char* p = abi::__cxa_demangle(mangled, 0, 0, &status);
+            std::string ret(p);
+            std::free(p);
+            return ret;
         }
 
         void throwUnsupportedType(Parameter param)
