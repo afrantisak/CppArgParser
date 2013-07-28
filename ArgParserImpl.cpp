@@ -228,23 +228,11 @@ void ArgParserImpl::parse(int argc, char* argv[])
         {
             throwUnsupportedType(param);
         }
-        /*
-        catch (boost::bad_any_cast&)
-        {
-            throwFailedConversion(param, value.as<std::string>());
-        }
-        catch (std::exception&)
-        {
-            // it seems boost actually throws this instead
-            throwFailedConversion(param, value.as<std::string>());
-        }
-        */
     }
 }
 
 Name ArgParserImpl::getOptional(const Name& name)
 {
-    // TODO: convert spaces/underscores to dashes
     if (name.size() && name[0] == '-')
     {
         Name sNice(name.substr(1));

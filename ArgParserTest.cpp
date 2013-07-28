@@ -81,14 +81,14 @@ int main(int argc, char* argv[])
     {
         return n;
     }
-//    catch (std::exception& e)
-//    {
-//        if (e.what())
-//            std::cerr << "exception: " << e.what() << "\n";
-//        std::cerr << "Unhandled exception!" << std::endl;
-//        std::cerr << boost::current_exception_diagnostic_information();        
-//        return 127;
-//    }
+    catch (std::exception& e)
+    {
+        if (e.what())
+            std::cerr << "exception: " << e.what() << "\n";
+        std::cerr << "Unhandled exception!" << std::endl;
+        std::cerr << boost::current_exception_diagnostic_information();        
+        return 127;
+    }
     
     return 0;
 }
