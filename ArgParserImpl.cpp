@@ -44,6 +44,13 @@ namespace CppArgParser
             throw 1;
         }
     
+        void throwUnknownParameter(std::string name)
+        {
+            std::cout << "ERROR: ArgParser unknown name ";
+            std::cout << "\"" << name << "\"" << std::endl;
+            throw 1;
+        }
+        
         template<typename T>
         void optionAddImpl(const Parameter& param, BpoOptsDesc& desc, const std::string& name)
         {
@@ -167,6 +174,10 @@ void ArgParserImpl::parse(int argc, char* argv[])
             return getOptional(param.m_name) == e.get_option_name();
         });
         throwFailedConversion(*paramIter);
+    }
+    catch (Bpo::unknown_option& e)
+    {
+        throwUnknownParameter(e.get_option_name());
     }
     
     // automatically handle --help
