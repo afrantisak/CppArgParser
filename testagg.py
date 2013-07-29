@@ -121,7 +121,8 @@ def test(name, instruction, cmd, refop, timeout, options):
 def recurse(data, tests, refop, timeout, options):
     aggregate = 0
     found = 0
-    for key, value in data.iteritems():
+    for key in sorted(data.keys()):
+        value = data[key]
         if type(value) == dict:
             cwd = os.path.abspath(os.getcwd())
             os.chdir(key)

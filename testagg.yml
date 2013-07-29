@@ -1,5 +1,18 @@
 test:
-    base:       ref ../build/bin/ArgParserTest
-    help:       ref ../build/bin/ArgParserTest --help
-    unknonwn:   ref ../build/bin/ArgParserTest --?
-    b:          ref ../build/bin/ArgParserTest --b
+    01_base:       ref ../build/bin/ArgParserTest
+    02_help:       ref ../build/bin/ArgParserTest --help
+    03_unknonwn:   ref ../build/bin/ArgParserTest --unknown
+    04_b:          ref ../build/bin/ArgParserTest --b
+    05_c:          ref ../build/bin/ArgParserTest --c A
+    06_uc:         ref ../build/bin/ArgParserTest --uc A
+    07_s:          ref ../build/bin/ArgParserTest --s -32767
+    08_us:         ref ../build/bin/ArgParserTest --us 65535
+    09_n:          ref ../build/bin/ArgParserTest --n -2147483647
+    10_un:         ref ../build/bin/ArgParserTest --un 4294967295
+    11_l:          ref ../build/bin/ArgParserTest --l -2147483647
+    12_ul:         ref ../build/bin/ArgParserTest --ul 4294967295
+    13_ll:         ref ../build/bin/ArgParserTest --ll 4294967295
+    14_ull:        ref ../build/bin/ArgParserTest --ull 4294967295
+    15_size:       ref ../build/bin/ArgParserTest --size 4294967295
+    #16_str:        ref ../build/bin/ArgParserTest --str "Hello World"
+    

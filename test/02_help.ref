@@ -1,0 +1,20 @@
+Usage: ../build/bin/ArgParserTest [options]
+
+Test the CppArgParser
+
+Optional parameters:
+  --help                show this help message
+  --b                   bool
+  --c arg               char
+  --uc arg              unsigned char
+  --s arg               short
+  --us arg              unsigned short
+  --n arg               int
+  --un arg              unsigned int
+  --l arg               long
+  --ul arg              unsigned long
+  --ll arg              long long
+  --ull arg             unsigned long long
+  --size arg            size_t
+  --str arg             std::string
+
