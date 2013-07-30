@@ -28,12 +28,8 @@ test:
     un_neg:     ref ../build/bin/ArgParserTest --un -1
     un_zero:    ref ../build/bin/ArgParserTest --un 0
     l_neg:      ref ../build/bin/ArgParserTest --l -2147483648
-    l_neg_big:  ref ../build/bin/ArgParserTest --l -2147483649
     l_pos:      ref ../build/bin/ArgParserTest --l 2147483647
-    l_pos_big:  ref ../build/bin/ArgParserTest --l 2147483648
     ul:         ref ../build/bin/ArgParserTest --ul 4294967295
-    ul_big:     ref ../build/bin/ArgParserTest --ul 4294967296
-    ul_neg:     ref ../build/bin/ArgParserTest --ul -1
     ul_zero:    ref ../build/bin/ArgParserTest --ul 0
     ll_neg:     ref ../build/bin/ArgParserTest --ll -9223372036854775808
     ll_neg_big: ref ../build/bin/ArgParserTest --ll -9223372036854775809
@@ -46,3 +42,8 @@ test:
     size:       ref ../build/bin/ArgParserTest --size 4294967295
     str:        ref ../build/bin/ArgParserTest --str "Hello World"
     
+    # these tests are different on 32/64 bit systems
+    #l_neg_big:  ref ../build/bin/ArgParserTest --l -2147483649
+    #l_pos_big:  ref ../build/bin/ArgParserTest --l 2147483648
+    #ul_big:     ref ../build/bin/ArgParserTest --ul 4294967296
+    #ul_neg:     ref ../build/bin/ArgParserTest --ul -1
