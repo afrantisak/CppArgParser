@@ -131,6 +131,7 @@ def recurse(data, tests, refop, timeout, options):
             found += found
             os.chdir(cwd)
             continue
+        value = value.decode('string_escape')
         import shlex
         tokens = shlex.split(value)
         instruction = tokens[0]

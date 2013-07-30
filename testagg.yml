@@ -1,10 +1,10 @@
 test:
-    01_base:       ref ../build/bin/ArgParserTest
-    02_help:       ref ../build/bin/ArgParserTest --help
-    03_unknonwn:   ref ../build/bin/ArgParserTest --unknown
+    01_help:       ref ../build/bin/ArgParserTest --help
+    02_unknown:    ref ../build/bin/ArgParserTest --unknown
+    03_base:       ref ../build/bin/ArgParserTest
     04_b:          ref ../build/bin/ArgParserTest --b
-    05_c:          ref ../build/bin/ArgParserTest --c A
-    06_uc:         ref ../build/bin/ArgParserTest --uc A
+    05_c:          ref ../build/bin/ArgParserTest --c \xFF
+    06_uc:         ref ../build/bin/ArgParserTest --uc \xFF
     07_s:          ref ../build/bin/ArgParserTest --s -32767
     08_us:         ref ../build/bin/ArgParserTest --us 65535
     09_n:          ref ../build/bin/ArgParserTest --n -2147483647
