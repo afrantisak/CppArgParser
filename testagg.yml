@@ -16,6 +16,9 @@ test:
     07_s_pos_big:  ref ../build/bin/ArgParserTest --s 32769
     07_s_badchar:  ref ../build/bin/ArgParserTest --s 10a
     08_us:         ref ../build/bin/ArgParserTest --us 65535
+    08_us_big:     ref ../build/bin/ArgParserTest --us 65536
+    08_us_neg:     ref ../build/bin/ArgParserTest --us -1
+    08_us_zero:    ref ../build/bin/ArgParserTest --us 0
     09_n:          ref ../build/bin/ArgParserTest --n -2147483647
     10_un:         ref ../build/bin/ArgParserTest --un 4294967295
     11_l:          ref ../build/bin/ArgParserTest --l -2147483647
