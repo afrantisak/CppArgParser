@@ -20,14 +20,21 @@ def TimeoutProcess(procfunc, timeout):
         def run(self):
             self.proc = procfunc(subprocess.PIPE, None, subprocess.STDOUT)
             if self.proc:
-                out = self.proc.communicate()[0]
+                out, err = self.proc.communicate()
                 # if it has a postprocess attribute, it is a function to process the output
                 if hasattr(self.proc, 'postprocess'):
                     out = out.split('\n')[:-1]
                     out = [line + '\n' for line in out]
+                    err = err.split('\n')[:-1]
+                    err = [line + '\n' for line in err]
+                    out += err
                     self.ret = self.proc.postprocess(out)
-                elif out:
-                    print out.rstrip()
+                else:
+                    if out:
+                        print out.rstrip()
+                    if err:
+                        print err.rstrip()
+                    
         def kill(self):
             if self.proc:
                 # kill with extreme prejudice
@@ -48,18 +55,19 @@ def testProcess(cmd, ref, refop, timeout):
         if refop == 'gen':
             print "Generating ref file %s" % ref,
             with open(ref, 'w') as out:
-                return subprocess.Popen(cmd, stdout = out, preexec_fn=os.setpgrp)
+                return subprocess.Popen(cmd, stdout = out, stderr = out, preexec_fn=os.setpgrp)
         elif refop == 'none':
-            return subprocess.Popen(cmd, stdout=subprocess.PIPE, preexec_fn=os.setpgrp)
+            return subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, preexec_fn=os.setpgrp)
         else:
             if not os.path.exists(ref):
-                print "Ref file does not exist: %s" % ref
-                return None
+                print "Ref file %s does not exist.  Test output follows:" % ref
+                # now print the output of the test
+                return subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, preexec_fn=os.setpgrp)
             if refop == 'dump':
                 for line in open(ref, 'r'):
                     print line.rstrip()
                 return 0
-            proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, preexec_fn=os.setpgrp)
+            proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, preexec_fn=os.setpgrp)
             def postprocess(out):
                 import difflib
                 diff = difflib.context_diff(open(ref, 'r').readlines(), out, "Expected", "Actual", n=2)

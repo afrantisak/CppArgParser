@@ -3,7 +3,11 @@ test:
     02_unknown:    ref ../build/bin/ArgParserTest --unknown
     03_base:       ref ../build/bin/ArgParserTest
     04_b:          ref ../build/bin/ArgParserTest --b
+    04_b_dup:      ref ../build/bin/ArgParserTest --b --b
+    05_c_missing:  ref ../build/bin/ArgParserTest --c
     05_c:          ref ../build/bin/ArgParserTest --c \xFF
+    05_c_partial:  ref ../build/bin/ArgParserTest --c \xFF --c
+    05_c_dup:      ref ../build/bin/ArgParserTest --c \xFF --c \xFF
     06_uc:         ref ../build/bin/ArgParserTest --uc \xFF
     07_s:          ref ../build/bin/ArgParserTest --s -32767
     08_us:         ref ../build/bin/ArgParserTest --us 65535
