@@ -9,7 +9,12 @@ test:
     05_c_partial:  ref ../build/bin/ArgParserTest --c \xFF --c
     05_c_dup:      ref ../build/bin/ArgParserTest --c \xFF --c \xFF
     06_uc:         ref ../build/bin/ArgParserTest --uc \xFF
-    07_s:          ref ../build/bin/ArgParserTest --s -32767
+    06_uc_big:     ref ../build/bin/ArgParserTest --uc \x100
+    07_s_neg:      ref ../build/bin/ArgParserTest --s -32767
+    07_s_neg_big:  ref ../build/bin/ArgParserTest --s -32768
+    07_s_pos:      ref ../build/bin/ArgParserTest --s 32768
+    07_s_pos_big:  ref ../build/bin/ArgParserTest --s 32769
+    07_s_badchar:  ref ../build/bin/ArgParserTest --s 10a
     08_us:         ref ../build/bin/ArgParserTest --us 65535
     09_n:          ref ../build/bin/ArgParserTest --n -2147483647
     10_un:         ref ../build/bin/ArgParserTest --un 4294967295
