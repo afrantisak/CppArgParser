@@ -24,6 +24,9 @@ test:
     n_pos:      ref ../build/bin/ArgParserTest --n 2147483647
     n_pos_big:  ref ../build/bin/ArgParserTest --n 2147483648
     un:         ref ../build/bin/ArgParserTest --un 4294967295
+    un_big:     ref ../build/bin/ArgParserTest --un 4294967296
+    un_neg:     ref ../build/bin/ArgParserTest --un -1
+    un_zero:    ref ../build/bin/ArgParserTest --un 0
     l:          ref ../build/bin/ArgParserTest --l -2147483647
     ul:         ref ../build/bin/ArgParserTest --ul 4294967295
     ll:         ref ../build/bin/ArgParserTest --ll 4294967295
