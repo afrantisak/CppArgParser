@@ -9,6 +9,4 @@ project(CppArgParser)
 add_executable(ArgParserTest ArgParserTest.cpp ArgParser.cpp ArgParserImpl.cpp)
 TARGET_LINK_LIBRARIES(ArgParserTest boost_system boost_program_options)
 
-enable_testing()
-
 ADD_DEFINITIONS("-std=c++0x -g")
