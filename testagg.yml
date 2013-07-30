@@ -19,7 +19,10 @@ test:
     us_big:     ref ../build/bin/ArgParserTest --us 65536
     us_neg:     ref ../build/bin/ArgParserTest --us -1
     us_zero:    ref ../build/bin/ArgParserTest --us 0
-    n:          ref ../build/bin/ArgParserTest --n -2147483647
+    n_neg:      ref ../build/bin/ArgParserTest --n -2147483648
+    n_neg_big:  ref ../build/bin/ArgParserTest --n -2147483649
+    n_pos:      ref ../build/bin/ArgParserTest --n 2147483647
+    n_pos_big:  ref ../build/bin/ArgParserTest --n 2147483648
     un:         ref ../build/bin/ArgParserTest --un 4294967295
     l:          ref ../build/bin/ArgParserTest --l -2147483647
     ul:         ref ../build/bin/ArgParserTest --ul 4294967295
