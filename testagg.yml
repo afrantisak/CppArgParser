@@ -14,5 +14,5 @@ test:
     13_ll:         ref ../build/bin/ArgParserTest --ll 4294967295
     14_ull:        ref ../build/bin/ArgParserTest --ull 4294967295
     15_size:       ref ../build/bin/ArgParserTest --size 4294967295
-    #16_str:        ref ../build/bin/ArgParserTest --str "Hello World"
+    16_str:        ref ../build/bin/ArgParserTest --str "Hello World"
     

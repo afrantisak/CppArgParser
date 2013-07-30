@@ -131,7 +131,8 @@ def recurse(data, tests, refop, timeout, options):
             found += found
             os.chdir(cwd)
             continue
-        tokens = value.split()
+        import shlex
+        tokens = shlex.split(value)
         instruction = tokens[0]
         cmd = tokens[1:]
         
