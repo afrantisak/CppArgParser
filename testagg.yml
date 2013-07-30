@@ -35,8 +35,14 @@ test:
     ul_big:     ref ../build/bin/ArgParserTest --ul 4294967296
     ul_neg:     ref ../build/bin/ArgParserTest --ul -1
     ul_zero:    ref ../build/bin/ArgParserTest --ul 0
-    ll:         ref ../build/bin/ArgParserTest --ll 4294967295
-    ull:        ref ../build/bin/ArgParserTest --ull 4294967295
+    ll_neg:     ref ../build/bin/ArgParserTest --ll -9223372036854775808
+    ll_neg_big: ref ../build/bin/ArgParserTest --ll -9223372036854775809
+    ll_pos:     ref ../build/bin/ArgParserTest --ll 9223372036854775807
+    ll_pos_big: ref ../build/bin/ArgParserTest --ll 9223372036854775808
+    ull:        ref ../build/bin/ArgParserTest --ull 18446744073709551615
+    ull_big:    ref ../build/bin/ArgParserTest --ull 18446744073709551616
+    ull_neg:    ref ../build/bin/ArgParserTest --ull -1
+    ull_zero:   ref ../build/bin/ArgParserTest --ull 0
     size:       ref ../build/bin/ArgParserTest --size 4294967295
     str:        ref ../build/bin/ArgParserTest --str "Hello World"
     
