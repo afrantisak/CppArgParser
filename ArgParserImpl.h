@@ -64,7 +64,7 @@ namespace CppArgParser
             BpoVarsMap m_po_map;
             
             MapSwitch<std::type_index, const Parameter&, BpoOptsDesc&, const std::string&> m_addSwitch;
-            MapSwitch<std::type_index, Parameter&, const BpoVarValue&> m_convertSwitch;
+            MapSwitch<std::type_index, Parameter&, const BpoVarValue&> m_cvtSwitch;
         };
 
     };//namespace Private

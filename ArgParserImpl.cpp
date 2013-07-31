@@ -51,20 +51,25 @@ namespace CppArgParser
             throw 1;
         }
         
+    };//namespace Private
+    
+    namespace Types
+    {
+
         template<typename T>
-        void optionAddImpl(const Parameter& param, BpoOptsDesc& desc, const std::string& name)
+        void add(const Parameter& param, BpoOptsDesc& desc, const std::string& name)
         {
             desc.add_options()(name.c_str(), Bpo::value<T>(), param.m_desc.c_str());    
         }
 
         template<>
-        void optionAddImpl<bool>(const Parameter& param, BpoOptsDesc& desc, const std::string& name)
+        void add<bool>(const Parameter& param, BpoOptsDesc& desc, const std::string& name)
         {
             desc.add_options()(name.c_str(), param.m_desc.c_str());    
         }
 
         template<typename T>
-        void optionConvertImpl(const Parameter& param, const BpoVarValue& value)
+        void cvt(const Parameter& param, const BpoVarValue& value)
         {
             if (!value.empty())
             {
@@ -73,7 +78,7 @@ namespace CppArgParser
         }
         
         template<>
-        void optionConvertImpl<bool>(const Parameter& param, const BpoVarValue& value)
+        void cvt<bool>(const Parameter& param, const BpoVarValue& value)
         {
             if (!value.empty())
             {
@@ -84,15 +89,15 @@ namespace CppArgParser
             }
         }
         
-    };//namespace Private
+    };//namespace Types
 
 };//namespace CppArgParser
 
 template<typename T>
 void ArgParserImpl::registerType()
 {
-    m_addSwitch.add(typeid(T), &CppArgParser::Private::optionAddImpl<T>);
-    m_convertSwitch.add(typeid(T), &CppArgParser::Private::optionConvertImpl<T>);
+    m_addSwitch.add(typeid(T), &CppArgParser::Types::add<T>);
+    m_cvtSwitch.add(typeid(T), &CppArgParser::Types::cvt<T>);
 }
 
 ArgParserImpl::ArgParserImpl(Name desc)
@@ -105,7 +110,7 @@ ArgParserImpl::ArgParserImpl(Name desc)
     m_po_positional(),
     m_po_map(),
     m_addSwitch(),
-    m_convertSwitch()
+    m_cvtSwitch()
 {
     // register each type that we handle
     registerType<bool>();
@@ -233,7 +238,7 @@ void ArgParserImpl::parse(int argc, char* argv[])
             const BpoVarValue& value = m_po_map.operator[](name.c_str());
             if (!name.size())
                 name = param.m_name;
-            m_convertSwitch(param.m_type, param, value);
+            m_cvtSwitch(param.m_type, param, value);
         }
         catch (std::bad_function_call&)
         {

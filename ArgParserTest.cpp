@@ -22,13 +22,28 @@ struct ArgParserType
     typedef std::string        Str;
 };
 
+template<typename T>
+void dump(std::string name, T t)
+{
+    std::cout << name << t << std::endl;
+}
+
+template<typename T>
+void dump(std::string name, std::vector<T> t_m)
+{
+    std::cout << name;
+    for (auto t: t_m)
+        std::cout << t << ", ";
+    std::cout << std::endl;
+}
+
 int main(int argc, char* argv[])
 {
   std::set_terminate(__gnu_cxx::__verbose_terminate_handler);
   
   try
     {
-        // declare and set defaults
+        // declare single instance args
         ArgParserType::B    b    = 0;
         ArgParserType::C    c    = 0;
         ArgParserType::UC   uc   = 0;
@@ -42,9 +57,27 @@ int main(int argc, char* argv[])
         ArgParserType::ULL  ull  = 0;
         ArgParserType::Size size = 0;
         ArgParserType::Str  str  = "";
+      
+#if 0
+        // declare multiple instance args
+        std::vector<ArgParserType::B>    b_m;
+        std::vector<ArgParserType::C>    c_m;
+        std::vector<ArgParserType::UC>   uc_m;
+        std::vector<ArgParserType::S>    s_m;
+        std::vector<ArgParserType::US>   us_m;
+        std::vector<ArgParserType::N>    n_m;
+        std::vector<ArgParserType::UN>   un_m;
+        std::vector<ArgParserType::L>    l_m;
+        std::vector<ArgParserType::UL>   ul_m;
+        std::vector<ArgParserType::LL>   ll_m;
+        std::vector<ArgParserType::ULL>  ull_m;
+        std::vector<ArgParserType::Size> size_m;
+        std::vector<ArgParserType::Str>  str_m;
+#endif
 
-        // define arguments
         CppArgParser::ArgParser args("Test the CppArgParser");
+
+        // configure single instance arguments
         args.add("--b",      b,    "bool");
         args.add("--c",      c,    "char");
         args.add("--uc",     uc,   "unsigned char");
@@ -59,23 +92,56 @@ int main(int argc, char* argv[])
         args.add("--size",   size, "size_t");
         args.add("--str",    str,  "std::string");
 
+#if 0
+        // configure multiple instance arguments
+        args.add("--b_m",      b_m,    "bool (multiple instances)");
+        args.add("--c_m",      c_m,    "char (multiple instances)");
+        args.add("--uc_m",     uc_m,   "unsigned char (multiple instances)");
+        args.add("--s_m",      s_m,    "short (multiple instances)");
+        args.add("--us_m",     us_m,   "unsigned short (multiple instances)");
+        args.add("--n_m",      n_m,    "int (multiple instances)");
+        args.add("--un_m",     un_m,   "unsigned int (multiple instances)");
+        args.add("--l_m",      l_m,    "long (multiple instances)");
+        args.add("--ul_m",     ul_m,   "unsigned long (multiple instances)");
+        args.add("--ll_m",     ll_m,   "long long (multiple instances)");
+        args.add("--ull_m",    ull_m,  "unsigned long long (multiple instances)");
+        args.add("--size_m",   size_m, "size_t (multiple instances)");
+        args.add("--str_m",    str_m,  "std::string (multiple instances)");
+#endif
+
         // parse
         args.parse(argc, argv);
 
         // output
-        std::cout << "b:      " << b       << std::endl;
-        std::cout << "c:      " << (int)c  << std::endl;
-        std::cout << "uc:     " << (int)uc << std::endl;
-        std::cout << "s:      " << s       << std::endl;
-        std::cout << "us:     " << us      << std::endl;
-        std::cout << "n:      " << n       << std::endl;
-        std::cout << "un:     " << un      << std::endl;
-        std::cout << "l:      " << l       << std::endl;
-        std::cout << "ul:     " << ul      << std::endl;
-        std::cout << "ll:     " << ll      << std::endl;
-        std::cout << "ull:    " << ull     << std::endl;
-        std::cout << "size:   " << size    << std::endl;
-        std::cout << "str:    " << str     << std::endl;
+        dump("b:      ", b);
+        dump("c:      ", (int)c);
+        dump("uc:     ", (int)uc);
+        dump("s:      ", s);
+        dump("us:     ", us);
+        dump("n:      ", n);
+        dump("un:     ", un);
+        dump("l:      ", l);
+        dump("ul:     ", ul);
+        dump("ll:     ", ll);
+        dump("ull:    ", ull);
+        dump("size:   ", size);
+        dump("str:    ", str);
+
+#if 0        
+        dump("b_m:    ", b_m);
+        dump("c_m:    ", c_m);
+        dump("uc_m:   ", uc_m);
+        dump("s_m:    ", s_m);
+        dump("us_m:   ", us_m);
+        dump("n_m:    ", n_m);
+        dump("un_m:   ", un_m);
+        dump("l_m:    ", l_m);
+        dump("ul_m:   ", ul_m);
+        dump("ll_m:   ", ll_m);
+        dump("ull_m:  ", ull_m);
+        dump("size_m: ", size_m);
+        dump("str_m:  ", str_m);
+#endif
     }
     catch (int n)
     {
