@@ -1,4 +1,5 @@
 #include "ArgParserImpl.h"
+#include <algorithm>
 #include <cxxabi.h>
 #include <boost/lexical_cast.hpp>
 #include <boost/program_options/errors.hpp>
@@ -57,38 +58,71 @@ namespace CppArgParser
     {
 
         template<typename T>
-        void add(const Parameter& param, BpoOptsDesc& desc, const std::string& name)
+        struct Add
         {
-            desc.add_options()(name.c_str(), Bpo::value<T>(), param.m_desc.c_str());    
-        }
+            static void impl(const Parameter& param, BpoOptsDesc& desc, const std::string& name)
+            {
+                desc.add_options()(name.c_str(), Bpo::value<T>(), param.m_desc.c_str());    
+            }
+        };
 
         template<>
-        void add<bool>(const Parameter& param, BpoOptsDesc& desc, const std::string& name)
+        struct Add<bool>
         {
-            desc.add_options()(name.c_str(), param.m_desc.c_str());    
-        }
-
+            static void impl(const Parameter& param, BpoOptsDesc& desc, const std::string& name)
+            {
+                desc.add_options()(name.c_str(), param.m_desc.c_str());    
+            }
+        };
+        #if 0
         template<typename T>
-        void cvt(const Parameter& param, const BpoVarValue& value)
+        struct Add<std::vector<T>>
         {
-            if (!value.empty())
+            static void impl(const Parameter& param, BpoOptsDesc& desc, const std::string& name)
             {
-                *reinterpret_cast<T*>(param.m_valuePtr) = value.as<T>();
+                desc.add_options()(name.c_str(), Bpo::value<std::vector<T>>(), param.m_desc.c_str());
             }
-        }
+        };
+        #endif
+        template<typename T>
+        struct Cvt
+        {
+            static void impl(const Parameter& param, const BpoVarValue& value)
+            {
+                if (!value.empty())
+                {
+                    *reinterpret_cast<T*>(param.m_valuePtr) = value.as<T>();
+                }
+            }
+        };
         
         template<>
-        void cvt<bool>(const Parameter& param, const BpoVarValue& value)
+        struct Cvt<bool>
         {
-            if (!value.empty())
+            static void impl(const Parameter& param, const BpoVarValue& value)
             {
-                if (value.as<std::string>().size())
-                    *reinterpret_cast<bool*>(param.m_valuePtr) = boost::lexical_cast<bool>(value.as<std::string>());
-                else
-                    *reinterpret_cast<bool*>(param.m_valuePtr) = true;
+                if (!value.empty())
+                {
+                    if (value.as<std::string>().size())
+                        *reinterpret_cast<bool*>(param.m_valuePtr) = boost::lexical_cast<bool>(value.as<std::string>());
+                    else
+                        *reinterpret_cast<bool*>(param.m_valuePtr) = true;
+                }
             }
-        }
-        
+        };
+        #if 0
+        template<typename T>
+        struct Cvt<std::vector<T>>
+        {
+            static void impl(const Parameter& param, const BpoVarValue& value)
+            {
+                if (!value.empty())
+                {
+                    *reinterpret_cast<std::vector<T>*>(param.m_valuePtr) = value.as<std::vector<T>>();
+                }
+            }
+        };
+        #endif
     };//namespace Types
 
 };//namespace CppArgParser
@@ -96,8 +130,10 @@ namespace CppArgParser
 template<typename T>
 void ArgParserImpl::registerType()
 {
-    m_addSwitch.add(typeid(T), &CppArgParser::Types::add<T>);
-    m_cvtSwitch.add(typeid(T), &CppArgParser::Types::cvt<T>);
+    m_addSwitch.add(typeid(T), &CppArgParser::Types::Add<T>::impl);
+    m_cvtSwitch.add(typeid(T), &CppArgParser::Types::Cvt<T>::impl);
+    m_addSwitch.add(typeid(std::vector<T>), &CppArgParser::Types::Add<std::vector<T>>::impl);
+    m_cvtSwitch.add(typeid(std::vector<T>), &CppArgParser::Types::Cvt<std::vector<T>>::impl);
 }
 
 ArgParserImpl::ArgParserImpl(Name desc)
@@ -139,6 +175,7 @@ void ArgParserImpl::parse(int argc, char* argv[])
     m_po_visible.add_options()("help", "show this help message");
     
     m_name = argv[0];
+    m_name = m_name.substr(m_name.find_last_of("\\/") + 1);
     
     // Declare the supported parameters
     for (auto param: m_parameters)

@@ -39,7 +39,8 @@
 *.aps
 
 # cmake
-build/*
+clang/*
+gcc/*
 
 # tempoutput files
 *.tmp

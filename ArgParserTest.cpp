@@ -4,7 +4,7 @@
 #include <string>
 #include <boost/exception/diagnostic_information.hpp> 
 
-// shortcuts
+// list of built-in types we support
 struct ArgParserType
 {
     typedef bool               B;
@@ -58,7 +58,6 @@ int main(int argc, char* argv[])
         ArgParserType::Size size = 0;
         ArgParserType::Str  str  = "";
       
-#if 0
         // declare multiple instance args
         std::vector<ArgParserType::B>    b_m;
         std::vector<ArgParserType::C>    c_m;
@@ -73,7 +72,6 @@ int main(int argc, char* argv[])
         std::vector<ArgParserType::ULL>  ull_m;
         std::vector<ArgParserType::Size> size_m;
         std::vector<ArgParserType::Str>  str_m;
-#endif
 
         CppArgParser::ArgParser args("Test the CppArgParser");
 
@@ -92,7 +90,6 @@ int main(int argc, char* argv[])
         args.add("--size",   size, "size_t");
         args.add("--str",    str,  "std::string");
 
-#if 0
         // configure multiple instance arguments
         args.add("--b_m",      b_m,    "bool (multiple instances)");
         args.add("--c_m",      c_m,    "char (multiple instances)");
@@ -107,7 +104,6 @@ int main(int argc, char* argv[])
         args.add("--ull_m",    ull_m,  "unsigned long long (multiple instances)");
         args.add("--size_m",   size_m, "size_t (multiple instances)");
         args.add("--str_m",    str_m,  "std::string (multiple instances)");
-#endif
 
         // parse
         args.parse(argc, argv);
@@ -127,7 +123,6 @@ int main(int argc, char* argv[])
         dump("size:   ", size);
         dump("str:    ", str);
 
-#if 0        
         dump("b_m:    ", b_m);
         dump("c_m:    ", c_m);
         dump("uc_m:   ", uc_m);
@@ -141,7 +136,6 @@ int main(int argc, char* argv[])
         dump("ull_m:  ", ull_m);
         dump("size_m: ", size_m);
         dump("str_m:  ", str_m);
-#endif
     }
     catch (int n)
     {

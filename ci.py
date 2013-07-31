@@ -1,7 +1,12 @@
 #!/usr/bin/env python
 import os, sys
 
-buildDirname = 'build'
+varName = 'CC'
+
+if varName in os.environ:
+    buildDirname = os.environ['CC']
+else:
+    buildDirname = 'build'
 
 def _mkdir(newdir):
     """works the way a good mkdir should :)

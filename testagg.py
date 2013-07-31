@@ -100,6 +100,8 @@ def test(name, instruction, cmd, refop, timeout, options):
             ret = testProcess(cmd, '', 'none', timeout)
         elif instruction == 'ref':
             ret = testProcess(cmd, ref, refop, timeout)
+    except OSError as e:
+        print str(e)
     except Exception as e:
         print str(e)
         
@@ -141,6 +143,8 @@ def recurse(data, tests, refop, timeout, options):
             os.chdir(cwd)
             continue
         value = value.decode('string_escape')
+        if 'CC' in os.environ:
+            value = value.format(build=os.environ['CC'])
         import shlex
         tokens = shlex.split(value)
         instruction = tokens[0]
