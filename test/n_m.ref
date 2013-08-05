@@ -1,4 +1,4 @@
-b:      1
+b:      0
 c:      0
 uc:     0
 s:      0
@@ -16,7 +16,7 @@ c_m:
 uc_m:   
 s_m:    
 us_m:   
-n_m:    
+n_m:    1, 2, 
 un_m:   
 l_m:    
 ul_m:   

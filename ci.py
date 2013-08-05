@@ -1,13 +1,6 @@
 #!/usr/bin/env python
 import os, sys
 
-varName = 'CC'
-
-if varName in os.environ:
-    buildDirname = os.environ['CC']
-else:
-    buildDirname = 'build'
-
 def _mkdir(newdir):
     """works the way a good mkdir should :)
         - already exists, silently complete
@@ -27,15 +20,38 @@ def _mkdir(newdir):
         if tail:
             os.mkdir(newdir)
             
-originalDirname = os.getcwd()            
-_mkdir(buildDirname)
-os.chdir(buildDirname)
+def main(options):            
+    varName = 'CC'
 
-returnValue = os.system('cmake .. && make')
-if returnValue:
-    sys.exit(returnValue)
+    if varName in os.environ:
+        buildDirname = os.environ['CC']
+    else:
+        buildDirname = 'build'
+
+    originalDirname = os.getcwd()            
+    _mkdir(buildDirname)
+    os.chdir(buildDirname)
+
+    returnValue = os.system('cmake .. && make')
+    if returnValue:
+        return returnValue
+        
+    os.chdir(originalDirname)
+
+    return os.system(sys.executable + ' testagg.py {tests}'.format(tests=' '.join(options.tests)))
+
+if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser(description="Continuous Integration Build")
+    parser.add_argument('tests', nargs='*', 
+                        help="run these tests only")
+    #parser.add_argument('--ref', choices=['cmp', 'gen', 'none', 'dump'], default='cmp',
+    #                    help="ref file operations (default=cmp)")
+    #parser.add_argument('--deftimeout', type=float, default=20,
+    #                    help="default timeout in seconds")
+    #parser.add_argument('-N', '--line-numbers', action='store_true',
+    #                    help="show line numbers when printing output")
+    args = parser.parse_args()
     
-os.chdir(originalDirname)
+    sys.exit(main(args))
 
-returnValue = os.system(sys.executable + ' testagg.py')
-sys.exit(returnValue)

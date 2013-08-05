@@ -61,10 +61,12 @@ def testProcess(cmd, ref, refop, timeout):
             return subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, preexec_fn=os.setpgrp)
         else:
             if not os.path.exists(ref):
-                print "Ref file %s does not exist.  Test output follows:" % ref
+                print "Ref file %s does not exist." % ref
+                print "Command: %s" % ' '.join(cmd)
                 # now print the output of the test
                 return subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, preexec_fn=os.setpgrp)
             if refop == 'dump':
+                print "Command: %s" % ' '.join(cmd)
                 for line in open(ref, 'r'):
                     print line.rstrip()
                 return 0
@@ -76,6 +78,8 @@ def testProcess(cmd, ref, refop, timeout):
                 for line in diff:
                     print line.rstrip()
                     ret = 1
+                if ret:
+                    print "Command: %s" % ' '.join(cmd)
                 return ret
             proc.postprocess = postprocess
             return proc

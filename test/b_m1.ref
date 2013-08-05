@@ -1,4 +1,4 @@
-b:      1
+b:      0
 c:      0
 uc:     0
 s:      0
@@ -11,7 +11,7 @@ ll:     0
 ull:    0
 size:   0
 str:    
-b_m:    
+b_m:    0, 
 c_m:    
 uc_m:   
 s_m:    

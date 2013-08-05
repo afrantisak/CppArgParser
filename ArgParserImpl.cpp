@@ -71,19 +71,10 @@ namespace CppArgParser
         {
             static void impl(const Parameter& param, BpoOptsDesc& desc, const std::string& name)
             {
-                desc.add_options()(name.c_str(), param.m_desc.c_str());    
+                desc.add_options()(name.c_str(), Bpo::value<bool>()->implicit_value(true), param.m_desc.c_str());
             }
         };
-        #if 0
-        template<typename T>
-        struct Add<std::vector<T>>
-        {
-            static void impl(const Parameter& param, BpoOptsDesc& desc, const std::string& name)
-            {
-                desc.add_options()(name.c_str(), Bpo::value<std::vector<T>>(), param.m_desc.c_str());
-            }
-        };
-        #endif
+
         template<typename T>
         struct Cvt
         {
@@ -95,34 +86,7 @@ namespace CppArgParser
                 }
             }
         };
-        
-        template<>
-        struct Cvt<bool>
-        {
-            static void impl(const Parameter& param, const BpoVarValue& value)
-            {
-                if (!value.empty())
-                {
-                    if (value.as<std::string>().size())
-                        *reinterpret_cast<bool*>(param.m_valuePtr) = boost::lexical_cast<bool>(value.as<std::string>());
-                    else
-                        *reinterpret_cast<bool*>(param.m_valuePtr) = true;
-                }
-            }
-        };
-        #if 0
-        template<typename T>
-        struct Cvt<std::vector<T>>
-        {
-            static void impl(const Parameter& param, const BpoVarValue& value)
-            {
-                if (!value.empty())
-                {
-                    *reinterpret_cast<std::vector<T>*>(param.m_valuePtr) = value.as<std::vector<T>>();
-                }
-            }
-        };
-        #endif
+
     };//namespace Types
 
 };//namespace CppArgParser

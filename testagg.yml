@@ -42,6 +42,10 @@ test:
     size:       ref ../{build}/bin/ArgParserTest --size 4294967295
     str:        ref ../{build}/bin/ArgParserTest --str "Hello World"
     
+    b_m1:       ref ../{build}/bin/ArgParserTest --b_m 0
+    b_m2:       ref ../{build}/bin/ArgParserTest --b_m 0 --b_m 1
+    n_m:        ref ../{build}/bin/ArgParserTest --n_m 1 --n_m 2
+    
     # these tests are different on 32/64 bit systems
     #l_neg_big:  ref ../{build}/bin/ArgParserTest --l -2147483649
     #l_pos_big:  ref ../{build}/bin/ArgParserTest --l 2147483648

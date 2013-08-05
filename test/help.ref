@@ -4,7 +4,7 @@ Test the CppArgParser
 
 Optional parameters:
   --help                show this help message
-  --b                   bool
+  --b [=arg(=1)]        bool
   --c arg               char
   --uc arg              unsigned char
   --s arg               short
