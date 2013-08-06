@@ -1,4 +1,5 @@
 test:
+  tests:
     - help:       ref ../{build}/bin/ArgParserTest --help
     - unknown:    ref ../{build}/bin/ArgParserTest --unknown
     - base:       ref ../{build}/bin/ArgParserTest

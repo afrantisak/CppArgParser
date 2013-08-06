@@ -138,7 +138,9 @@ def recurse(data, tests, refop, timeout, options):
     found = 0
     for key in sorted(data.keys()):
         value = data[key]
-        if type(value) == list:
+        if 'tests' in value:
+          value = value['tests']
+          if type(value) == list:
             for item in value:
                 if type(item) == dict:
                     cwd = os.path.abspath(os.getcwd())
