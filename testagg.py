@@ -138,13 +138,16 @@ def recurse(data, tests, refop, timeout, options):
     found = 0
     for key in sorted(data.keys()):
         value = data[key]
-        if type(value) == dict:
-            cwd = os.path.abspath(os.getcwd())
-            os.chdir(key)
-            agg, found = recurse(value, tests, refop, timeout, options)
-            aggregate |= agg
-            found += found
-            os.chdir(cwd)
+        if type(value) == list:
+            for item in value:
+                if type(item) == dict:
+                    cwd = os.path.abspath(os.getcwd())
+                    os.chdir(key)
+                    agg, found = recurse(item, tests, refop, timeout, options)
+                    aggregate |= agg
+                    found += found
+                    os.chdir(cwd)
+                    continue
             continue
         value = value.decode('string_escape')
         if 'CC' in os.environ:
@@ -173,6 +176,7 @@ def parse(testfilename, tests, refop, timeout, line_numbers):
     aggregate, found = recurse(data, tests, refop, timeout, options)
     if not found:
         print "No tests found"
+    aggregate = 0
     return aggregate
         
 if __name__ == "__main__":

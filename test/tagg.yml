@@ -1,0 +1,57 @@
+#in main.yml:
+#tests:
+#    main: dir test/tagg.yml
+
+tests:
+    help:       ref ../{build}/bin/ArgParserTest --help
+    unknown:    ref ../{build}/bin/ArgParserTest --unknown
+    base:       ref ../{build}/bin/ArgParserTest
+    b:          ref ../{build}/bin/ArgParserTest --b
+    b_dup:      ref ../{build}/bin/ArgParserTest --b --b
+    c_missing:  ref ../{build}/bin/ArgParserTest --c
+    c:          ref ../{build}/bin/ArgParserTest --c \xFF
+    c_partial:  ref ../{build}/bin/ArgParserTest --c \xFF --c
+    c_dup:      ref ../{build}/bin/ArgParserTest --c \xFF --c \xFF
+    uc:         ref ../{build}/bin/ArgParserTest --uc \xFF
+    uc_big:     ref ../{build}/bin/ArgParserTest --uc \x100
+    s_neg:      ref ../{build}/bin/ArgParserTest --s -32767
+    s_neg_big:  ref ../{build}/bin/ArgParserTest --s -32768
+    s_pos:      ref ../{build}/bin/ArgParserTest --s 32768
+    s_pos_big:  ref ../{build}/bin/ArgParserTest --s 32769
+    s_badchar:  ref ../{build}/bin/ArgParserTest --s 10a
+    us:         ref ../{build}/bin/ArgParserTest --us 65535
+    us_big:     ref ../{build}/bin/ArgParserTest --us 65536
+    us_neg:     ref ../{build}/bin/ArgParserTest --us -1
+    us_zero:    ref ../{build}/bin/ArgParserTest --us 0
+    n_neg:      ref ../{build}/bin/ArgParserTest --n -2147483648
+    n_neg_big:  ref ../{build}/bin/ArgParserTest --n -2147483649
+    n_pos:      ref ../{build}/bin/ArgParserTest --n 2147483647
+    n_pos_big:  ref ../{build}/bin/ArgParserTest --n 2147483648
+    un:         ref ../{build}/bin/ArgParserTest --un 4294967295
+    un_big:     ref ../{build}/bin/ArgParserTest --un 4294967296
+    un_neg:     ref ../{build}/bin/ArgParserTest --un -1
+    un_zero:    ref ../{build}/bin/ArgParserTest --un 0
+    l_neg:      ref ../{build}/bin/ArgParserTest --l -2147483648
+    l_pos:      ref ../{build}/bin/ArgParserTest --l 2147483647
+    ul:         ref ../{build}/bin/ArgParserTest --ul 4294967295
+    ul_zero:    ref ../{build}/bin/ArgParserTest --ul 0
+    ll_neg:     ref ../{build}/bin/ArgParserTest --ll -9223372036854775808
+    ll_neg_big: ref ../{build}/bin/ArgParserTest --ll -9223372036854775809
+    ll_pos:     ref ../{build}/bin/ArgParserTest --ll 9223372036854775807
+    ll_pos_big: ref ../{build}/bin/ArgParserTest --ll 9223372036854775808
+    ull:        ref ../{build}/bin/ArgParserTest --ull 18446744073709551615
+    ull_big:    ref ../{build}/bin/ArgParserTest --ull 18446744073709551616
+    ull_neg:    ref ../{build}/bin/ArgParserTest --ull -1
+    ull_zero:   ref ../{build}/bin/ArgParserTest --ull 0
+    size:       ref ../{build}/bin/ArgParserTest --size 4294967295
+    str:        ref ../{build}/bin/ArgParserTest --str "Hello World"
+    
+    b_m1:       ref ../{build}/bin/ArgParserTest --b_m 0
+    b_m2:       ref ../{build}/bin/ArgParserTest --b_m 0 --b_m 1
+    n_m:        ref ../{build}/bin/ArgParserTest --n_m 1 --n_m 2
+    
+    # these tests are different on 32/64 bit systems
+    #l_neg_big:  ref ../{build}/bin/ArgParserTest --l -2147483649
+    #l_pos_big:  ref ../{build}/bin/ArgParserTest --l 2147483648
+    #ul_big:     ref ../{build}/bin/ArgParserTest --ul 4294967296
+    #ul_neg:     ref ../{build}/bin/ArgParserTest --ul -1
