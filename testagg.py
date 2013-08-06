@@ -138,17 +138,17 @@ def recurse(data, tests, refop, timeout, options):
     found = 0
     for key in sorted(data.keys()):
         value = data[key]
+        cwd = os.path.abspath(os.getcwd())
+        if 'cd' in value:
+            os.chdir(value['cd'])
         if 'tests' in value:
           value = value['tests']
           if type(value) == list:
             for item in value:
                 if type(item) == dict:
-                    cwd = os.path.abspath(os.getcwd())
-                    os.chdir(key)
                     agg, found = recurse(item, tests, refop, timeout, options)
                     aggregate |= agg
                     found += found
-                    os.chdir(cwd)
                     continue
             continue
         value = value.decode('string_escape')
@@ -164,6 +164,7 @@ def recurse(data, tests, refop, timeout, options):
     
         aggregate |= test(key, instruction, cmd, refop, timeout, options)
         found += 1
+        os.chdir(cwd)
     return aggregate, found
     
 def parse(testfilename, tests, refop, timeout, line_numbers):
