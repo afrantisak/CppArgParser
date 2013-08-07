@@ -133,7 +133,20 @@ def test(name, instruction, cmd, refop, timeout, options):
         return 127
     return ret
     
-def recurse(data, tests, refop, timeout, options):
+def translate(value, defines):
+    value = value.decode('string_escape')
+    if 'CC' in os.environ:
+        value = value.format(**defines)
+    return value
+    
+def split(value):
+    import shlex
+    tokens = shlex.split(value)
+    instruction = tokens[0]
+    cmd = tokens[1:]
+    return instruction, cmd
+    
+def recurse(data, tests, refop, timeout, options, defines):
     aggregate = 0
     found = 0
     for key in sorted(data.keys()):
@@ -141,33 +154,33 @@ def recurse(data, tests, refop, timeout, options):
         cwd = os.path.abspath(os.getcwd())
         if 'cd' in value:
             os.chdir(value['cd'])
+        if 'alias' in value:
+            for alias in value['alias']:
+                for k, v in alias.iteritems():
+                    defines[k] = translate(v, defines)
         if 'tests' in value:
           value = value['tests']
           if type(value) == list:
             for item in value:
                 if type(item) == dict:
-                    agg, found = recurse(item, tests, refop, timeout, options)
+                    agg, f = recurse(item, tests, refop, timeout, options, defines)
                     aggregate |= agg
-                    found += found
+                    found += f
                     continue
             continue
-        value = value.decode('string_escape')
-        if 'CC' in os.environ:
-            value = value.format(build=os.environ['CC'])
-        import shlex
-        tokens = shlex.split(value)
-        instruction = tokens[0]
-        cmd = tokens[1:]
-        
+        value = translate(value, defines)
+        instruction, cmd = split(value)
         if tests and key not in tests:
             continue
-    
         aggregate |= test(key, instruction, cmd, refop, timeout, options)
         found += 1
         os.chdir(cwd)
     return aggregate, found
     
 def parse(testfilename, tests, refop, timeout, line_numbers):
+    build = os.environ['CC']
+    defines = { 'build': build }
+    
     abspath = os.path.abspath(testfilename)
     aggregate = 0
     found = 0
@@ -176,7 +189,7 @@ def parse(testfilename, tests, refop, timeout, line_numbers):
     if '.global' in data:
         options = data['.global']
         data.remove('.global')
-    aggregate, found = recurse(data, tests, refop, timeout, options)
+    aggregate, found = recurse(data, tests, refop, timeout, options, defines)
     if not found:
         print "No tests found"
     aggregate = 0
