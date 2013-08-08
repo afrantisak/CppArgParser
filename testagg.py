@@ -35,7 +35,7 @@ def TimeoutProcess(procfunc, timeout):
                         print out.rstrip()
                     if err:
                         print err.rstrip()
-                    
+                    self.ret = 1
         def kill(self):
             if self.proc:
                 # kill with extreme prejudice
@@ -149,6 +149,7 @@ def split(value):
 def recurse(data, tests, refop, timeout, options, defines):
     aggregate = 0
     found = 0
+    failures = 0
     for key in sorted(data.keys()):
         value = data[key]
         cwd = os.path.abspath(os.getcwd())
@@ -163,36 +164,42 @@ def recurse(data, tests, refop, timeout, options, defines):
           if type(value) == list:
             for item in value:
                 if type(item) == dict:
-                    agg, f = recurse(item, tests, refop, timeout, options, defines)
-                    aggregate |= agg
-                    found += f
+                    aggregateLocal, foundLocal, failuresLocal = recurse(item, tests, refop, timeout, options, defines)
+                    aggregate |= aggregateLocal
+                    found += foundLocal
+                    failures += failuresLocal
                     continue
             continue
         value = translate(value, defines)
         instruction, cmd = split(value)
         if tests and key not in tests:
             continue
-        aggregate |= test(key, instruction, cmd, refop, timeout, options)
+        result = test(key, instruction, cmd, refop, timeout, options)
+        aggregate |= result
+        if result:
+            failures += 1
         found += 1
         os.chdir(cwd)
-    return aggregate, found
+    return aggregate, found, failures
     
 def parse(testfilename, tests, refop, timeout, line_numbers):
     build = os.environ['CC']
     defines = { 'build': build }
     
     abspath = os.path.abspath(testfilename)
-    aggregate = 0
-    found = 0
     data = yaml.safe_load(open(abspath, 'r'))
     options = {'line_numbers': line_numbers}
     if '.global' in data:
         options = data['.global']
         data.remove('.global')
-    aggregate, found = recurse(data, tests, refop, timeout, options, defines)
+    aggregate, found, failures = recurse(data, tests, refop, timeout, options, defines)
     if not found:
         print "No tests found"
-    aggregate = 0
+    else:
+        print "Tests:  {found}".format(found=found)
+        print "Passed: {passed}".format(passed=found - failures)
+        if failures:
+            print "FAILED: {failed}".format(failed=failures)
     return aggregate
         
 if __name__ == "__main__":
