@@ -41,15 +41,17 @@ namespace CppArgParser
             void add(Name name, void* valuePtr, std::type_index type, Name desc);
 
             void parse(int argc, char* argv[]);
-            
+
+            template<typename T>
+            void registerType();
+
         private:
             // if this is an optional argument (i.e. the name begins with "-" or "--")
             // then return the name WITHOUT the dashes.  If it is a required argument, return empty string.
             Name getOptional(const Name& name);
-
-            // this will add the type to both of the add and convert MapSwitches
+            
             template<typename T>
-            void registerType();
+            void registerTypeAndVector();
                 
             Name m_name;
             Name m_desc;

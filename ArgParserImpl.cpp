@@ -96,8 +96,13 @@ void ArgParserImpl::registerType()
 {
     m_addSwitch.add(typeid(T), &CppArgParser::Types::Add<T>::impl);
     m_cvtSwitch.add(typeid(T), &CppArgParser::Types::Cvt<T>::impl);
-    m_addSwitch.add(typeid(std::vector<T>), &CppArgParser::Types::Add<std::vector<T>>::impl);
-    m_cvtSwitch.add(typeid(std::vector<T>), &CppArgParser::Types::Cvt<std::vector<T>>::impl);
+}
+
+template<typename T>
+void ArgParserImpl::registerTypeAndVector()
+{
+    registerType<T>();
+    registerType<std::vector<T>>();
 }
 
 ArgParserImpl::ArgParserImpl(Name desc)
@@ -113,19 +118,19 @@ ArgParserImpl::ArgParserImpl(Name desc)
     m_cvtSwitch()
 {
     // register each type that we handle
-    registerType<bool>();
-    registerType<char>();
-    registerType<unsigned char>();
-    registerType<short>();
-    registerType<unsigned short>();
-    registerType<int>();
-    registerType<unsigned int>();
-    registerType<long>();
-    registerType<unsigned long>();
-    registerType<long long>();
-    registerType<unsigned long long>();
-    registerType<size_t>();
-    registerType<std::string>();
+    registerTypeAndVector<bool>();
+    registerTypeAndVector<char>();
+    registerTypeAndVector<unsigned char>();
+    registerTypeAndVector<short>();
+    registerTypeAndVector<unsigned short>();
+    registerTypeAndVector<int>();
+    registerTypeAndVector<unsigned int>();
+    registerTypeAndVector<long>();
+    registerTypeAndVector<unsigned long>();
+    registerTypeAndVector<long long>();
+    registerTypeAndVector<unsigned long long>();
+    registerTypeAndVector<size_t>();
+    registerTypeAndVector<std::string>();
 }
 
 void ArgParserImpl::add(Name name, void* valuePtr, std::type_index type, Name desc)
