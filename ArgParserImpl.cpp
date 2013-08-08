@@ -2,7 +2,6 @@
 #include <algorithm>
 #include <cxxabi.h>
 #include <boost/lexical_cast.hpp>
-#include <boost/program_options/errors.hpp>
 
 using namespace CppArgParser::Private;
 
@@ -140,6 +139,7 @@ void ArgParserImpl::add(Name name, void* valuePtr, std::type_index type, Name de
 
 void ArgParserImpl::parse(int argc, char* argv[])
 {
+#if 0
     m_po_all.add_options()("help", "show this help message");
     m_po_visible.add_options()("help", "show this help message");
     
@@ -251,6 +251,7 @@ void ArgParserImpl::parse(int argc, char* argv[])
             throwUnsupportedType(param);
         }
     }
+#endif
 }
 
 Name ArgParserImpl::getOptional(const Name& name)
