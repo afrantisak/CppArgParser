@@ -7,6 +7,13 @@
 namespace CppArgParser
 {
     
+    struct Bool
+    {
+        Bool() : m_b(false) {} // HACK?
+        Bool(bool b) : m_b(b) {}
+        bool m_b;
+    };
+    
     namespace Private
     {
         class ArgParserImpl;

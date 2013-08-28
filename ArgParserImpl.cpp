@@ -1,9 +1,24 @@
 #include "ArgParserImpl.h"
+#include "ArgParser.h"
 #include <algorithm>
+#include <iostream>
+#include <iomanip>
 #include <cxxabi.h>
 #include <boost/lexical_cast.hpp>
 
 using namespace CppArgParser::Private;
+
+std::ostream& operator<<(std::ostream& os, const CppArgParser::Bool& v)
+{
+    os << v.m_b;
+    return os;
+}        
+
+std::istream& operator>>(std::istream& is, CppArgParser::Bool& v)
+{
+    is >> v.m_b;
+    return is;
+}        
 
 namespace CppArgParser
 {
@@ -31,8 +46,8 @@ namespace CppArgParser
         void throwFailedConversion(Parameter param, std::string valueStr = std::string())
         {
             std::cout << "ERROR: ArgParser failed conversion ";
-            if (valueStr.size())
-                std::cout << "from value \"" << valueStr << "\" ";
+            //if (valueStr.size())
+            //    std::cout << "from value \"" << valueStr << "\" ";
             std::cout << "to type \"" << demangle(param.m_type.name()) << "\" ";
             std::cout << "for parameter \"" << param.m_name << "\"" << std::endl;
             throw 1;
@@ -41,6 +56,12 @@ namespace CppArgParser
         void throwRequiredMissing(Parameter param)
         {
             std::cout << "ERROR: " << param.m_name << " is required" << std::endl;
+            throw 1;
+        }
+    
+        void throwMultipleNotAllowed(Parameter param)
+        {
+            std::cout << "ERROR: " << param.m_name << " does not allow multiple occurrences" << std::endl;
             throw 1;
         }
     
@@ -55,68 +76,223 @@ namespace CppArgParser
     
     namespace Types
     {
-
-        template<typename T>
-        struct Add
+        void debug(Parameter& param, Args args, std::string desc)
         {
-            static void impl(const Parameter& param, BpoOptsDesc& desc, const std::string& name)
+            std::cout << "Cvt debug " << param.m_name << " (" << desc << "): ";
+            while (!args.empty())
             {
-                desc.add_options()(name.c_str(), Bpo::value<T>(), param.m_desc.c_str());    
+                std::string arg = args.front();
+                std::cout << arg << " ";
+                args.pop_front();
+            }
+            std::cout << std::endl;
+        }
+        
+        template<typename T>
+        struct Cvt
+        {
+            static void impl(Parameter& param, Args& args)
+            {
+                if (!args.size())
+                    throwRequiredMissing(param);
+                std::string value = args[0];
+                args.pop_front();
+                if (value[0] == '=')
+                {
+                    value = value.substr(1);
+                }
+                param.set(boost::lexical_cast<T>(value));
+            }
+        };
+        
+        template<typename T>
+        struct Cvt<std::vector<T>>
+        {
+            static void impl(Parameter& param, Args& args)
+            {
+                if (!args.size())
+                    throwRequiredMissing(param);
+                std::string value = args[0];
+                args.pop_front();
+                if (value[0] == '=')
+                {
+                    value = value.substr(1);
+                }
+                try
+                {
+                    T t = boost::lexical_cast<T>(value);
+                    param.as<std::vector<T>>().push_back(t);
+                }
+                catch (boost::bad_lexical_cast& e)
+                {
+                    // fake out the thrower
+                    Parameter paramFake = param;
+                    paramFake.m_type = typeid(T);
+                    throwFailedConversion(paramFake, value);
+                }
+            }
+        };
+        
+        template<>
+        struct Cvt<char>
+        {
+            static void impl(Parameter& param, Args& args)
+            {
+                if (!args.size())
+                    throwRequiredMissing(param);
+                if (param.m_set)
+                    throwMultipleNotAllowed(param);
+                std::string value = args[0];
+                args.pop_front();
+                if (value[0] == '=')
+                {
+                    value = value.substr(1);
+                }
+                if (value.size() > 1)
+                    throwFailedConversion(param, value);
+                param.set(value[0]);
             }
         };
 
         template<>
-        struct Add<bool>
+        struct Cvt<unsigned char>
         {
-            static void impl(const Parameter& param, BpoOptsDesc& desc, const std::string& name)
+            static void impl(Parameter& param, Args& args)
             {
-                desc.add_options()(name.c_str(), Bpo::value<bool>()->implicit_value(true), param.m_desc.c_str());
+                if (!args.size())
+                    throwRequiredMissing(param);
+                if (param.m_set)
+                    throwMultipleNotAllowed(param);
+                std::string value = args[0];
+                args.pop_front();
+                if (value[0] == '=')
+                {
+                    value = value.substr(1);
+                }
+                if (value.size() > 1)
+                    throwFailedConversion(param, value);
+                param.set(value[0]);
+            }
+        };
+
+        template<>
+        struct Cvt<bool>
+        {
+            static void impl(Parameter& param, Args& args)
+            {
+                param.set(true);
+                return;
+            }
+        };
+
+        template<>
+        struct Cvt<Bool>
+        {
+            static void impl(Parameter& param, Args& args)
+            {
+                std::vector<std::string> trueValues, falseValues;
+                trueValues.push_back("1");
+                trueValues.push_back("T");
+                trueValues.push_back("True");
+                trueValues.push_back("Y");
+                trueValues.push_back("Yes");
+                falseValues.push_back("0");
+                falseValues.push_back("F");
+                falseValues.push_back("False");
+                falseValues.push_back("N");
+                falseValues.push_back("No");
+                // bool requires the --arg=value syntax, otherwise if the flag is present, 
+                // the value will be true.
+                if (args.size() && args[0][0] == '=')
+                {
+                    std::string value = args[0].substr(1);
+                    for (auto valid: trueValues)
+                    {
+                        if (value == valid)
+                        {
+                            Bool b(true);
+                            param.set(b);
+                            args.pop_front();
+                            return;
+                        }
+                    }
+                    for (auto valid: falseValues)
+                    {
+                        if (value == valid)
+                        {
+                            Bool b(false);
+                            param.set(b);
+                            args.pop_front();
+                            return;
+                        }
+                    }
+                    throwFailedConversion(param, value);
+                }
+                else
+                {
+                    Bool b(true);
+                    param.set(b);
+                    return;
+                }
             }
         };
 
         template<typename T>
-        struct Cvt
+        struct Dec
         {
-            static void impl(const Parameter& param, const BpoVarValue& value)
+            static void impl(Parameter& param, std::string& decorator)
             {
-                if (!value.empty())
-                {
-                    *reinterpret_cast<T*>(param.m_valuePtr) = value.as<T>();
-                }
+                decorator = "arg";
+            }
+        };
+
+        template<>
+        struct Dec<bool>
+        {
+            static void impl(Parameter& param, std::string& decorator)
+            {
+                decorator = "";
+            }
+        };
+
+        template<>
+        struct Dec<Bool>
+        {
+            static void impl(Parameter& param, std::string& decorator)
+            {
+                decorator = "[=arg(=1)]";
             }
         };
 
     };//namespace Types
 
+    namespace Private
+    {
+        template<typename T>
+        void ArgParserImpl::registerType()
+        {
+            m_cvtSwitch.add(typeid(T), &CppArgParser::Types::Cvt<T>::impl);
+            m_decSwitch.add(typeid(T), &CppArgParser::Types::Dec<T>::impl);
+        }
+
+        template<typename T>
+        void ArgParserImpl::registerTypeAndVector()
+        {
+            registerType<T>();
+            registerType<std::vector<T>>();
+        }
+    };
 };//namespace CppArgParser
-
-template<typename T>
-void ArgParserImpl::registerType()
-{
-    m_addSwitch.add(typeid(T), &CppArgParser::Types::Add<T>::impl);
-    m_cvtSwitch.add(typeid(T), &CppArgParser::Types::Cvt<T>::impl);
-}
-
-template<typename T>
-void ArgParserImpl::registerTypeAndVector()
-{
-    registerType<T>();
-    registerType<std::vector<T>>();
-}
 
 ArgParserImpl::ArgParserImpl(Name desc)
 :   m_name(),
     m_desc(desc),
     m_parameters(),
-    m_po_visible("Optional parameters"),
-    m_po_required("Required parameters"),
-    m_po_all("All parameters"),
-    m_po_positional(),
-    m_po_map(),
-    m_addSwitch(),
-    m_cvtSwitch()
+    m_cvtSwitch(),
+    m_decSwitch()
 {
     // register each type that we handle
+    registerTypeAndVector<Bool>();
     registerTypeAndVector<bool>();
     registerTypeAndVector<char>();
     registerTypeAndVector<unsigned char>();
@@ -130,6 +306,8 @@ ArgParserImpl::ArgParserImpl(Name desc)
     registerTypeAndVector<unsigned long long>();
     registerTypeAndVector<size_t>();
     registerTypeAndVector<std::string>();
+    
+    add("--help", &m_bHelp, typeid(bool), "show this help message");
 }
 
 void ArgParserImpl::add(Name name, void* valuePtr, std::type_index type, Name desc)
@@ -139,119 +317,133 @@ void ArgParserImpl::add(Name name, void* valuePtr, std::type_index type, Name de
 
 void ArgParserImpl::parse(int argc, char* argv[])
 {
-#if 0
-    m_po_all.add_options()("help", "show this help message");
-    m_po_visible.add_options()("help", "show this help message");
-    
-    m_name = argv[0];
-    m_name = m_name.substr(m_name.find_last_of("\\/") + 1);
-    
-    // Declare the supported parameters
-    for (auto param: m_parameters)
+    Args args;
+    for (int argn = 0; argn < argc; argn++)
     {
-        Name name = getOptional(param.m_name);
-        if (name.size())
-        {
-            // add optional parameters
-            try
-            {
-                m_addSwitch(param.m_type, param, m_po_all, name);
-                m_addSwitch(param.m_type, param, m_po_visible, name);
-            }
-            catch (std::bad_function_call&)
-            {
-                throwUnsupportedType(param);
-            }
-        }
-        else
-        {
-            // add required parameters
-            m_po_all.add_options()(param.m_name.c_str(), param.m_desc.c_str());    
-            m_po_required.add_options()(param.m_name.c_str(), param.m_desc.c_str());    
-            m_po_positional.add(param.m_name.c_str(), 1);
-        }
+        args.push_back(argv[argn]);
     }
+    
+    m_name = args.front();
+    m_name = m_name.substr(m_name.find_last_of("\\/") + 1);
+    args.pop_front();
+    
+    parse_argsfirst(args);
+    
+    if (m_bHelp)
+    {
+        print_help();
+    }
+}
 
-    // process the command line
+void ArgParserImpl::parse_argsfirst(Args args)
+{
+    // args first - less intuitive matching?
+    Parameters::iterator paramIter = m_parameters.end();
+    std::string arg;
     try
     {
-        Bpo::store(Bpo::command_line_parser(argc, argv).options(m_po_all).positional(m_po_positional).run(), m_po_map);
-        Bpo::notify(m_po_map);    
-    }
-    catch (Bpo::validation_error& e)
-    {
-        auto paramIter = std::find_if(m_parameters.begin(), m_parameters.end(), [&](const Parameter& param)
+        while (!args.empty())
         {
-            return getOptional(param.m_name) == e.get_option_name();
-        });
-        throwFailedConversion(*paramIter);
-    }
-    catch (Bpo::unknown_option& e)
-    {
-        throwUnknownParameter(e.get_option_name());
-    }
-    
-    // automatically handle --help
-    if (m_po_map.count("help")) {
-        std::cout << "Usage: " << m_name; 
-        for (auto param: m_parameters)
-        {
-            Name name = getOptional(param.m_name);
-            if (!name.size())
+            arg = args.front();
+            args.pop_front();
+            
+            // check for exact match of optional parameter
+            paramIter = std::find_if(m_parameters.begin(), m_parameters.end(), [arg](const Parameter& param)
             {
-                std::cout << " <" << param.m_name << ">";
+                return arg == param.m_name;
+            });
+            if (paramIter != m_parameters.end())
+            {
+                m_cvtSwitch(paramIter->m_type, *paramIter, args);
+                continue;
             }
-        }        
-        if (m_po_visible.options().size())
-            std::cout << " [options]";
-        std::cout << std::endl;
-        std::cout << std::endl;
-        
-        if (m_desc.size())
-        {
-            std::cout << m_desc << std::endl;
-            std::cout << std::endl;
+            
+            // look for tokens that start with optional parameter and have = following
+            paramIter = std::find_if(m_parameters.begin(), m_parameters.end(), [arg](const Parameter& param)
+            {
+                return arg.size() > param.m_name.size() 
+                    && arg.substr(0, param.m_name.size()) == param.m_name
+                    && arg[param.m_name.size()] == '=';
+            });
+            if (paramIter != m_parameters.end())
+            {
+                args.push_front(arg.substr(paramIter->m_name.size()));
+                m_cvtSwitch(paramIter->m_type, *paramIter, args);
+                continue;
+            }
+            
+            throwUnknownParameter(arg);
         }
-
-        if (m_po_required.options().size())
-            std::cout << m_po_required << std::endl;
-
-        if (m_po_visible.options().size())
-            std::cout << m_po_visible << std::endl;
-
-        throw 0;
     }
-    
-    // check for required args
+    catch (boost::bad_lexical_cast& e)
+    {
+        if (paramIter != m_parameters.end())
+            throwFailedConversion(*paramIter, arg);
+    }
+}
+
+void ArgParserImpl::print_help()
+{
+    Parameters optional;
+    Parameters required;
+    std::cout << "Usage: " << m_name; 
     for (auto param: m_parameters)
     {
         Name name = getOptional(param.m_name);
         if (!name.size())
         {
-            if (m_po_map.count(param.m_name.c_str()) == 0)
-            {
-                throwRequiredMissing(param);
-            }
+            std::cout << " <" << param.m_name << ">";
+            required.push_back(param);
+        }
+        else
+        {
+            optional.push_back(param);
+        }
+    }        
+    if (optional.size())
+        std::cout << " [options]";
+    std::cout << std::endl;
+    std::cout << std::endl;
+    
+    if (m_desc.size())
+    {
+        std::cout << m_desc << std::endl;
+        std::cout << std::endl;
+    }
+
+    if (required.size())
+    {
+        std::cout << "Required parameters:" << std::endl;
+        for (auto param: required)
+        {
+            std::cout << "  " << param.m_name << ": " << param.m_desc << std::endl;
         }
     }
 
-    // do the conversions
-    for (auto param: m_parameters)
+    if (optional.size())
     {
-        try
+        std::cout << "Optional parameters:" << std::endl;
+        int max = 0;
+        for (auto param: optional)
         {
-            Name name = getOptional(param.m_name);
-            const BpoVarValue& value = m_po_map.operator[](name.c_str());
-            if (!name.size())
-                name = param.m_name;
-            m_cvtSwitch(param.m_type, param, value);
+            // get the decorator (HACKY)
+            std::string decorator;
+            m_decSwitch(param.m_type, param, decorator);
+            int cur = param.m_name.size() + 1 + decorator.size();
+            if (max < cur)
+                max = cur;
         }
-        catch (std::bad_function_call&)
+        for (auto param: optional)
         {
-            throwUnsupportedType(param);
+            std::string decorator;
+            m_decSwitch(param.m_type, param, decorator);
+            decorator = param.m_name + " " + decorator;
+            std::cout << "  " << std::left << std::setw(max + 8) << decorator << param.m_desc << std::endl;
         }
+        std::cout << std::endl;
     }
-#endif
+
+    throw 0;
 }
 
 Name ArgParserImpl::getOptional(const Name& name)

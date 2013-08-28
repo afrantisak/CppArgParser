@@ -37,16 +37,18 @@ def main(options):
         return returnValue
         
     os.chdir(originalDirname)
+    
+    formats = {'tests': ' '.join(options.tests), 'ref': options.ref }
 
-    return os.system(sys.executable + ' testagg.py {tests}'.format(tests=' '.join(options.tests)))
+    return os.system(sys.executable + ' testagg.py {tests} --ref {ref}'.format(**formats))
 
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description="Continuous Integration Build")
     parser.add_argument('tests', nargs='*', 
                         help="run these tests only")
-    #parser.add_argument('--ref', choices=['cmp', 'gen', 'none', 'dump'], default='cmp',
-    #                    help="ref file operations (default=cmp)")
+    parser.add_argument('--ref', choices=['cmp', 'gen', 'none', 'dump'], default='cmp',
+                        help="ref file operations (default=cmp)")
     #parser.add_argument('--deftimeout', type=float, default=20,
     #                    help="default timeout in seconds")
     #parser.add_argument('-N', '--line-numbers', action='store_true',

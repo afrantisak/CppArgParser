@@ -1,9 +1,10 @@
 #pragma once
 #include <map>
 #include <string>
+#include <vector>
 #include <typeindex>
-#include <boost/program_options.hpp>
 #include "MapSwitch.h"
+#include <deque>
 
 namespace CppArgParser
 {
@@ -11,18 +12,12 @@ namespace CppArgParser
     namespace Private
     {
 
-        typedef boost::program_options::variable_value BpoVarValue;
-        typedef boost::program_options::options_description BpoOptsDesc;
-        typedef boost::program_options::positional_options_description BpoPosOptsDesc;
-        typedef boost::program_options::variables_map BpoVarsMap;
-        namespace Bpo = boost::program_options;
-
         typedef std::string Name;
             
         struct Parameter
         {
             Parameter(Name name, Name abbrev, void* valuePtr, std::type_index type, Name desc)
-            :   m_name(name), m_abbrev(abbrev), m_valuePtr(valuePtr), m_type(type), m_desc(desc)
+            :   m_name(name), m_abbrev(abbrev), m_valuePtr(valuePtr), m_type(type), m_desc(desc), m_set(false)
             {
             }
             
@@ -31,7 +26,32 @@ namespace CppArgParser
             void* m_valuePtr;
             std::type_index m_type;
             Name m_desc;
+            bool m_set;
+            
+            template<typename T>
+            void set(const T& v)
+            {
+                *(reinterpret_cast<T*>(m_valuePtr)) = v;
+                m_set = true;
+            }
+            
+            template<typename T>
+            void get(T& v) const
+            {
+                v = *(reinterpret_cast<const T*>(m_valuePtr));
+            }
+            
+            template<typename T>
+            T& as()
+            {
+                m_set = true;
+                return *(reinterpret_cast<T*>(m_valuePtr));
+            }
+            
+
         };
+        
+        typedef std::deque<std::string> Args;
 
         class ArgParserImpl
         {
@@ -44,6 +64,11 @@ namespace CppArgParser
 
             template<typename T>
             void registerType();
+            
+        protected:
+            void parse_argsfirst(Args args);
+            
+            void print_help();
 
         private:
             // if this is an optional argument (i.e. the name begins with "-" or "--")
@@ -58,15 +83,11 @@ namespace CppArgParser
             
             typedef std::vector<Parameter> Parameters;
             Parameters m_parameters;
-            
-            BpoOptsDesc m_po_visible;
-            BpoOptsDesc m_po_required;
-            BpoOptsDesc m_po_all;
-            BpoPosOptsDesc m_po_positional;
-            BpoVarsMap m_po_map;
-            
-            MapSwitch<std::type_index, const Parameter&, BpoOptsDesc&, const std::string&> m_addSwitch;
-            MapSwitch<std::type_index, Parameter&, const BpoVarValue&> m_cvtSwitch;
+
+            bool m_bHelp;
+
+            MapSwitch<std::type_index, Parameter&, Args&> m_cvtSwitch;
+            MapSwitch<std::type_index, Parameter&, std::string&> m_decSwitch;
         };
 
     };//namespace Private

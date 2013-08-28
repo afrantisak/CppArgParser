@@ -7,6 +7,9 @@ main:
         - unknown:    ref {app} --unknown
         - base:       ref {app}
         - b:          ref {app} --b
+        - b_eq_empty: ref {app} --b=
+        - b_eq1:      ref {app} --b=1
+        - b_eq0:      ref {app} --b=0
         - b_dup:      ref {app} --b --b
         - c_missing:  ref {app} --c
         - c:          ref {app} --c \xFF
@@ -49,6 +52,9 @@ main:
         - b_m1:       ref {app} --b_m 0
         - b_m2:       ref {app} --b_m 0 --b_m 1
         - n_m:        ref {app} --n_m 1 --n_m 2
+        - n_m_fail:   ref {app} --n_m --n_m 1 --n_m
+        - n_m_eq:     ref {app} --n_m=1 --n_m 2 --n_m=3 --n_m=4
+        - n_m_eqfail: ref {app} --n_m= --n_m=1 --n_m=
         
         # these tests are different on 32/64 bit systems
         #- l_neg_big:  ref {app} --l -2147483649
