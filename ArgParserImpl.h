@@ -86,8 +86,8 @@ namespace CppArgParser
 
             bool m_bHelp;
 
-            MapSwitch<std::type_index, Parameter&, Args&> m_cvtSwitch;
-            MapSwitch<std::type_index, Parameter&, std::string&> m_decSwitch;
+            MapSwitch<std::type_index, Parameter&, Args&> m_convertSwitch;
+            MapSwitch<std::type_index, Parameter&, std::string&> m_decorateSwitch;
         };
 
     };//namespace Private

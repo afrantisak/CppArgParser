@@ -89,7 +89,7 @@ namespace CppArgParser
         }
         
         template<typename T>
-        struct Cvt
+        struct Convert
         {
             static void impl(Parameter& param, Args& args)
             {
@@ -106,7 +106,7 @@ namespace CppArgParser
         };
         
         template<typename T>
-        struct Cvt<std::vector<T>>
+        struct Convert<std::vector<T>>
         {
             static void impl(Parameter& param, Args& args)
             {
@@ -134,7 +134,7 @@ namespace CppArgParser
         };
         
         template<>
-        struct Cvt<char>
+        struct Convert<char>
         {
             static void impl(Parameter& param, Args& args)
             {
@@ -155,7 +155,7 @@ namespace CppArgParser
         };
 
         template<>
-        struct Cvt<unsigned char>
+        struct Convert<unsigned char>
         {
             static void impl(Parameter& param, Args& args)
             {
@@ -176,7 +176,7 @@ namespace CppArgParser
         };
 
         template<>
-        struct Cvt<bool>
+        struct Convert<bool>
         {
             static void impl(Parameter& param, Args& args)
             {
@@ -186,7 +186,7 @@ namespace CppArgParser
         };
 
         template<>
-        struct Cvt<Bool>
+        struct Convert<Bool>
         {
             static void impl(Parameter& param, Args& args)
             {
@@ -238,7 +238,7 @@ namespace CppArgParser
         };
 
         template<typename T>
-        struct Dec
+        struct Decorate
         {
             static void impl(Parameter& param, std::string& decorator)
             {
@@ -247,7 +247,7 @@ namespace CppArgParser
         };
 
         template<>
-        struct Dec<bool>
+        struct Decorate<bool>
         {
             static void impl(Parameter& param, std::string& decorator)
             {
@@ -256,7 +256,7 @@ namespace CppArgParser
         };
 
         template<>
-        struct Dec<Bool>
+        struct Decorate<Bool>
         {
             static void impl(Parameter& param, std::string& decorator)
             {
@@ -271,8 +271,8 @@ namespace CppArgParser
         template<typename T>
         void ArgParserImpl::registerType()
         {
-            m_cvtSwitch.add(typeid(T), &CppArgParser::Types::Cvt<T>::impl);
-            m_decSwitch.add(typeid(T), &CppArgParser::Types::Dec<T>::impl);
+            m_convertSwitch.add(typeid(T), &CppArgParser::Types::Convert<T>::impl);
+            m_decorateSwitch.add(typeid(T), &CppArgParser::Types::Decorate<T>::impl);
         }
 
         template<typename T>
@@ -288,8 +288,8 @@ ArgParserImpl::ArgParserImpl(Name desc)
 :   m_name(),
     m_desc(desc),
     m_parameters(),
-    m_cvtSwitch(),
-    m_decSwitch()
+    m_convertSwitch(),
+    m_decorateSwitch()
 {
     // register each type that we handle
     registerTypeAndVector<Bool>();
@@ -354,7 +354,7 @@ void ArgParserImpl::parse_argsfirst(Args args)
             });
             if (paramIter != m_parameters.end())
             {
-                m_cvtSwitch(paramIter->m_type, *paramIter, args);
+                m_convertSwitch(paramIter->m_type, *paramIter, args);
                 continue;
             }
             
@@ -368,7 +368,7 @@ void ArgParserImpl::parse_argsfirst(Args args)
             if (paramIter != m_parameters.end())
             {
                 args.push_front(arg.substr(paramIter->m_name.size()));
-                m_cvtSwitch(paramIter->m_type, *paramIter, args);
+                m_convertSwitch(paramIter->m_type, *paramIter, args);
                 continue;
             }
             
@@ -428,7 +428,7 @@ void ArgParserImpl::print_help()
         {
             // get the decorator (HACKY)
             std::string decorator;
-            m_decSwitch(param.m_type, param, decorator);
+            m_decorateSwitch(param.m_type, param, decorator);
             int cur = param.m_name.size() + 1 + decorator.size();
             if (max < cur)
                 max = cur;
@@ -436,7 +436,7 @@ void ArgParserImpl::print_help()
         for (auto param: optional)
         {
             std::string decorator;
-            m_decSwitch(param.m_type, param, decorator);
+            m_decorateSwitch(param.m_type, param, decorator);
             decorator = param.m_name + " " + decorator;
             std::cout << "  " << std::left << std::setw(max + 8) << decorator << param.m_desc << std::endl;
         }
