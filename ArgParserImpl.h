@@ -76,7 +76,7 @@ namespace CppArgParser
             Name getOptional(const Name& name);
             
             template<typename T>
-            void registerTypeAndVector();
+            void registerTypeMutations();
                 
             Name m_name;
             Name m_desc;

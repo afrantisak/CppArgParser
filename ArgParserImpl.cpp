@@ -276,7 +276,7 @@ namespace CppArgParser
         }
 
         template<typename T>
-        void ArgParserImpl::registerTypeAndVector()
+        void ArgParserImpl::registerTypeMutations()
         {
             registerType<T>();
             registerType<std::vector<T>>();
@@ -292,20 +292,20 @@ ArgParserImpl::ArgParserImpl(Name desc)
     m_decorateSwitch()
 {
     // register each type that we handle
-    registerTypeAndVector<Bool>();
-    registerTypeAndVector<bool>();
-    registerTypeAndVector<char>();
-    registerTypeAndVector<unsigned char>();
-    registerTypeAndVector<short>();
-    registerTypeAndVector<unsigned short>();
-    registerTypeAndVector<int>();
-    registerTypeAndVector<unsigned int>();
-    registerTypeAndVector<long>();
-    registerTypeAndVector<unsigned long>();
-    registerTypeAndVector<long long>();
-    registerTypeAndVector<unsigned long long>();
-    registerTypeAndVector<size_t>();
-    registerTypeAndVector<std::string>();
+    registerTypeMutations<Bool>();
+    registerTypeMutations<bool>();
+    registerTypeMutations<char>();
+    registerTypeMutations<unsigned char>();
+    registerTypeMutations<short>();
+    registerTypeMutations<unsigned short>();
+    registerTypeMutations<int>();
+    registerTypeMutations<unsigned int>();
+    registerTypeMutations<long>();
+    registerTypeMutations<unsigned long>();
+    registerTypeMutations<long long>();
+    registerTypeMutations<unsigned long long>();
+    registerTypeMutations<size_t>();
+    registerTypeMutations<std::string>();
     
     add("--help", &m_bHelp, typeid(bool), "show this help message");
 }
