@@ -2,7 +2,7 @@
 #include <iostream>
 #include <iomanip>
 #include <string>
-#include <boost/exception/diagnostic_information.hpp> 
+#include <vector>
 
 // list of built-in types we support
 struct ArgParserType
@@ -161,7 +161,6 @@ int main(int argc, char* argv[])
         if (e.what())
             std::cerr << "exception: " << e.what() << "\n";
         std::cerr << "Unhandled exception!" << std::endl;
-        std::cerr << boost::current_exception_diagnostic_information();        
         return 127;
     }
     

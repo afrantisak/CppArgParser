@@ -5,7 +5,6 @@
 #include <iostream>
 #include <iomanip>
 #include <cxxabi.h>
-#include <boost/lexical_cast.hpp>
 
 using namespace CppArgParser::Private;
 
