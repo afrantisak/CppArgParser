@@ -35,10 +35,6 @@ namespace CppArgParser
             void print_help();
 
         private:
-            // if this is an optional argument (i.e. the name begins with "-" or "--")
-            // then return the name WITHOUT the dashes.  If it is a required argument, return empty string.
-            Name getOptional(const Name& name);
-            
             template<typename T>
             void registerTypeMutations();
                 

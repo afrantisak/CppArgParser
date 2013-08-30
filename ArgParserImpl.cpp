@@ -156,15 +156,14 @@ void ArgParserImpl::print_help()
     std::cout << "Usage: " << m_name; 
     for (auto param: m_parameters)
     {
-        Name name = getOptional(param.m_name);
-        if (!name.size())
+        if (param.m_name.size() && param.m_name[0] == '-')
         {
-            std::cout << " <" << param.m_name << ">";
-            required.push_back(param);
+            optional.push_back(param);
         }
         else
         {
-            optional.push_back(param);
+            std::cout << " <" << param.m_name << ">";
+            required.push_back(param);
         }
     }        
     if (optional.size())
@@ -211,19 +210,6 @@ void ArgParserImpl::print_help()
     }
 
     throw 0;
-}
-
-Name ArgParserImpl::getOptional(const Name& name)
-{
-    if (name.size() && name[0] == '-')
-    {
-        Name sNice(name.substr(1));
-        if (sNice.size() && sNice[0] == '-')
-            sNice = sNice.substr(1);
-        return sNice;
-    }
-    
-    return Name();
 }
 
 /*
