@@ -1,4 +1,5 @@
 #include "ArgParserImpl.h"
+#include "ArgParserTypes.h"
 #include "ArgParser.h"
 #include <algorithm>
 #include <iostream>
@@ -20,252 +21,18 @@ std::istream& operator>>(std::istream& is, CppArgParser::Bool& v)
     return is;
 }        
 
+std::string CppArgParser::Private::demangle(const char* mangled)
+{
+    int status;
+    char* p = abi::__cxa_demangle(mangled, 0, 0, &status);
+    std::string ret(p);
+    std::free(p);
+    return ret;
+}
+
 namespace CppArgParser
 {
     
-    namespace Private
-    {
-        
-        std::string demangle(const char* mangled)
-        {
-            int status;
-            char* p = abi::__cxa_demangle(mangled, 0, 0, &status);
-            std::string ret(p);
-            std::free(p);
-            return ret;
-        }
-
-        void throwUnsupportedType(Parameter param)
-        {
-            std::cout << "ERROR: ArgParser unsupported type ";
-            std::cout << "(" << demangle(param.m_type.name()) << ") ";
-            std::cout << "for parameter \"" << param.m_name << "\"" << std::endl;
-            throw 1;
-        }
-        
-        void throwFailedConversion(Parameter param, std::string valueStr = std::string())
-        {
-            std::cout << "ERROR: ArgParser failed conversion ";
-            //if (valueStr.size())
-            //    std::cout << "from value \"" << valueStr << "\" ";
-            std::cout << "to type \"" << demangle(param.m_type.name()) << "\" ";
-            std::cout << "for parameter \"" << param.m_name << "\"" << std::endl;
-            throw 1;
-        }
-        
-        void throwRequiredMissing(Parameter param)
-        {
-            std::cout << "ERROR: " << param.m_name << " is required" << std::endl;
-            throw 1;
-        }
-    
-        void throwMultipleNotAllowed(Parameter param)
-        {
-            std::cout << "ERROR: " << param.m_name << " does not allow multiple occurrences" << std::endl;
-            throw 1;
-        }
-    
-        void throwUnknownParameter(std::string name)
-        {
-            std::cout << "ERROR: ArgParser unknown name ";
-            std::cout << "\"" << name << "\"" << std::endl;
-            throw 1;
-        }
-        
-    };//namespace Private
-    
-    namespace Types
-    {
-        void debug(Parameter& param, Args args, std::string desc)
-        {
-            std::cout << "Cvt debug " << param.m_name << " (" << desc << "): ";
-            while (!args.empty())
-            {
-                std::string arg = args.front();
-                std::cout << arg << " ";
-                args.pop_front();
-            }
-            std::cout << std::endl;
-        }
-        
-        template<typename T>
-        struct Convert
-        {
-            static void impl(Parameter& param, Args& args)
-            {
-                if (!args.size())
-                    throwRequiredMissing(param);
-                std::string value = args[0];
-                args.pop_front();
-                if (value[0] == '=')
-                {
-                    value = value.substr(1);
-                }
-                param.set(boost::lexical_cast<T>(value));
-            }
-        };
-        
-        template<typename T>
-        struct Convert<std::vector<T>>
-        {
-            static void impl(Parameter& param, Args& args)
-            {
-                if (!args.size())
-                    throwRequiredMissing(param);
-                std::string value = args[0];
-                args.pop_front();
-                if (value[0] == '=')
-                {
-                    value = value.substr(1);
-                }
-                try
-                {
-                    T t = boost::lexical_cast<T>(value);
-                    param.as<std::vector<T>>().push_back(t);
-                }
-                catch (boost::bad_lexical_cast& e)
-                {
-                    // fake out the thrower
-                    Parameter paramFake = param;
-                    paramFake.m_type = typeid(T);
-                    throwFailedConversion(paramFake, value);
-                }
-            }
-        };
-        
-        template<>
-        struct Convert<char>
-        {
-            static void impl(Parameter& param, Args& args)
-            {
-                if (!args.size())
-                    throwRequiredMissing(param);
-                if (param.m_set)
-                    throwMultipleNotAllowed(param);
-                std::string value = args[0];
-                args.pop_front();
-                if (value[0] == '=')
-                {
-                    value = value.substr(1);
-                }
-                if (value.size() > 1)
-                    throwFailedConversion(param, value);
-                param.set(value[0]);
-            }
-        };
-
-        template<>
-        struct Convert<unsigned char>
-        {
-            static void impl(Parameter& param, Args& args)
-            {
-                if (!args.size())
-                    throwRequiredMissing(param);
-                if (param.m_set)
-                    throwMultipleNotAllowed(param);
-                std::string value = args[0];
-                args.pop_front();
-                if (value[0] == '=')
-                {
-                    value = value.substr(1);
-                }
-                if (value.size() > 1)
-                    throwFailedConversion(param, value);
-                param.set(value[0]);
-            }
-        };
-
-        template<>
-        struct Convert<bool>
-        {
-            static void impl(Parameter& param, Args& args)
-            {
-                param.set(true);
-                return;
-            }
-        };
-
-        template<>
-        struct Convert<Bool>
-        {
-            static void impl(Parameter& param, Args& args)
-            {
-                std::vector<std::string> trueValues, falseValues;
-                trueValues.push_back("1");
-                trueValues.push_back("T");
-                trueValues.push_back("True");
-                trueValues.push_back("Y");
-                trueValues.push_back("Yes");
-                falseValues.push_back("0");
-                falseValues.push_back("F");
-                falseValues.push_back("False");
-                falseValues.push_back("N");
-                falseValues.push_back("No");
-                // bool requires the --arg=value syntax, otherwise if the flag is present, 
-                // the value will be true.
-                if (args.size() && args[0][0] == '=')
-                {
-                    std::string value = args[0].substr(1);
-                    for (auto valid: trueValues)
-                    {
-                        if (value == valid)
-                        {
-                            Bool b(true);
-                            param.set(b);
-                            args.pop_front();
-                            return;
-                        }
-                    }
-                    for (auto valid: falseValues)
-                    {
-                        if (value == valid)
-                        {
-                            Bool b(false);
-                            param.set(b);
-                            args.pop_front();
-                            return;
-                        }
-                    }
-                    throwFailedConversion(param, value);
-                }
-                else
-                {
-                    Bool b(true);
-                    param.set(b);
-                    return;
-                }
-            }
-        };
-
-        template<typename T>
-        struct Decorate
-        {
-            static void impl(Parameter& param, std::string& decorator)
-            {
-                decorator = "arg";
-            }
-        };
-
-        template<>
-        struct Decorate<bool>
-        {
-            static void impl(Parameter& param, std::string& decorator)
-            {
-                decorator = "";
-            }
-        };
-
-        template<>
-        struct Decorate<Bool>
-        {
-            static void impl(Parameter& param, std::string& decorator)
-            {
-                decorator = "[=arg(=1)]";
-            }
-        };
-
-    };//namespace Types
-
     namespace Private
     {
         template<typename T>
@@ -372,7 +139,7 @@ void ArgParserImpl::parse_argsfirst(Args args)
                 continue;
             }
             
-            throwUnknownParameter(arg);
+            Types::throwUnknownParameter(arg);
         }
     }
     catch (boost::bad_lexical_cast& e)

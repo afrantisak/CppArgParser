@@ -1,4 +1,5 @@
 #pragma once
+#include "ArgParserTypes.h"
 #include <map>
 #include <string>
 #include <vector>
@@ -11,48 +12,11 @@ namespace CppArgParser
     
     namespace Private
     {
-
-        typedef std::string Name;
-            
-        struct Parameter
-        {
-            Parameter(Name name, Name abbrev, void* valuePtr, std::type_index type, Name desc)
-            :   m_name(name), m_abbrev(abbrev), m_valuePtr(valuePtr), m_type(type), m_desc(desc), m_set(false)
-            {
-            }
-            
-            Name m_name;
-            Name m_abbrev;
-            void* m_valuePtr;
-            std::type_index m_type;
-            Name m_desc;
-            bool m_set;
-            
-            template<typename T>
-            void set(const T& v)
-            {
-                *(reinterpret_cast<T*>(m_valuePtr)) = v;
-                m_set = true;
-            }
-            
-            template<typename T>
-            void get(T& v) const
-            {
-                v = *(reinterpret_cast<const T*>(m_valuePtr));
-            }
-            
-            template<typename T>
-            T& as()
-            {
-                m_set = true;
-                return *(reinterpret_cast<T*>(m_valuePtr));
-            }
-            
-
-        };
         
-        typedef std::deque<std::string> Args;
-
+        typedef Types::Name Name;
+        typedef Types::Args Args;
+        typedef Types::Parameter Parameter;
+        
         class ArgParserImpl
         {
         public:  
@@ -89,6 +53,8 @@ namespace CppArgParser
             MapSwitch<std::type_index, Parameter&, Args&> m_convertSwitch;
             MapSwitch<std::type_index, Parameter&, std::string&> m_decorateSwitch;
         };
+
+        std::string demangle(const char* mangled);
 
     };//namespace Private
     
