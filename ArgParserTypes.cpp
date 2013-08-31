@@ -1,6 +1,5 @@
 #include "ArgParserTypes.h"
 #include "ArgParserImpl.h"
-#include <cxxabi.h>
 
 using namespace CppArgParser::Private;
 

@@ -109,45 +109,37 @@ void ArgParserImpl::parse_argsfirst(Args args)
     // args first - less intuitive matching?
     Parameters::iterator paramIter = m_parameters.end();
     std::string arg;
-    try
+    while (!args.empty())
     {
-        while (!args.empty())
+        arg = args.front();
+        args.pop_front();
+        
+        // check for exact match of optional parameter
+        paramIter = std::find_if(m_parameters.begin(), m_parameters.end(), [arg](const Parameter& param)
         {
-            arg = args.front();
-            args.pop_front();
-            
-            // check for exact match of optional parameter
-            paramIter = std::find_if(m_parameters.begin(), m_parameters.end(), [arg](const Parameter& param)
-            {
-                return arg == param.m_name;
-            });
-            if (paramIter != m_parameters.end())
-            {
-                m_convertSwitch(paramIter->m_type, *paramIter, args);
-                continue;
-            }
-            
-            // look for tokens that start with optional parameter and have = following
-            paramIter = std::find_if(m_parameters.begin(), m_parameters.end(), [arg](const Parameter& param)
-            {
-                return arg.size() > param.m_name.size() 
-                    && arg.substr(0, param.m_name.size()) == param.m_name
-                    && arg[param.m_name.size()] == '=';
-            });
-            if (paramIter != m_parameters.end())
-            {
-                args.push_front(arg.substr(paramIter->m_name.size()));
-                m_convertSwitch(paramIter->m_type, *paramIter, args);
-                continue;
-            }
-            
-            Types::throwUnknownParameter(arg);
-        }
-    }
-    catch (boost::bad_lexical_cast& e)
-    {
+            return arg == param.m_name;
+        });
         if (paramIter != m_parameters.end())
-            throwFailedConversion(*paramIter, arg);
+        {
+            m_convertSwitch(paramIter->m_type, *paramIter, args);
+            continue;
+        }
+        
+        // look for tokens that start with optional parameter and have = following
+        paramIter = std::find_if(m_parameters.begin(), m_parameters.end(), [arg](const Parameter& param)
+        {
+            return arg.size() > param.m_name.size() 
+                && arg.substr(0, param.m_name.size()) == param.m_name
+                && arg[param.m_name.size()] == '=';
+        });
+        if (paramIter != m_parameters.end())
+        {
+            args.push_front(arg.substr(paramIter->m_name.size()));
+            m_convertSwitch(paramIter->m_type, *paramIter, args);
+            continue;
+        }
+        
+        Types::throwUnknownParameter(arg);
     }
 }
 

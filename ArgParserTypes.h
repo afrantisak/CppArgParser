@@ -73,7 +73,14 @@ namespace CppArgParser
                 {
                     value = value.substr(1);
                 }
-                param.set(boost::lexical_cast<T>(value));
+                try
+                {
+                    param.set(boost::lexical_cast<T>(value));
+                }
+                catch (boost::bad_lexical_cast& e)
+                {
+                    throwFailedConversion(param, value);
+                }
             }
         };
         
