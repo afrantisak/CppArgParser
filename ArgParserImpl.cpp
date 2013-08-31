@@ -34,6 +34,7 @@ namespace CppArgParser
     
     namespace Private
     {
+    
         template<typename T>
         void ArgParserImpl::registerType()
         {
@@ -47,7 +48,9 @@ namespace CppArgParser
             registerType<T>();
             registerType<std::vector<T>>();
         }
+    
     };
+    
 };//namespace CppArgParser
 
 ArgParserImpl::ArgParserImpl(Name desc)
