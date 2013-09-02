@@ -29,19 +29,6 @@ namespace CppArgParser
             bool m_set;
             
             template<typename T>
-            void set(const T& v)
-            {
-                *(reinterpret_cast<T*>(m_valuePtr)) = v;
-                m_set = true;
-            }
-            
-            template<typename T>
-            void get(T& v) const
-            {
-                v = *(reinterpret_cast<const T*>(m_valuePtr));
-            }
-            
-            template<typename T>
             T& as()
             {
                 m_set = true;
@@ -58,13 +45,28 @@ namespace CppArgParser
         void throwMultipleNotAllowed(Parameter param);
         void throwUnknownParameter(std::string name);
         
-        void debug(Parameter& param, Args args, std::string desc);
+        void debug(Parameter& param, Args args);
+        
+        template<typename T>
+        T lexical_cast(const Parameter& param, std::string value)
+        {
+            try
+            {
+                //std::stringstream(value) >> t;
+                return boost::lexical_cast<T>(value);
+            }
+            catch (boost::bad_lexical_cast& e)
+            {
+                throwFailedConversion(param, value);
+            }
+        }
         
         template<typename T>
         struct Convert
         {
             static void impl(Parameter& param, Args& args)
             {
+                //debug(param, args);
                 if (!args.size())
                     throwRequiredMissing(param);
                 std::string value = args[0];
@@ -73,14 +75,8 @@ namespace CppArgParser
                 {
                     value = value.substr(1);
                 }
-                try
-                {
-                    param.set(boost::lexical_cast<T>(value));
-                }
-                catch (boost::bad_lexical_cast& e)
-                {
-                    throwFailedConversion(param, value);
-                }
+                T t = lexical_cast<T>(param, value);
+                param.as<T>() = t;
             }
         };
         
@@ -97,18 +93,10 @@ namespace CppArgParser
                 {
                     value = value.substr(1);
                 }
-                try
-                {
-                    T t = boost::lexical_cast<T>(value);
-                    param.as<std::vector<T>>().push_back(t);
-                }
-                catch (boost::bad_lexical_cast& e)
-                {
-                    // fake out the thrower
-                    Parameter paramFake = param;
-                    paramFake.m_type = typeid(T);
-                    throwFailedConversion(paramFake, value);
-                }
+                Parameter paramFake = param;
+                paramFake.m_type = typeid(T);
+                T t = lexical_cast<T>(paramFake, value);
+                param.as<std::vector<T>>().push_back(t);
             }
         };
         

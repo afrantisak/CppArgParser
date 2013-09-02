@@ -40,9 +40,9 @@ void CppArgParser::Types::throwUnknownParameter(std::string name)
     throw 1;
 }
 
-void CppArgParser::Types::debug(Parameter& param, Args args, std::string desc)
+void CppArgParser::Types::debug(Parameter& param, Args args)
 {
-    std::cout << "Cvt debug " << param.m_name << " (" << desc << "): ";
+    std::cout << "Cvt debug " << param.m_name << " (" << demangle(param.m_type.name()) << "): ";
     while (!args.empty())
     {
         std::string arg = args.front();
@@ -54,6 +54,7 @@ void CppArgParser::Types::debug(Parameter& param, Args args, std::string desc)
 
 void CppArgParser::Types::Convert<char>::impl(Parameter& param, Args& args)
 {
+    typedef char T;
     if (!args.size())
         throwRequiredMissing(param);
     if (param.m_set)
@@ -66,11 +67,13 @@ void CppArgParser::Types::Convert<char>::impl(Parameter& param, Args& args)
     }
     if (value.size() > 1)
         throwFailedConversion(param, value);
-    param.set(value[0]);
+    param.as<T>() = value[0];
+
 }
 
 void CppArgParser::Types::Convert<unsigned char>::impl(Parameter& param, Args& args)
 {
+    typedef unsigned char T;
     if (!args.size())
         throwRequiredMissing(param);
     if (param.m_set)
@@ -83,12 +86,13 @@ void CppArgParser::Types::Convert<unsigned char>::impl(Parameter& param, Args& a
     }
     if (value.size() > 1)
         throwFailedConversion(param, value);
-    param.set(value[0]);
+    param.as<T>() = value[0];
 }
 
 void CppArgParser::Types::Convert<bool>::impl(Parameter& param, Args& args)
 {
-    param.set(true);
+    typedef bool T;
+    param.as<T>() = true;
     return;
 }
 
@@ -114,8 +118,9 @@ void CppArgParser::Types::Convert<CppArgParser::Bool>::impl(Parameter& param, Ar
         {
             if (value == valid)
             {
+                typedef bool T;
                 Bool b(true);
-                param.set(b);
+                param.as<T>() = b.m_b;
                 args.pop_front();
                 return;
             }
@@ -124,8 +129,9 @@ void CppArgParser::Types::Convert<CppArgParser::Bool>::impl(Parameter& param, Ar
         {
             if (value == valid)
             {
+                typedef bool T;
                 Bool b(false);
-                param.set(b);
+                param.as<T>() = b.m_b;
                 args.pop_front();
                 return;
             }
@@ -134,8 +140,9 @@ void CppArgParser::Types::Convert<CppArgParser::Bool>::impl(Parameter& param, Ar
     }
     else
     {
+        typedef bool T;
         Bool b(true);
-        param.set(b);
+        param.as<T>() = b.m_b;
         return;
     }
 }
