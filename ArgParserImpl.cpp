@@ -8,12 +8,6 @@
 
 using namespace CppArgParser::Private;
 
-std::ostream& operator<<(std::ostream& os, const CppArgParser::Bool& v)
-{
-    os << v.m_b;
-    return os;
-}        
-
 std::istream& operator>>(std::istream& is, CppArgParser::Bool& v)
 {
     is >> v.m_b;

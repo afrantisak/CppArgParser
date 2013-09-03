@@ -4,8 +4,14 @@
 #include <iostream>
 #include <iomanip>
 #include <deque>
-#include <boost/lexical_cast.hpp>
+#include <sstream>
 
+#ifdef USE_BOOST_LEXICAL_CAST
+#include <boost/lexical_cast.hpp>
+#endif
+
+std::istream& operator>>(std::istream& is, CppArgParser::Bool& v);
+        
 namespace CppArgParser
 {
     
@@ -47,12 +53,31 @@ namespace CppArgParser
         
         void debug(Parameter& param, Args args);
         
+#ifndef USE_BOOST_LEXICAL_CAST
         template<typename T>
         T lexical_cast(const Parameter& param, std::string value)
         {
             try
             {
-                //std::stringstream(value) >> t;
+                std::istringstream strm(value);
+                strm.exceptions(std::istringstream::failbit | std::istringstream::badbit);
+                T t;
+                strm >> t;
+                if (!strm.eof())
+                    throwFailedConversion(param, value);
+                return t;
+            }
+            catch (std::istringstream::failure&)
+            {
+                throwFailedConversion(param, value);
+            }
+        }
+#else
+        template<typename T>
+        T lexical_cast(const Parameter& param, std::string value)
+        {
+            try
+            {
                 return boost::lexical_cast<T>(value);
             }
             catch (boost::bad_lexical_cast& e)
@@ -60,13 +85,18 @@ namespace CppArgParser
                 throwFailedConversion(param, value);
             }
         }
+#endif        
+        template<>
+        inline std::string lexical_cast<std::string>(const Parameter& param, std::string value)
+        {
+            return value;
+        }
         
         template<typename T>
         struct Convert
         {
             static void impl(Parameter& param, Args& args)
             {
-                //debug(param, args);
                 if (!args.size())
                     throwRequiredMissing(param);
                 std::string value = args[0];
