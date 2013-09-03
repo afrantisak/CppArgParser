@@ -32,8 +32,8 @@ namespace CppArgParser
         template<typename T>
         void ArgParserImpl::registerType()
         {
-            m_convertSwitch.add(typeid(T), &CppArgParser::Types::Convert<T>::impl);
-            m_decorateSwitch.add(typeid(T), &CppArgParser::Types::Decorate<T>::impl);
+            m_convertSwitch.add(typeid(T), &CppArgParser::Types::Type<T>::convert);
+            m_decorateSwitch.add(typeid(T), &CppArgParser::Types::Type<T>::decorate);
         }
 
         template<typename T>

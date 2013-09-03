@@ -93,9 +93,9 @@ namespace CppArgParser
         }
         
         template<typename T>
-        struct Convert
+        struct Type
         {
-            static void impl(Parameter& param, Args& args)
+            static void convert(Parameter& param, Args& args)
             {
                 if (!args.size())
                     throwRequiredMissing(param);
@@ -108,12 +108,17 @@ namespace CppArgParser
                 T t = lexical_cast<T>(param, value);
                 param.as<T>() = t;
             }
+
+            static void decorate(Parameter& param, std::string& decorator)
+            {
+                decorator = "arg";
+            }
         };
         
         template<typename T>
-        struct Convert<std::vector<T>>
+        struct Type<std::vector<T>>
         {
-            static void impl(Parameter& param, Args& args)
+            static void convert(Parameter& param, Args& args)
             {
                 if (!args.size())
                     throwRequiredMissing(param);
@@ -128,51 +133,38 @@ namespace CppArgParser
                 T t = lexical_cast<T>(paramFake, value);
                 param.as<std::vector<T>>().push_back(t);
             }
-        };
-        
-        template<>
-        struct Convert<char>
-        {
-            static void impl(Parameter& param, Args& args);
-        };
-
-        template<>
-        struct Convert<unsigned char>
-        {
-            static void impl(Parameter& param, Args& args);
-        };
-
-        template<>
-        struct Convert<bool>
-        {
-            static void impl(Parameter& param, Args& args);
-        };
-
-        template<>
-        struct Convert<Bool>
-        {
-            static void impl(Parameter& param, Args& args);
-        };
-
-        template<typename T>
-        struct Decorate
-        {
-            static void impl(Parameter& param, std::string& decorator)
+            static void decorate(Parameter& param, std::string& decorator)
             {
                 decorator = "arg";
             }
         };
-
+        
         template<>
-        struct Decorate<bool>
+        struct Type<char>
         {
-            static void impl(Parameter& param, std::string& decorator);
+            static void convert(Parameter& param, Args& args);
+            static void decorate(Parameter& param, std::string& decorator);
         };
 
         template<>
-        struct Decorate<Bool>
+        struct Type<unsigned char>
         {
-            static void impl(Parameter& param, std::string& decorator);
+            static void convert(Parameter& param, Args& args);
+            static void decorate(Parameter& param, std::string& decorator);
+        };
+
+        template<>
+        struct Type<bool>
+        {
+            static void convert(Parameter& param, Args& args);
+            static void decorate(Parameter& param, std::string& decorator);
+        };
+
+        template<>
+        struct Type<Bool>
+        {
+            static void convert(Parameter& param, Args& args);
+            static void decorate(Parameter& param, std::string& decorator);
         };
 
     };//namespace Types

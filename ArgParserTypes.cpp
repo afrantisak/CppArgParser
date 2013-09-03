@@ -52,7 +52,7 @@ void CppArgParser::Types::debug(Parameter& param, Args args)
     std::cout << std::endl;
 }
 
-void CppArgParser::Types::Convert<char>::impl(Parameter& param, Args& args)
+void CppArgParser::Types::Type<char>::convert(Parameter& param, Args& args)
 {
     typedef char T;
     if (!args.size())
@@ -71,7 +71,7 @@ void CppArgParser::Types::Convert<char>::impl(Parameter& param, Args& args)
 
 }
 
-void CppArgParser::Types::Convert<unsigned char>::impl(Parameter& param, Args& args)
+void CppArgParser::Types::Type<unsigned char>::convert(Parameter& param, Args& args)
 {
     typedef unsigned char T;
     if (!args.size())
@@ -89,14 +89,14 @@ void CppArgParser::Types::Convert<unsigned char>::impl(Parameter& param, Args& a
     param.as<T>() = value[0];
 }
 
-void CppArgParser::Types::Convert<bool>::impl(Parameter& param, Args& args)
+void CppArgParser::Types::Type<bool>::convert(Parameter& param, Args& args)
 {
     typedef bool T;
     param.as<T>() = true;
     return;
 }
 
-void CppArgParser::Types::Convert<CppArgParser::Bool>::impl(Parameter& param, Args& args)
+void CppArgParser::Types::Type<CppArgParser::Bool>::convert(Parameter& param, Args& args)
 {
     std::vector<std::string> trueValues, falseValues;
     trueValues.push_back("1");
@@ -147,12 +147,22 @@ void CppArgParser::Types::Convert<CppArgParser::Bool>::impl(Parameter& param, Ar
     }
 }
 
-void CppArgParser::Types::Decorate<bool>::impl(Parameter& param, std::string& decorator)
+void CppArgParser::Types::Type<char>::decorate(Parameter& param, std::string& decorator)
+{
+    decorator = "arg";
+}
+
+void CppArgParser::Types::Type<unsigned char>::decorate(Parameter& param, std::string& decorator)
+{
+    decorator = "arg";
+}
+
+void CppArgParser::Types::Type<bool>::decorate(Parameter& param, std::string& decorator)
 {
     decorator = "";
 }
 
-void CppArgParser::Types::Decorate<CppArgParser::Bool>::impl(Parameter& param, std::string& decorator)
+void CppArgParser::Types::Type<CppArgParser::Bool>::decorate(Parameter& param, std::string& decorator)
 {
     decorator = "[=arg(=1)]";
 }
