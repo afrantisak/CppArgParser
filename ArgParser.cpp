@@ -3,8 +3,8 @@
 
 using namespace CppArgParser;
 
-ArgParser::ArgParser(Name description)
-    :   m_implPtr(new Private::ArgParserImpl(description))
+ArgParser::ArgParser(int argc, char* argv[])
+    :   m_implPtr(new Private::ArgParserImpl(argc, argv))
 {    
 }
 
@@ -12,14 +12,19 @@ ArgParser::~ArgParser()
 {
 }
 
-void ArgParser::parse(int argc, char* argv[])
+bool ArgParser::help(Name description)
 {
-    m_implPtr->parse(argc, argv);
+    return m_implPtr->help(description);
 }
 
 void ArgParser::addImpl(Name name, void* valuePtr, std::type_index type, Name desc)
 {
-    m_implPtr->add(name, valuePtr, type, desc);
+    // HACK
+    std::string decorator;
+    decorator = "arg";
+    if (type == typeid(Bool))
+        decorator = "[=arg(=1)]";
+    m_implPtr->add(name, valuePtr, type, desc, decorator);
 }
 
 /*

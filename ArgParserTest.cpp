@@ -88,7 +88,7 @@ int main(int argc, char* argv[])
         std::vector<ArgParserType::Size> size_m;
         std::vector<ArgParserType::Str>  str_m;
 
-        CppArgParser::ArgParser args("Test the CppArgParser");
+        CppArgParser::ArgParser args(argc, argv);
 
         // configure single instance arguments
         args.add("--b",      b,    "bool");
@@ -121,7 +121,10 @@ int main(int argc, char* argv[])
         args.add("--str_m",    str_m,  "std::string (multiple instances)");
 
         // parse
-        args.parse(argc, argv);
+        if (args.help("Test the CppArgParser"))
+        {
+            return 1;
+        };
 
         // output
         dump("b:      ", b.m_b);

@@ -24,7 +24,7 @@ namespace CppArgParser
     public:  
         typedef std::string Name;
         
-        ArgParser(Name description = Name());
+        ArgParser(int argc, char* argv[]);
         ~ArgParser();
         
         template<typename T>
@@ -33,8 +33,7 @@ namespace CppArgParser
             addImpl(name, &value, typeid(T), desc);
         }
 
-        // process the arguments and check for errors
-        void parse(int argc, char* argv[]);
+        bool help(Name description);
         
     private:
         std::unique_ptr<Private::ArgParserImpl> m_implPtr;

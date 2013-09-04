@@ -20,24 +20,16 @@ namespace CppArgParser
         class ArgParserImpl
         {
         public:  
-            ArgParserImpl(Name description);
+            ArgParserImpl(int argc, char* argv[]);
             
-            void add(Name name, void* valuePtr, std::type_index type, Name desc);
+            void add(Name name, void* valuePtr, std::type_index type, Name desc, Name decorator);
 
-            void parse(int argc, char* argv[]);
+            bool help(Name description);
 
-            template<typename T>
-            void registerType();
-            
         protected:
-            void parse_argsfirst(Args args);
-            
             void print_help();
 
         private:
-            template<typename T>
-            void registerTypeMutations();
-                
             Name m_name;
             Name m_desc;
             
@@ -46,8 +38,8 @@ namespace CppArgParser
 
             bool m_bHelp;
 
-            MapSwitch<std::type_index, Parameter&, Args&> m_convertSwitch;
-            MapSwitch<std::type_index, Parameter&, std::string&> m_decorateSwitch;
+            typedef std::deque<std::string> Args;
+            Args m_args;
         };
 
         std::string demangle(const char* mangled);

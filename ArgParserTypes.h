@@ -22,8 +22,8 @@ namespace CppArgParser
             
         struct Parameter
         {
-            Parameter(Name name, Name abbrev, void* valuePtr, std::type_index type, Name desc)
-            :   m_name(name), m_abbrev(abbrev), m_valuePtr(valuePtr), m_type(type), m_desc(desc), m_set(false)
+            Parameter(Name name, Name abbrev, void* valuePtr, std::type_index type, Name desc, Name decorator)
+            :   m_name(name), m_abbrev(abbrev), m_valuePtr(valuePtr), m_type(type), m_desc(desc), m_decorator(decorator), m_set(false)
             {
             }
             
@@ -32,6 +32,7 @@ namespace CppArgParser
             void* m_valuePtr;
             std::type_index m_type;
             Name m_desc;
+            Name m_decorator;
             bool m_set;
             
             template<typename T>
