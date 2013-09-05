@@ -1,5 +1,6 @@
 #pragma once
-#include "ArgParser.h"
+//#include "ArgParser.h"
+#include <typeindex>
 #include <algorithm>
 #include <iostream>
 #include <iomanip>
@@ -10,10 +11,15 @@
 #include <boost/lexical_cast.hpp>
 #endif
 
-std::istream& operator>>(std::istream& is, CppArgParser::Bool& v);
-        
 namespace CppArgParser
 {
+    
+    struct Bool
+    {
+        Bool() : m_b(false) {} // HACK?
+        Bool(bool b) : m_b(b) {}
+        bool m_b;
+    };
     
     namespace Types
     {
@@ -53,6 +59,7 @@ namespace CppArgParser
         void throwUnknownParameter(std::string name);
         
         void debug(Parameter& param, Args args);
+        std::string demangle(const char* mangled);
         
 #ifndef USE_BOOST_LEXICAL_CAST
         template<typename T>
@@ -172,6 +179,8 @@ namespace CppArgParser
 
 };//namespace CppArgParser
 
+std::istream& operator>>(std::istream& is, CppArgParser::Bool& v);
+        
 /*
 Copyright (c) 2013 Aaron Frantisak
 

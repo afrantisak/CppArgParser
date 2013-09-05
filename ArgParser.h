@@ -3,21 +3,14 @@
 #include <memory>
 #include <typeinfo>
 #include <typeindex>
+#include "ArgParserTypes.h"
 
 namespace CppArgParser
 {
     
-    struct Bool
-    {
-        Bool() : m_b(false) {} // HACK?
-        Bool(bool b) : m_b(b) {}
-        bool m_b;
-    };
-    
-    namespace Private
-    {
-        class ArgParserImpl;
-    };
+    typedef Types::Name Name;
+    typedef Types::Args Args;
+    typedef Types::Parameter Parameter;
     
     class ArgParser
     {
@@ -35,10 +28,21 @@ namespace CppArgParser
 
         bool help(Name description);
         
-    private:
-        std::unique_ptr<Private::ArgParserImpl> m_implPtr;
-        
+    private:        
         void addImpl(Name name, void* valuePtr, std::type_index type, Name desc);
+
+        void print_help();
+
+        Name m_name;
+        Name m_desc;
+        
+        typedef std::vector<Parameter> Parameters;
+        Parameters m_parameters;
+
+        bool m_bHelp;
+
+        typedef std::deque<std::string> Args;
+        Args m_args;
     };
 
 };// namespace CppArgParser

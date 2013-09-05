@@ -1,7 +1,14 @@
 #include "ArgParserTypes.h"
-#include "ArgParserImpl.h"
+#include <cxxabi.h>
 
-using namespace CppArgParser::Private;
+std::string CppArgParser::Types::demangle(const char* mangled)
+{
+    int status;
+    char* p = abi::__cxa_demangle(mangled, 0, 0, &status);
+    std::string ret(p);
+    std::free(p);
+    return ret;
+}
 
 void CppArgParser::Types::throwUnsupportedType(Parameter param)
 {

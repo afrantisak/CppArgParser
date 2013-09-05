@@ -1,20 +1,33 @@
 #include "ArgParser.h"
-#include "ArgParserImpl.h"
 
 using namespace CppArgParser;
 
+std::istream& operator>>(std::istream& is, CppArgParser::Bool& v)
+{
+    is >> v.m_b;
+    return is;
+}        
+
 ArgParser::ArgParser(int argc, char* argv[])
-    :   m_implPtr(new Private::ArgParserImpl(argc, argv))
-{    
+:   m_name(),
+    m_desc(),
+    m_parameters(),
+    m_args()
+{
+    for (int argn = 0; argn < argc; argn++)
+    {
+        m_args.push_back(argv[argn]);
+    }
+    
+    m_name = m_args.front();
+    m_name = m_name.substr(m_name.find_last_of("\\/") + 1);
+    m_args.pop_front();    
+
+    m_parameters.push_back(Parameter("--help", "", &m_bHelp, typeid(bool), "show this help message", ""));
 }
 
 ArgParser::~ArgParser()
 {
-}
-
-bool ArgParser::help(Name description)
-{
-    return m_implPtr->help(description);
 }
 
 void ArgParser::addImpl(Name name, void* valuePtr, std::type_index type, Name desc)
@@ -24,7 +37,82 @@ void ArgParser::addImpl(Name name, void* valuePtr, std::type_index type, Name de
     decorator = "arg";
     if (type == typeid(Bool))
         decorator = "[=arg(=1)]";
-    m_implPtr->add(name, valuePtr, type, desc, decorator);
+    m_parameters.push_back(Parameter(name, "", valuePtr, type, desc, decorator));
+}
+
+bool ArgParser::help(Name description)
+{
+    m_desc = description;
+    for (auto& arg : m_args)
+    {
+        if (arg == "--help")
+        {
+            print_help();
+            return true;
+        }
+    }
+
+    return false;
+}
+
+void ArgParser::print_help()
+{
+    Parameters optional;
+    Parameters required;
+    
+    std::cout << "Usage: " << m_name; 
+    for (auto param: m_parameters)
+    {
+        if (param.m_name.size() && param.m_name[0] == '-')
+        {
+            optional.push_back(param);
+        }
+        else
+        {
+            std::cout << " <" << param.m_name << ">";
+            required.push_back(param);
+        }
+    }        
+    if (optional.size())
+        std::cout << " [options]";
+    std::cout << std::endl;
+    std::cout << std::endl;
+    
+    if (m_desc.size())
+    {
+        std::cout << m_desc << std::endl;
+        std::cout << std::endl;
+    }
+
+    if (required.size())
+    {
+        std::cout << "Required parameters:" << std::endl;
+        for (auto param: required)
+        {
+            std::cout << "  " << param.m_name << ": " << param.m_desc << std::endl;
+        }
+    }
+
+    if (optional.size())
+    {
+        std::cout << "Optional parameters:" << std::endl;
+        int max = 0;
+        for (auto param: optional)
+        {
+            // get the decorator (HACKY)
+            std::string decorator = param.m_decorator;
+            int cur = param.m_name.size() + 1 + decorator.size();
+            if (max < cur)
+                max = cur;
+        }
+        for (auto param: optional)
+        {
+            std::string decorator = param.m_decorator;
+            decorator = param.m_name + " " + decorator;
+            std::cout << "  " << std::left << std::setw(max + 8) << decorator << param.m_desc << std::endl;
+        }
+        std::cout << std::endl;
+    }
 }
 
 /*
