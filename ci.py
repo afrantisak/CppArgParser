@@ -40,7 +40,9 @@ def main(options):
     
     formats = {'tests': ' '.join(options.tests), 'ref': options.ref }
 
-    return os.system(sys.executable + ' testagg.py {tests} --ref {ref}'.format(**formats))
+    ret = os.system(sys.executable + ' testagg.py {tests} --ref {ref}'.format(**formats))
+    ret = ret / 256
+    return ret
 
 if __name__ == "__main__":
     import argparse
