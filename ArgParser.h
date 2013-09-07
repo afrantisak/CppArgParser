@@ -28,10 +28,9 @@ namespace CppArgParser
         bool help(Name description);
         
     private:        
-        void print_help();
+        void print_help(Name description);
 
         Name m_name;
-        Name m_desc;
         
         typedef std::vector<Parameter> Parameters;
         Parameters m_parameters;
@@ -69,7 +68,6 @@ namespace CppArgParser
         }
         m_args = args;
     }
-    
 
 };// namespace CppArgParser
 

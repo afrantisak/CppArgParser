@@ -10,7 +10,6 @@ std::istream& operator>>(std::istream& is, CppArgParser::Bool& v)
 
 ArgParser::ArgParser(int argc, char* argv[])
 :   m_name(),
-    m_desc(),
     m_parameters(),
     m_args()
 {
@@ -40,12 +39,11 @@ bool ArgParser::fail_remaining()
 
 bool ArgParser::help(Name description)
 {
-    m_desc = description;
     for (auto& arg : m_args)
     {
         if (arg == "--help")
         {
-            print_help();
+            print_help(description);
             return true;
         }
     }
@@ -55,7 +53,7 @@ bool ArgParser::help(Name description)
     return false;
 }
 
-void ArgParser::print_help()
+void ArgParser::print_help(Name description)
 {
     Parameters optional;
     Parameters required;
@@ -78,9 +76,9 @@ void ArgParser::print_help()
     std::cout << std::endl;
     std::cout << std::endl;
     
-    if (m_desc.size())
+    if (description.size())
     {
-        std::cout << m_desc << std::endl;
+        std::cout << description << std::endl;
         std::cout << std::endl;
     }
 
