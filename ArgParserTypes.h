@@ -99,6 +99,22 @@ namespace CppArgParser
             return value;
         }
         
+        template<>
+        inline char lexical_cast<char>(const Parameter& param, std::string value)
+        {
+            if (value.size() != 1)
+                throwFailedConversion(param, value);
+            return value[0];
+        }
+        
+        template<>
+        inline unsigned char lexical_cast<unsigned char>(const Parameter& param, std::string value)
+        {
+            if (value.size() != 1)
+                throwFailedConversion(param, value);
+            return value[0];
+        }
+        
         template<typename T>
         struct Type
         {
@@ -106,6 +122,8 @@ namespace CppArgParser
             {
                 if (!args.size())
                     throwRequiredMissing(param);
+                if (param.m_set)
+                    throwMultipleNotAllowed(param);
                 std::string value = args[0];
                 args.pop_front();
                 if (value[0] == '=')
@@ -146,20 +164,6 @@ namespace CppArgParser
             }
         };
         
-        template<>
-        struct Type<char>
-        {
-            static void convert(Parameter& param, Args& args);
-            static std::string decorate();
-        };
-
-        template<>
-        struct Type<unsigned char>
-        {
-            static void convert(Parameter& param, Args& args);
-            static std::string decorate();
-        };
-
         template<>
         struct Type<bool>
         {

@@ -59,43 +59,6 @@ void CppArgParser::Types::debug(Parameter& param, Args args)
     std::cout << std::endl;
 }
 
-void CppArgParser::Types::Type<char>::convert(Parameter& param, Args& args)
-{
-    typedef char T;
-    if (!args.size())
-        throwRequiredMissing(param);
-    if (param.m_set)
-        throwMultipleNotAllowed(param);
-    std::string value = args[0];
-    args.pop_front();
-    if (value[0] == '=')
-    {
-        value = value.substr(1);
-    }
-    if (value.size() > 1)
-        throwFailedConversion(param, value);
-    param.as<T>() = value[0];
-
-}
-
-void CppArgParser::Types::Type<unsigned char>::convert(Parameter& param, Args& args)
-{
-    typedef unsigned char T;
-    if (!args.size())
-        throwRequiredMissing(param);
-    if (param.m_set)
-        throwMultipleNotAllowed(param);
-    std::string value = args[0];
-    args.pop_front();
-    if (value[0] == '=')
-    {
-        value = value.substr(1);
-    }
-    if (value.size() > 1)
-        throwFailedConversion(param, value);
-    param.as<T>() = value[0];
-}
-
 void CppArgParser::Types::Type<bool>::convert(Parameter& param, Args& args)
 {
     typedef bool T;
@@ -152,16 +115,6 @@ void CppArgParser::Types::Type<CppArgParser::Bool>::convert(Parameter& param, Ar
         param.as<T>() = b.m_b;
         return;
     }
-}
-
-std::string CppArgParser::Types::Type<char>::decorate()
-{
-    return "arg";
-}
-
-std::string CppArgParser::Types::Type<unsigned char>::decorate()
-{
-    return "arg";
 }
 
 std::string CppArgParser::Types::Type<bool>::decorate()
