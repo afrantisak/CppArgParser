@@ -51,7 +51,6 @@ namespace CppArgParser
         
         typedef std::deque<std::string> Args;
                 
-        void throwUnsupportedType(Parameter param);
         void throwFailedConversion(Parameter param, std::string valueStr = std::string());
         void throwRequiredMissing(Parameter param);
         void throwMultipleNotAllowed(Parameter param);

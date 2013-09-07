@@ -10,14 +10,6 @@ std::string CppArgParser::Types::demangle(const char* mangled)
     return ret;
 }
 
-void CppArgParser::Types::throwUnsupportedType(Parameter param)
-{
-    std::cout << "ERROR: ArgParser unsupported type ";
-    std::cout << "(" << demangle(param.m_type.name()) << ") ";
-    std::cout << "for parameter \"" << param.m_name << "\"" << std::endl;
-    throw 1;
-}
-
 void CppArgParser::Types::throwFailedConversion(Parameter param, std::string valueStr)
 {
     std::cout << "ERROR: ArgParser failed conversion ";

@@ -54,9 +54,9 @@ void dump(std::string name, std::vector<CppArgParser::Bool> t_m)
 
 int main(int argc, char* argv[])
 {
-  std::set_terminate(__gnu_cxx::__verbose_terminate_handler);
-  
-  try
+    std::set_terminate(__gnu_cxx::__verbose_terminate_handler);
+
+    try
     {
         // declare single instance args
         ArgParserType::B    b    = 0;
