@@ -1,5 +1,1 @@
-exception: required parameter is missing in 'c'
-Unhandled exception!
-Throw in function (unknown)
-Dynamic exception type: boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::program_options::invalid_command_line_syntax> >
-std::exception::what: required parameter is missing in 'c'
+ERROR: --c is required

@@ -2,12 +2,12 @@
 #include <iostream>
 #include <iomanip>
 #include <string>
-#include <boost/exception/diagnostic_information.hpp> 
+#include <vector>
 
 // list of built-in types we support
 struct ArgParserType
 {
-    typedef bool               B;
+    typedef CppArgParser::Bool B;
     typedef char               C;
     typedef unsigned char      UC;
     typedef short              S;
@@ -28,12 +28,27 @@ void dump(std::string name, T t)
     std::cout << name << t << std::endl;
 }
 
+template<>
+void dump(std::string name, CppArgParser::Bool t)
+{
+    std::cout << name << t.m_b << std::endl;
+}
+
 template<typename T>
 void dump(std::string name, std::vector<T> t_m)
 {
     std::cout << name;
     for (auto t: t_m)
         std::cout << t << ", ";
+    std::cout << std::endl;
+}
+
+template<>
+void dump(std::string name, std::vector<CppArgParser::Bool> t_m)
+{
+    std::cout << name;
+    for (auto t: t_m)
+        std::cout << t.m_b << ", ";
     std::cout << std::endl;
 }
 
@@ -109,7 +124,7 @@ int main(int argc, char* argv[])
         args.parse(argc, argv);
 
         // output
-        dump("b:      ", b);
+        dump("b:      ", b.m_b);
         dump("c:      ", (int)c);
         dump("uc:     ", (int)uc);
         dump("s:      ", s);
@@ -146,7 +161,6 @@ int main(int argc, char* argv[])
         if (e.what())
             std::cerr << "exception: " << e.what() << "\n";
         std::cerr << "Unhandled exception!" << std::endl;
-        std::cerr << boost::current_exception_diagnostic_information();        
         return 127;
     }
     

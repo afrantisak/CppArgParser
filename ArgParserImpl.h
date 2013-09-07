@@ -1,38 +1,22 @@
 #pragma once
+#include "ArgParserTypes.h"
 #include <map>
 #include <string>
+#include <vector>
 #include <typeindex>
-#include <boost/program_options.hpp>
 #include "MapSwitch.h"
+#include <deque>
 
 namespace CppArgParser
 {
     
     namespace Private
     {
-
-        typedef boost::program_options::variable_value BpoVarValue;
-        typedef boost::program_options::options_description BpoOptsDesc;
-        typedef boost::program_options::positional_options_description BpoPosOptsDesc;
-        typedef boost::program_options::variables_map BpoVarsMap;
-        namespace Bpo = boost::program_options;
-
-        typedef std::string Name;
-            
-        struct Parameter
-        {
-            Parameter(Name name, Name abbrev, void* valuePtr, std::type_index type, Name desc)
-            :   m_name(name), m_abbrev(abbrev), m_valuePtr(valuePtr), m_type(type), m_desc(desc)
-            {
-            }
-            
-            Name m_name;
-            Name m_abbrev;
-            void* m_valuePtr;
-            std::type_index m_type;
-            Name m_desc;
-        };
-
+        
+        typedef Types::Name Name;
+        typedef Types::Args Args;
+        typedef Types::Parameter Parameter;
+        
         class ArgParserImpl
         {
         public:  
@@ -44,30 +28,29 @@ namespace CppArgParser
 
             template<typename T>
             void registerType();
+            
+        protected:
+            void parse_argsfirst(Args args);
+            
+            void print_help();
 
         private:
-            // if this is an optional argument (i.e. the name begins with "-" or "--")
-            // then return the name WITHOUT the dashes.  If it is a required argument, return empty string.
-            Name getOptional(const Name& name);
-            
             template<typename T>
-            void registerTypeAndVector();
+            void registerTypeMutations();
                 
             Name m_name;
             Name m_desc;
             
             typedef std::vector<Parameter> Parameters;
             Parameters m_parameters;
-            
-            BpoOptsDesc m_po_visible;
-            BpoOptsDesc m_po_required;
-            BpoOptsDesc m_po_all;
-            BpoPosOptsDesc m_po_positional;
-            BpoVarsMap m_po_map;
-            
-            MapSwitch<std::type_index, const Parameter&, BpoOptsDesc&, const std::string&> m_addSwitch;
-            MapSwitch<std::type_index, Parameter&, const BpoVarValue&> m_cvtSwitch;
+
+            bool m_bHelp;
+
+            MapSwitch<std::type_index, Parameter&, Args&> m_convertSwitch;
+            MapSwitch<std::type_index, Parameter&, std::string&> m_decorateSwitch;
         };
+
+        std::string demangle(const char* mangled);
 
     };//namespace Private
     
