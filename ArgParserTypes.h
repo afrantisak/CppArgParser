@@ -118,7 +118,7 @@ namespace CppArgParser
         template<typename T>
         struct Type
         {
-            static void convert(Parameter& param, Args& args)
+            void convert(Parameter& param, Args& args)
             {
                 if (!args.size())
                     throwRequiredMissing(param);
@@ -134,7 +134,7 @@ namespace CppArgParser
                 param.as<T>() = t;
             }
 
-            static std::string decorate()
+            std::string decorate()
             {
                 return "arg";
             }
@@ -143,7 +143,7 @@ namespace CppArgParser
         template<typename T>
         struct Type<std::vector<T>>
         {
-            static void convert(Parameter& param, Args& args)
+            void convert(Parameter& param, Args& args)
             {
                 if (!args.size())
                     throwRequiredMissing(param);
@@ -158,7 +158,8 @@ namespace CppArgParser
                 T t = lexical_cast<T>(paramFake, value);
                 param.as<std::vector<T>>().push_back(t);
             }
-            static std::string decorate()
+            
+            std::string decorate()
             {
                 return "arg";
             }
@@ -167,15 +168,20 @@ namespace CppArgParser
         template<>
         struct Type<bool>
         {
-            static void convert(Parameter& param, Args& args);
-            static std::string decorate();
+            void convert(Parameter& param, Args& args);
+            std::string decorate();
         };
 
         template<>
         struct Type<Bool>
         {
-            static void convert(Parameter& param, Args& args);
-            static std::string decorate();
+        public:
+            Type();
+            void convert(Parameter& param, Args& args);
+            std::string decorate();
+            
+        private:
+            std::vector<std::string> m_trueValues, m_falseValues;
         };
 
     };//namespace Types

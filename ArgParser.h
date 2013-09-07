@@ -45,7 +45,8 @@ namespace CppArgParser
     template<typename T>
     void ArgParser::add(Name name, T& value, Name desc)
     {
-        Parameter param(name, "", &value, typeid(T), desc, Types::Type<T>::decorate());
+        Types::Type<T> type;
+        Parameter param(name, "", &value, typeid(T), desc, type.decorate());
         m_parameters.push_back(param);
 
         Args args = m_args;
@@ -56,14 +57,14 @@ namespace CppArgParser
             if (arg == name)
             {
                 args.pop_front();
-                Types::Type<T>::convert(param, args);
+                type.convert(param, args);
             }
             else if (arg.size() > name.size() 
                 && arg.substr(0, name.size()) == name
                 && arg[name.size()] == '=')
             {
                 args[0] = arg.substr(name.size());
-                Types::Type<T>::convert(param, args);
+                type.convert(param, args);
             }
         }
         m_args = args;

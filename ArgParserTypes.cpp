@@ -61,48 +61,46 @@ void CppArgParser::Types::debug(Parameter& param, Args args)
 
 void CppArgParser::Types::Type<bool>::convert(Parameter& param, Args& args)
 {
-    typedef bool T;
-    param.as<T>() = true;
+    param.as<bool>() = true;
     return;
+}
+
+CppArgParser::Types::Type<CppArgParser::Bool>::Type()
+{
+    m_trueValues.push_back("1");
+    m_trueValues.push_back("T");
+    m_trueValues.push_back("True");
+    m_trueValues.push_back("Y");
+    m_trueValues.push_back("Yes");
+    m_falseValues.push_back("0");
+    m_falseValues.push_back("F");
+    m_falseValues.push_back("False");
+    m_falseValues.push_back("N");
+    m_falseValues.push_back("No");
 }
 
 void CppArgParser::Types::Type<CppArgParser::Bool>::convert(Parameter& param, Args& args)
 {
-    std::vector<std::string> trueValues, falseValues;
-    trueValues.push_back("1");
-    trueValues.push_back("T");
-    trueValues.push_back("True");
-    trueValues.push_back("Y");
-    trueValues.push_back("Yes");
-    falseValues.push_back("0");
-    falseValues.push_back("F");
-    falseValues.push_back("False");
-    falseValues.push_back("N");
-    falseValues.push_back("No");
     // bool requires the --arg=value syntax, otherwise if the flag is present, 
     // the value will be true.
     if (args.size() && args[0][0] == '=')
     {
         std::string value = args[0].substr(1);
-        for (auto valid: trueValues)
+        for (auto valid: m_trueValues)
         {
             if (value == valid)
             {
-                typedef bool T;
-                Bool b(true);
-                param.as<T>() = b.m_b;
                 args.pop_front();
+                param.as<bool>() = true;
                 return;
             }
         }
-        for (auto valid: falseValues)
+        for (auto valid: m_falseValues)
         {
             if (value == valid)
             {
-                typedef bool T;
-                Bool b(false);
-                param.as<T>() = b.m_b;
                 args.pop_front();
+                param.as<bool>() = false;
                 return;
             }
         }
@@ -110,9 +108,7 @@ void CppArgParser::Types::Type<CppArgParser::Bool>::convert(Parameter& param, Ar
     }
     else
     {
-        typedef bool T;
-        Bool b(true);
-        param.as<T>() = b.m_b;
+        param.as<bool>() = true;
         return;
     }
 }
