@@ -21,7 +21,7 @@ namespace CppArgParser
         ~ArgParser();
         
         template<typename T>
-        void add(Name name, T& value, Name desc = Name());
+        void param(Name name, T& value, Name desc = Name());
 
         bool fail_remaining();
 
@@ -42,7 +42,7 @@ namespace CppArgParser
     };
 
     template<typename T>
-    void ArgParser::add(Name name, T& value, Name desc)
+    void ArgParser::param(Name name, T& value, Name desc)
     {
         Types::Type<T> type;
         Parameter param(name, "", &value, typeid(T), desc, type.decorate());

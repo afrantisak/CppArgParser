@@ -38,7 +38,7 @@ bool ArgParser::fail_remaining()
 bool ArgParser::help(Name description)
 {
     bool bHelp = false;
-    add("--help", bHelp, "show this help message");
+    param("--help", bHelp, "show this help message");
     if (bHelp)
     {
         print_help(description);
