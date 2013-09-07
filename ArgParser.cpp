@@ -21,8 +21,6 @@ ArgParser::ArgParser(int argc, char* argv[])
     m_name = m_args.front();
     m_name = m_name.substr(m_name.find_last_of("\\/") + 1);
     m_args.pop_front();    
-
-    m_parameters.push_back(Parameter("--help", "", &m_bHelp, typeid(bool), "show this help message", ""));
 }
 
 ArgParser::~ArgParser()
@@ -39,15 +37,14 @@ bool ArgParser::fail_remaining()
 
 bool ArgParser::help(Name description)
 {
-    for (auto& arg : m_args)
+    bool bHelp = false;
+    add("--help", bHelp, "show this help message");
+    if (bHelp)
     {
-        if (arg == "--help")
-        {
-            print_help(description);
-            return true;
-        }
+        print_help(description);
+        return true;
     }
-    
+
     fail_remaining();
 
     return false;

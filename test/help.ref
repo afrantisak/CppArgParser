@@ -3,7 +3,6 @@ Usage: ArgParserTest [options]
 Test the CppArgParser
 
 Optional parameters:
-  --help                show this help message
   --b [=arg(=1)]        bool
   --c arg               char
   --uc arg              unsigned char
@@ -30,4 +29,5 @@ Optional parameters:
   --ull_m arg           unsigned long long (multiple instances)
   --size_m arg          size_t (multiple instances)
   --str_m arg           std::string (multiple instances)
+  --help                show this help message
 
