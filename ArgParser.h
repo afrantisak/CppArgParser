@@ -23,14 +23,35 @@ namespace CppArgParser
         template<typename T>
         void add(Name name, T& value, Name desc = Name())
         {
-            addImpl(name, &value, typeid(T), desc);
+            Parameter param(name, "", &value, typeid(T), desc, Types::Type<T>::decorate());
+            m_parameters.push_back(param);
+
+            Args args = m_args;
+            size_t argCount = m_args.size();
+            for (auto argIter = m_args.begin(); argIter != m_args.end(); ++argIter)
+            {
+                std::string arg = *argIter;
+                if (arg == name)
+                {
+                    args.pop_front();
+                    Types::Type<T>::convert(param, args);
+                }
+                else if (arg.size() > name.size() 
+                    && arg.substr(0, name.size()) == name
+                    && arg[name.size()] == '=')
+                {
+                    args[0] = arg.substr(name.size());
+                    Types::Type<T>::convert(param, args);
+                }
+            }
+            m_args = args;
         }
+        
+        bool fail_remaining();
 
         bool help(Name description);
         
     private:        
-        void addImpl(Name name, void* valuePtr, std::type_index type, Name desc);
-
         void print_help();
 
         Name m_name;

@@ -49,11 +49,11 @@ void CppArgParser::Types::throwUnknownParameter(std::string name)
 
 void CppArgParser::Types::debug(Parameter& param, Args args)
 {
-    std::cout << "Cvt debug " << param.m_name << " (" << demangle(param.m_type.name()) << "): ";
+    std::cout << "Cvt debug " << param.m_name << " (" << demangle(param.m_type.name()) << ") [" << args.size() << "]: ";
     while (!args.empty())
     {
         std::string arg = args.front();
-        std::cout << arg << " ";
+        std::cout << "\"" << arg << "\" ";
         args.pop_front();
     }
     std::cout << std::endl;
@@ -154,24 +154,24 @@ void CppArgParser::Types::Type<CppArgParser::Bool>::convert(Parameter& param, Ar
     }
 }
 
-void CppArgParser::Types::Type<char>::decorate(Parameter& param, std::string& decorator)
+std::string CppArgParser::Types::Type<char>::decorate()
 {
-    decorator = "arg";
+    return "arg";
 }
 
-void CppArgParser::Types::Type<unsigned char>::decorate(Parameter& param, std::string& decorator)
+std::string CppArgParser::Types::Type<unsigned char>::decorate()
 {
-    decorator = "arg";
+    return "arg";
 }
 
-void CppArgParser::Types::Type<bool>::decorate(Parameter& param, std::string& decorator)
+std::string CppArgParser::Types::Type<bool>::decorate()
 {
-    decorator = "";
+    return "";
 }
 
-void CppArgParser::Types::Type<CppArgParser::Bool>::decorate(Parameter& param, std::string& decorator)
+std::string CppArgParser::Types::Type<CppArgParser::Bool>::decorate()
 {
-    decorator = "[=arg(=1)]";
+    return "[=arg(=1)]";
 }
 
 /*

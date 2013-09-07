@@ -117,9 +117,9 @@ namespace CppArgParser
                 param.as<T>() = t;
             }
 
-            static void decorate(Parameter& param, std::string& decorator)
+            static std::string decorate()
             {
-                decorator = "arg";
+                return "arg";
             }
         };
         
@@ -141,9 +141,9 @@ namespace CppArgParser
                 T t = lexical_cast<T>(paramFake, value);
                 param.as<std::vector<T>>().push_back(t);
             }
-            static void decorate(Parameter& param, std::string& decorator)
+            static std::string decorate()
             {
-                decorator = "arg";
+                return "arg";
             }
         };
         
@@ -151,28 +151,28 @@ namespace CppArgParser
         struct Type<char>
         {
             static void convert(Parameter& param, Args& args);
-            static void decorate(Parameter& param, std::string& decorator);
+            static std::string decorate();
         };
 
         template<>
         struct Type<unsigned char>
         {
             static void convert(Parameter& param, Args& args);
-            static void decorate(Parameter& param, std::string& decorator);
+            static std::string decorate();
         };
 
         template<>
         struct Type<bool>
         {
             static void convert(Parameter& param, Args& args);
-            static void decorate(Parameter& param, std::string& decorator);
+            static std::string decorate();
         };
 
         template<>
         struct Type<Bool>
         {
             static void convert(Parameter& param, Args& args);
-            static void decorate(Parameter& param, std::string& decorator);
+            static std::string decorate();
         };
 
     };//namespace Types

@@ -30,14 +30,12 @@ ArgParser::~ArgParser()
 {
 }
 
-void ArgParser::addImpl(Name name, void* valuePtr, std::type_index type, Name desc)
+bool ArgParser::fail_remaining()
 {
-    // HACK
-    std::string decorator;
-    decorator = "arg";
-    if (type == typeid(Bool))
-        decorator = "[=arg(=1)]";
-    m_parameters.push_back(Parameter(name, "", valuePtr, type, desc, decorator));
+    for (auto& arg : m_args)
+    {
+        Types::throwUnknownParameter(arg);
+    }
 }
 
 bool ArgParser::help(Name description)
@@ -51,6 +49,8 @@ bool ArgParser::help(Name description)
             return true;
         }
     }
+    
+    fail_remaining();
 
     return false;
 }
