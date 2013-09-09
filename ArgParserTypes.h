@@ -50,11 +50,10 @@ namespace CppArgParser
         typedef std::deque<std::string> Args;
                 
         void throwFailedConversion(Parameter param, std::string valueStr = std::string());
-        void throwRequiredMissing(Parameter param);
-        void throwMultipleNotAllowed(Parameter param);
+        void throwRequiredMissing(std::string name);
+        void throwMultipleNotAllowed(std::string name);
         void throwUnknownParameter(std::string name);
         
-        void debug(Parameter& param, Args args);
         std::string demangle(const char* mangled);
         
 #ifndef USE_BOOST_LEXICAL_CAST
@@ -119,9 +118,9 @@ namespace CppArgParser
             void convert(Parameter& param, Args& args)
             {
                 if (!args.size())
-                    throwRequiredMissing(param);
+                    throwRequiredMissing(param.m_name);
                 if (m_count)
-                    throwMultipleNotAllowed(param);
+                    throwMultipleNotAllowed(param.m_name);
                 std::string value = args[0];
                 args.pop_front();
                 if (value[0] == '=')
@@ -147,7 +146,7 @@ namespace CppArgParser
             void convert(Parameter& param, Args& args)
             {
                 if (!args.size())
-                    throwRequiredMissing(param);
+                    throwRequiredMissing(param.m_name);
                 std::string value = args[0];
                 args.pop_front();
                 if (value[0] == '=')

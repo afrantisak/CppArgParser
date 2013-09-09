@@ -20,15 +20,15 @@ void CppArgParser::Types::throwFailedConversion(Parameter param, std::string val
     throw 1;
 }
 
-void CppArgParser::Types::throwRequiredMissing(Parameter param)
+void CppArgParser::Types::throwRequiredMissing(std::string name)
 {
-    std::cout << "ERROR: " << param.m_name << " is required" << std::endl;
+    std::cout << "ERROR: " << name << " is required" << std::endl;
     throw 1;
 }
 
-void CppArgParser::Types::throwMultipleNotAllowed(Parameter param)
+void CppArgParser::Types::throwMultipleNotAllowed(std::string name)
 {
-    std::cout << "ERROR: " << param.m_name << " does not allow multiple occurrences" << std::endl;
+    std::cout << "ERROR: " << name << " does not allow multiple occurrences" << std::endl;
     throw 1;
 }
 
@@ -37,18 +37,6 @@ void CppArgParser::Types::throwUnknownParameter(std::string name)
     std::cout << "ERROR: ArgParser unknown name ";
     std::cout << "\"" << name << "\"" << std::endl;
     throw 1;
-}
-
-void CppArgParser::Types::debug(Parameter& param, Args args)
-{
-    std::cout << "Cvt debug " << param.m_name << " (" << demangle(param.m_type.name()) << ") [" << args.size() << "]: ";
-    while (!args.empty())
-    {
-        std::string arg = args.front();
-        std::cout << "\"" << arg << "\" ";
-        args.pop_front();
-    }
-    std::cout << std::endl;
 }
 
 void CppArgParser::Types::Type<bool>::convert(Parameter& param, Args& args)
