@@ -28,7 +28,7 @@ namespace CppArgParser
         struct Parameter
         {
             Parameter(Name name, Name abbrev, void* valuePtr, std::type_index type, Name desc, Name decorator)
-            :   m_name(name), m_abbrev(abbrev), m_valuePtr(valuePtr), m_type(type), m_desc(desc), m_decorator(decorator), m_set(false)
+            :   m_name(name), m_abbrev(abbrev), m_valuePtr(valuePtr), m_type(type), m_desc(desc), m_decorator(decorator)
             {
             }
             
@@ -38,12 +38,10 @@ namespace CppArgParser
             std::type_index m_type;
             Name m_desc;
             Name m_decorator;
-            bool m_set;
             
             template<typename T>
             T& as()
             {
-                m_set = true;
                 return *(reinterpret_cast<T*>(m_valuePtr));
             }
 
@@ -117,11 +115,12 @@ namespace CppArgParser
         template<typename T>
         struct Type
         {
+            Type() : m_count(0) {}
             void convert(Parameter& param, Args& args)
             {
                 if (!args.size())
                     throwRequiredMissing(param);
-                if (param.m_set)
+                if (m_count)
                     throwMultipleNotAllowed(param);
                 std::string value = args[0];
                 args.pop_front();
@@ -131,12 +130,15 @@ namespace CppArgParser
                 }
                 T t = lexical_cast<T>(param, value);
                 param.as<T>() = t;
+                m_count++;
             }
 
             std::string decorate()
             {
                 return "arg";
             }
+            private:
+                int m_count;
         };
         
         template<typename T>
