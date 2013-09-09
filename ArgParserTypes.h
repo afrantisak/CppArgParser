@@ -49,7 +49,7 @@ namespace CppArgParser
         
         typedef std::deque<std::string> Args;
                 
-        void throwFailedConversion(Parameter param, std::string valueStr = std::string());
+        void throwFailedConversion(std::string name);
         void throwRequiredMissing(std::string name);
         void throwMultipleNotAllowed(std::string name);
         void throwUnknownParameter(std::string name);
@@ -67,12 +67,12 @@ namespace CppArgParser
                 T t;
                 strm >> t;
                 if (!strm.eof())
-                    throwFailedConversion(param, value);
+                    throwFailedConversion(param.m_name);
                 return t;
             }
             catch (std::istringstream::failure&)
             {
-                throwFailedConversion(param, value);
+                throwFailedConversion(param.m_name);
             }
         }
 #else
@@ -99,7 +99,7 @@ namespace CppArgParser
         inline char lexical_cast<char>(const Parameter& param, std::string value)
         {
             if (value.size() != 1)
-                throwFailedConversion(param, value);
+                throwFailedConversion(param.m_name);
             return value[0];
         }
         
@@ -107,7 +107,7 @@ namespace CppArgParser
         inline unsigned char lexical_cast<unsigned char>(const Parameter& param, std::string value)
         {
             if (value.size() != 1)
-                throwFailedConversion(param, value);
+                throwFailedConversion(param.m_name);
             return value[0];
         }
         
@@ -136,6 +136,7 @@ namespace CppArgParser
             {
                 return "arg";
             }
+            
             private:
                 int m_count;
         };

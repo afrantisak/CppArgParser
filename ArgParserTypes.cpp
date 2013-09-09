@@ -10,13 +10,12 @@ std::string CppArgParser::Types::demangle(const char* mangled)
     return ret;
 }
 
-void CppArgParser::Types::throwFailedConversion(Parameter param, std::string valueStr)
+void CppArgParser::Types::throwFailedConversion(std::string name)
 {
-    std::cout << "ERROR: ArgParser failed conversion ";
+    std::cout << "ERROR: " << name << " failed conversion" << std::endl;
     //if (valueStr.size())
     //    std::cout << "from value \"" << valueStr << "\" ";
-    std::cout << "to type \"" << demangle(param.m_type.name()) << "\" ";
-    std::cout << "for parameter \"" << param.m_name << "\"" << std::endl;
+    //std::cout << "to type \"" << demangle(param.m_type.name()) << "\" ";
     throw 1;
 }
 
@@ -84,7 +83,7 @@ void CppArgParser::Types::Type<CppArgParser::Bool>::convert(Parameter& param, Ar
                 return;
             }
         }
-        throwFailedConversion(param, value);
+        throwFailedConversion(param.m_name);
     }
     else
     {
