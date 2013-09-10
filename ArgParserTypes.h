@@ -56,9 +56,10 @@ namespace CppArgParser
         
         std::string demangle(const char* mangled);
         
+        class bad_lexical_cast {};
 #ifndef USE_BOOST_LEXICAL_CAST
         template<typename T>
-        T lexical_cast(const Parameter& param, std::string value)
+        T lexical_cast(std::string value)
         {
             try
             {
@@ -67,17 +68,17 @@ namespace CppArgParser
                 T t;
                 strm >> t;
                 if (!strm.eof())
-                    throwFailedConversion(param.m_name);
+                    throw bad_lexical_cast();
                 return t;
             }
             catch (std::istringstream::failure&)
             {
-                throwFailedConversion(param.m_name);
+                throw bad_lexical_cast();
             }
         }
 #else
         template<typename T>
-        T lexical_cast(const Parameter& param, std::string value)
+        T lexical_cast(std::string value)
         {
             try
             {
@@ -85,29 +86,29 @@ namespace CppArgParser
             }
             catch (boost::bad_lexical_cast& e)
             {
-                throwFailedConversion(param, value);
+                throw bad_lexical_cast();
             }
         }
 #endif        
         template<>
-        inline std::string lexical_cast<std::string>(const Parameter& param, std::string value)
+        inline std::string lexical_cast<std::string>(std::string value)
         {
             return value;
         }
         
         template<>
-        inline char lexical_cast<char>(const Parameter& param, std::string value)
+        inline char lexical_cast<char>(std::string value)
         {
             if (value.size() != 1)
-                throwFailedConversion(param.m_name);
+                throw bad_lexical_cast();
             return value[0];
         }
         
         template<>
-        inline unsigned char lexical_cast<unsigned char>(const Parameter& param, std::string value)
+        inline unsigned char lexical_cast<unsigned char>(std::string value)
         {
             if (value.size() != 1)
-                throwFailedConversion(param.m_name);
+                throw bad_lexical_cast();
             return value[0];
         }
         
@@ -127,7 +128,7 @@ namespace CppArgParser
                 {
                     value = value.substr(1);
                 }
-                T t = lexical_cast<T>(param, value);
+                T t = lexical_cast<T>(value);
                 param.as<T>() = t;
                 m_count++;
             }
@@ -156,7 +157,7 @@ namespace CppArgParser
                 }
                 Parameter paramFake = param;
                 paramFake.m_type = typeid(T);
-                T t = lexical_cast<T>(paramFake, value);
+                T t = lexical_cast<T>(value);
                 param.as<std::vector<T>>().push_back(t);
             }
             
