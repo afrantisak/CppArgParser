@@ -128,9 +128,16 @@ namespace CppArgParser
                 {
                     value = value.substr(1);
                 }
-                T t = lexical_cast<T>(value);
-                param.as<T>() = t;
-                m_count++;
+                try
+                {
+                    T t = lexical_cast<T>(value);
+                    param.as<T>() = t;
+                    m_count++;
+                }
+                catch (Types::bad_lexical_cast& e)
+                {
+                    Types::throwFailedConversion(param.m_name);
+                }
             }
 
             std::string decorate()
@@ -155,10 +162,15 @@ namespace CppArgParser
                 {
                     value = value.substr(1);
                 }
-                Parameter paramFake = param;
-                paramFake.m_type = typeid(T);
-                T t = lexical_cast<T>(value);
-                param.as<std::vector<T>>().push_back(t);
+                try
+                {
+                    T t = lexical_cast<T>(value);
+                    param.as<std::vector<T>>().push_back(t);
+                }
+                catch (Types::bad_lexical_cast& e)
+                {
+                    Types::throwFailedConversion(param.m_name);
+                }
             }
             
             std::string decorate()

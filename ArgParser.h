@@ -52,25 +52,18 @@ namespace CppArgParser
         size_t argCount = m_args.size();
         for (auto argIter = m_args.begin(); argIter != m_args.end(); ++argIter)
         {
-            try
+            std::string arg = *argIter;
+            if (arg == name)
             {
-                std::string arg = *argIter;
-                if (arg == name)
-                {
-                    args.pop_front();
-                    type.convert(param, args);
-                }
-                else if (arg.size() > name.size() 
-                    && arg.substr(0, name.size()) == name
-                    && arg[name.size()] == '=')
-                {
-                    args[0] = arg.substr(name.size());
-                    type.convert(param, args);
-                }
+                args.pop_front();
+                type.convert(param, args);
             }
-            catch (Types::bad_lexical_cast& e)
+            else if (arg.size() > name.size() 
+                && arg.substr(0, name.size()) == name
+                && arg[name.size()] == '=')
             {
-                Types::throwFailedConversion(name);
+                args[0] = arg.substr(name.size());
+                type.convert(param, args);
             }
         }
         m_args = args;
