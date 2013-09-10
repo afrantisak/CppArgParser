@@ -4,6 +4,8 @@
 #include <deque>
 #include <vector>
 #include <sstream>
+#include <iostream>
+#include <iomanip>
 
 namespace CppArgParser
 {
@@ -14,29 +16,6 @@ namespace CppArgParser
         Bool(bool b) : m_b(b) {}
         bool m_b;
     };
-    
-    struct Parameter
-    {
-        typedef std::string Name;
-        Parameter(Name name, Name abbrev, Name desc, Name decorator)
-        :   m_name(name), m_abbrev(abbrev), m_desc(desc), m_decorator(decorator)
-        {
-        }
-        
-        Name m_name;
-        Name m_abbrev;
-        Name m_desc;
-        Name m_decorator;
-    };
-
-    typedef std::deque<std::string> Args;
-            
-    void throwFailedConversion(std::string name);
-    void throwRequiredMissing(std::string name);
-    void throwMultipleNotAllowed(std::string name);
-    void throwUnknownParameter(std::string name);
-    
-    std::string demangle(const char* mangled);
     
     class bad_lexical_cast {};
 
@@ -80,6 +59,15 @@ namespace CppArgParser
             throw bad_lexical_cast();
         return value[0];
     }
+    
+    typedef std::deque<std::string> Args;
+            
+    void throwFailedConversion(std::string name);
+    void throwRequiredMissing(std::string name);
+    void throwMultipleNotAllowed(std::string name);
+    void throwUnknownParameter(std::string name);
+    
+    std::string demangle(const char* mangled);
     
     template<typename T>
     struct Type
@@ -166,13 +154,26 @@ namespace CppArgParser
         std::vector<std::string> m_trueValues, m_falseValues;
     };
 
+    struct Parameter
+    {
+        typedef std::string Name;
+        Parameter(Name name, Name abbrev, Name desc, Name decorator)
+        :   m_name(name), m_abbrev(abbrev), m_desc(desc), m_decorator(decorator)
+        {
+        }
+        
+        Name m_name;
+        Name m_abbrev;
+        Name m_desc;
+        Name m_decorator;
+    };
+
     class ArgParser
     {
     public:  
         typedef std::string Name;
         
         ArgParser(int argc, char* argv[]);
-        ~ArgParser();
         
         template<typename T>
         void param(Name name, T& value, Name desc = Name());
@@ -225,8 +226,216 @@ namespace CppArgParser
 
 };// namespace CppArgParser
 
-std::istream& operator>>(std::istream& is, CppArgParser::Bool& v);
+inline
+std::istream& operator>>(std::istream& is, CppArgParser::Bool& v)
+{
+    is >> v.m_b;
+    return is;
+}        
         
+inline 
+CppArgParser::ArgParser::ArgParser(int argc, char* argv[])
+:   m_name(),
+    m_parameters(),
+    m_args()
+{
+    for (int argn = 0; argn < argc; argn++)
+    {
+        m_args.push_back(argv[argn]);
+    }
+    
+    m_name = m_args.front();
+    m_name = m_name.substr(m_name.find_last_of("\\/") + 1);
+    m_args.pop_front();    
+}
+
+inline
+bool CppArgParser::ArgParser::fail_remaining()
+{
+    for (auto& arg : m_args)
+    {
+        throwUnknownParameter(arg);
+    }
+}
+
+inline
+bool CppArgParser::ArgParser::help(Name description)
+{
+    bool bHelp = false;
+    param("--help", bHelp, "show this help message");
+    if (bHelp)
+    {
+        print_help(description);
+        return true;
+    }
+
+    fail_remaining();
+
+    return false;
+}
+
+inline
+void CppArgParser::ArgParser::print_help(Name description)
+{
+    Parameters optional;
+    Parameters required;
+    
+    std::cout << "Usage: " << m_name; 
+    for (auto param: m_parameters)
+    {
+        if (param.m_name.size() && param.m_name[0] == '-')
+        {
+            optional.push_back(param);
+        }
+        else
+        {
+            std::cout << " <" << param.m_name << ">";
+            required.push_back(param);
+        }
+    }        
+    if (optional.size())
+        std::cout << " [options]";
+    std::cout << std::endl;
+    std::cout << std::endl;
+    
+    if (description.size())
+    {
+        std::cout << description << std::endl;
+        std::cout << std::endl;
+    }
+
+    if (required.size())
+    {
+        std::cout << "Required parameters:" << std::endl;
+        for (auto param: required)
+        {
+            std::cout << "  " << param.m_name << ": " << param.m_desc << std::endl;
+        }
+    }
+
+    if (optional.size())
+    {
+        std::cout << "Optional parameters:" << std::endl;
+        int max = 0;
+        for (auto param: optional)
+        {
+            // get the decorator (HACKY)
+            std::string decorator = param.m_decorator;
+            int cur = param.m_name.size() + 1 + decorator.size();
+            if (max < cur)
+                max = cur;
+        }
+        for (auto param: optional)
+        {
+            std::string decorator = param.m_decorator;
+            decorator = param.m_name + " " + decorator;
+            std::cout << "  " << std::left << std::setw(max + 8) << decorator << param.m_desc << std::endl;
+        }
+        std::cout << std::endl;
+    }
+}
+
+inline
+void CppArgParser::throwFailedConversion(std::string name)
+{
+    std::cout << "ERROR: " << name << " failed conversion" << std::endl;
+    //if (valueStr.size())
+    //    std::cout << "from value \"" << valueStr << "\" ";
+    //std::cout << "to type \"" << demangle(param.m_type.name()) << "\" ";
+    throw 1;
+}
+
+inline
+void CppArgParser::throwRequiredMissing(std::string name)
+{
+    std::cout << "ERROR: " << name << " is required" << std::endl;
+    throw 1;
+}
+
+inline
+void CppArgParser::throwMultipleNotAllowed(std::string name)
+{
+    std::cout << "ERROR: " << name << " does not allow multiple occurrences" << std::endl;
+    throw 1;
+}
+
+inline
+void CppArgParser::throwUnknownParameter(std::string name)
+{
+    std::cout << "ERROR: ArgParser unknown name ";
+    std::cout << "\"" << name << "\"" << std::endl;
+    throw 1;
+}
+
+inline
+void CppArgParser::Type<bool>::convert(std::string name, bool& t, Args& args)
+{
+    t = true;
+    return;
+}
+
+inline
+CppArgParser::Type<CppArgParser::Bool>::Type()
+{
+    m_trueValues.push_back("1");
+    m_trueValues.push_back("T");
+    m_trueValues.push_back("True");
+    m_trueValues.push_back("Y");
+    m_trueValues.push_back("Yes");
+    m_falseValues.push_back("0");
+    m_falseValues.push_back("F");
+    m_falseValues.push_back("False");
+    m_falseValues.push_back("N");
+    m_falseValues.push_back("No");
+}
+
+inline
+void CppArgParser::Type<CppArgParser::Bool>::convert(std::string name, Bool& t, Args& args)
+{
+    // bool requires the --arg=value syntax, otherwise if the flag is present, 
+    // the value will be true.
+    if (args.size() && args[0][0] == '=')
+    {
+        std::string value = args[0].substr(1);
+        for (auto valid: m_trueValues)
+        {
+            if (value == valid)
+            {
+                args.pop_front();
+                t = true;
+                return;
+            }
+        }
+        for (auto valid: m_falseValues)
+        {
+            if (value == valid)
+            {
+                args.pop_front();
+                t = false;
+                return;
+            }
+        }
+        throwFailedConversion(name);
+    }
+    else
+    {
+        t = true;
+        return;
+    }
+}
+
+inline
+std::string CppArgParser::Type<bool>::decorate()
+{
+    return "";
+}
+
+inline
+std::string CppArgParser::Type<CppArgParser::Bool>::decorate()
+{
+    return "[=arg(=1)]";
+}
+
 /*
 Copyright (c) 2013 Aaron Frantisak
 
