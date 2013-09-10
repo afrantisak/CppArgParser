@@ -24,29 +24,20 @@ namespace CppArgParser
     {
 
         typedef std::string Name;
-            
+
         struct Parameter
         {
-            Parameter(Name name, Name abbrev, void* valuePtr, std::type_index type, Name desc, Name decorator)
-            :   m_name(name), m_abbrev(abbrev), m_valuePtr(valuePtr), m_type(type), m_desc(desc), m_decorator(decorator)
+            Parameter(Name name, Name abbrev, Name desc, Name decorator)
+            :   m_name(name), m_abbrev(abbrev), m_desc(desc), m_decorator(decorator)
             {
             }
             
             Name m_name;
             Name m_abbrev;
-            void* m_valuePtr;
-            std::type_index m_type;
             Name m_desc;
             Name m_decorator;
-            
-            template<typename T>
-            T& as()
-            {
-                return *(reinterpret_cast<T*>(m_valuePtr));
-            }
-
         };
-        
+
         typedef std::deque<std::string> Args;
                 
         void throwFailedConversion(std::string name);
@@ -116,12 +107,12 @@ namespace CppArgParser
         struct Type
         {
             Type() : m_count(0) {}
-            void convert(Parameter& param, Args& args)
+            void convert(std::string name, T& t, Args& args)
             {
                 if (!args.size())
-                    throwRequiredMissing(param.m_name);
+                    throwRequiredMissing(name);
                 if (m_count)
-                    throwMultipleNotAllowed(param.m_name);
+                    throwMultipleNotAllowed(name);
                 std::string value = args[0];
                 args.pop_front();
                 if (value[0] == '=')
@@ -130,13 +121,12 @@ namespace CppArgParser
                 }
                 try
                 {
-                    T t = lexical_cast<T>(value);
-                    param.as<T>() = t;
+                    t = lexical_cast<T>(value);
                     m_count++;
                 }
                 catch (Types::bad_lexical_cast& e)
                 {
-                    Types::throwFailedConversion(param.m_name);
+                    Types::throwFailedConversion(name);
                 }
             }
 
@@ -152,10 +142,10 @@ namespace CppArgParser
         template<typename T>
         struct Type<std::vector<T>>
         {
-            void convert(Parameter& param, Args& args)
+            void convert(std::string name, std::vector<T>& v, Args& args)
             {
                 if (!args.size())
-                    throwRequiredMissing(param.m_name);
+                    throwRequiredMissing(name);
                 std::string value = args[0];
                 args.pop_front();
                 if (value[0] == '=')
@@ -165,11 +155,11 @@ namespace CppArgParser
                 try
                 {
                     T t = lexical_cast<T>(value);
-                    param.as<std::vector<T>>().push_back(t);
+                    v.push_back(t);
                 }
                 catch (Types::bad_lexical_cast& e)
                 {
-                    Types::throwFailedConversion(param.m_name);
+                    Types::throwFailedConversion(name);
                 }
             }
             
@@ -182,7 +172,7 @@ namespace CppArgParser
         template<>
         struct Type<bool>
         {
-            void convert(Parameter& param, Args& args);
+            void convert(std::string name, bool& t, Args& args);
             std::string decorate();
         };
 
@@ -191,7 +181,7 @@ namespace CppArgParser
         {
         public:
             Type();
-            void convert(Parameter& param, Args& args);
+            void convert(std::string name, Bool& t, Args& args);
             std::string decorate();
             
         private:

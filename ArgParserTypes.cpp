@@ -38,9 +38,9 @@ void CppArgParser::Types::throwUnknownParameter(std::string name)
     throw 1;
 }
 
-void CppArgParser::Types::Type<bool>::convert(Parameter& param, Args& args)
+void CppArgParser::Types::Type<bool>::convert(std::string name, bool& t, Args& args)
 {
-    param.as<bool>() = true;
+    t = true;
     return;
 }
 
@@ -58,7 +58,7 @@ CppArgParser::Types::Type<CppArgParser::Bool>::Type()
     m_falseValues.push_back("No");
 }
 
-void CppArgParser::Types::Type<CppArgParser::Bool>::convert(Parameter& param, Args& args)
+void CppArgParser::Types::Type<CppArgParser::Bool>::convert(std::string name, Bool& t, Args& args)
 {
     // bool requires the --arg=value syntax, otherwise if the flag is present, 
     // the value will be true.
@@ -70,7 +70,7 @@ void CppArgParser::Types::Type<CppArgParser::Bool>::convert(Parameter& param, Ar
             if (value == valid)
             {
                 args.pop_front();
-                param.as<bool>() = true;
+                t = true;
                 return;
             }
         }
@@ -79,15 +79,15 @@ void CppArgParser::Types::Type<CppArgParser::Bool>::convert(Parameter& param, Ar
             if (value == valid)
             {
                 args.pop_front();
-                param.as<bool>() = false;
+                t = false;
                 return;
             }
         }
-        throwFailedConversion(param.m_name);
+        throwFailedConversion(name);
     }
     else
     {
-        param.as<bool>() = true;
+        t = true;
         return;
     }
 }
