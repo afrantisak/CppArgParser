@@ -1,7 +1,7 @@
 #include "ArgParserTypes.h"
 #include <cxxabi.h>
 
-std::string CppArgParser::Types::demangle(const char* mangled)
+std::string CppArgParser::demangle(const char* mangled)
 {
     int status;
     char* p = abi::__cxa_demangle(mangled, 0, 0, &status);
@@ -10,7 +10,7 @@ std::string CppArgParser::Types::demangle(const char* mangled)
     return ret;
 }
 
-void CppArgParser::Types::throwFailedConversion(std::string name)
+void CppArgParser::throwFailedConversion(std::string name)
 {
     std::cout << "ERROR: " << name << " failed conversion" << std::endl;
     //if (valueStr.size())
@@ -19,32 +19,32 @@ void CppArgParser::Types::throwFailedConversion(std::string name)
     throw 1;
 }
 
-void CppArgParser::Types::throwRequiredMissing(std::string name)
+void CppArgParser::throwRequiredMissing(std::string name)
 {
     std::cout << "ERROR: " << name << " is required" << std::endl;
     throw 1;
 }
 
-void CppArgParser::Types::throwMultipleNotAllowed(std::string name)
+void CppArgParser::throwMultipleNotAllowed(std::string name)
 {
     std::cout << "ERROR: " << name << " does not allow multiple occurrences" << std::endl;
     throw 1;
 }
 
-void CppArgParser::Types::throwUnknownParameter(std::string name)
+void CppArgParser::throwUnknownParameter(std::string name)
 {
     std::cout << "ERROR: ArgParser unknown name ";
     std::cout << "\"" << name << "\"" << std::endl;
     throw 1;
 }
 
-void CppArgParser::Types::Type<bool>::convert(std::string name, bool& t, Args& args)
+void CppArgParser::Type<bool>::convert(std::string name, bool& t, Args& args)
 {
     t = true;
     return;
 }
 
-CppArgParser::Types::Type<CppArgParser::Bool>::Type()
+CppArgParser::Type<CppArgParser::Bool>::Type()
 {
     m_trueValues.push_back("1");
     m_trueValues.push_back("T");
@@ -58,7 +58,7 @@ CppArgParser::Types::Type<CppArgParser::Bool>::Type()
     m_falseValues.push_back("No");
 }
 
-void CppArgParser::Types::Type<CppArgParser::Bool>::convert(std::string name, Bool& t, Args& args)
+void CppArgParser::Type<CppArgParser::Bool>::convert(std::string name, Bool& t, Args& args)
 {
     // bool requires the --arg=value syntax, otherwise if the flag is present, 
     // the value will be true.
@@ -92,12 +92,12 @@ void CppArgParser::Types::Type<CppArgParser::Bool>::convert(std::string name, Bo
     }
 }
 
-std::string CppArgParser::Types::Type<bool>::decorate()
+std::string CppArgParser::Type<bool>::decorate()
 {
     return "";
 }
 
-std::string CppArgParser::Types::Type<CppArgParser::Bool>::decorate()
+std::string CppArgParser::Type<CppArgParser::Bool>::decorate()
 {
     return "[=arg(=1)]";
 }

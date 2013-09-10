@@ -31,7 +31,7 @@ bool ArgParser::fail_remaining()
 {
     for (auto& arg : m_args)
     {
-        Types::throwUnknownParameter(arg);
+        throwUnknownParameter(arg);
     }
 }
 

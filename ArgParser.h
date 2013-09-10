@@ -8,10 +8,6 @@
 namespace CppArgParser
 {
     
-    typedef Types::Name Name;
-    typedef Types::Args Args;
-    typedef Types::Parameter Parameter;
-    
     class ArgParser
     {
     public:  
@@ -44,7 +40,7 @@ namespace CppArgParser
     template<typename T>
     void ArgParser::param(Name name, T& value, Name desc)
     {
-        Types::Type<T> type;
+        Type<T> type;
         Parameter param(name, "", desc, type.decorate());
         m_parameters.push_back(param);
 
