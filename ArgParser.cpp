@@ -1,4 +1,7 @@
 #include "ArgParser.h"
+#include <cxxabi.h>
+#include <iostream>
+#include <iomanip>
 
 using namespace CppArgParser;
 
@@ -108,6 +111,107 @@ void ArgParser::print_help(Name description)
         }
         std::cout << std::endl;
     }
+}
+
+std::string CppArgParser::demangle(const char* mangled)
+{
+    int status;
+    char* p = abi::__cxa_demangle(mangled, 0, 0, &status);
+    std::string ret(p);
+    std::free(p);
+    return ret;
+}
+
+void CppArgParser::throwFailedConversion(std::string name)
+{
+    std::cout << "ERROR: " << name << " failed conversion" << std::endl;
+    //if (valueStr.size())
+    //    std::cout << "from value \"" << valueStr << "\" ";
+    //std::cout << "to type \"" << demangle(param.m_type.name()) << "\" ";
+    throw 1;
+}
+
+void CppArgParser::throwRequiredMissing(std::string name)
+{
+    std::cout << "ERROR: " << name << " is required" << std::endl;
+    throw 1;
+}
+
+void CppArgParser::throwMultipleNotAllowed(std::string name)
+{
+    std::cout << "ERROR: " << name << " does not allow multiple occurrences" << std::endl;
+    throw 1;
+}
+
+void CppArgParser::throwUnknownParameter(std::string name)
+{
+    std::cout << "ERROR: ArgParser unknown name ";
+    std::cout << "\"" << name << "\"" << std::endl;
+    throw 1;
+}
+
+void CppArgParser::Type<bool>::convert(std::string name, bool& t, Args& args)
+{
+    t = true;
+    return;
+}
+
+CppArgParser::Type<CppArgParser::Bool>::Type()
+{
+    m_trueValues.push_back("1");
+    m_trueValues.push_back("T");
+    m_trueValues.push_back("True");
+    m_trueValues.push_back("Y");
+    m_trueValues.push_back("Yes");
+    m_falseValues.push_back("0");
+    m_falseValues.push_back("F");
+    m_falseValues.push_back("False");
+    m_falseValues.push_back("N");
+    m_falseValues.push_back("No");
+}
+
+void CppArgParser::Type<CppArgParser::Bool>::convert(std::string name, Bool& t, Args& args)
+{
+    // bool requires the --arg=value syntax, otherwise if the flag is present, 
+    // the value will be true.
+    if (args.size() && args[0][0] == '=')
+    {
+        std::string value = args[0].substr(1);
+        for (auto valid: m_trueValues)
+        {
+            if (value == valid)
+            {
+                args.pop_front();
+                t = true;
+                return;
+            }
+        }
+        for (auto valid: m_falseValues)
+        {
+            if (value == valid)
+            {
+                args.pop_front();
+                t = false;
+                return;
+            }
+        }
+        throwFailedConversion(name);
+    }
+    else
+    {
+        t = true;
+        return;
+    }
+}
+
+std::string CppArgParser::Type<bool>::decorate()
+{
+    return "";
+}
+
+std::string CppArgParser::Type<CppArgParser::Bool>::decorate()
+{
+    return "[=arg(=1)]";
 }
 
 /*

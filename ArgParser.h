@@ -1,13 +1,171 @@
 #pragma once
 #include <string>
 #include <memory>
-#include <typeinfo>
-#include <typeindex>
-#include "ArgParserTypes.h"
+#include <deque>
+#include <vector>
+#include <sstream>
 
 namespace CppArgParser
 {
     
+    struct Bool
+    {
+        Bool() : m_b(false) {} // HACK?
+        Bool(bool b) : m_b(b) {}
+        bool m_b;
+    };
+    
+    struct Parameter
+    {
+        typedef std::string Name;
+        Parameter(Name name, Name abbrev, Name desc, Name decorator)
+        :   m_name(name), m_abbrev(abbrev), m_desc(desc), m_decorator(decorator)
+        {
+        }
+        
+        Name m_name;
+        Name m_abbrev;
+        Name m_desc;
+        Name m_decorator;
+    };
+
+    typedef std::deque<std::string> Args;
+            
+    void throwFailedConversion(std::string name);
+    void throwRequiredMissing(std::string name);
+    void throwMultipleNotAllowed(std::string name);
+    void throwUnknownParameter(std::string name);
+    
+    std::string demangle(const char* mangled);
+    
+    class bad_lexical_cast {};
+
+    template<typename T>
+    T lexical_cast(std::string value)
+    {
+        try
+        {
+            std::istringstream strm(value);
+            strm.exceptions(std::istringstream::failbit | std::istringstream::badbit);
+            T t;
+            strm >> t;
+            if (!strm.eof())
+                throw bad_lexical_cast();
+            return t;
+        }
+        catch (std::istringstream::failure&)
+        {
+            throw bad_lexical_cast();
+        }
+    }
+
+    template<>
+    inline std::string lexical_cast<std::string>(std::string value)
+    {
+        return value;
+    }
+    
+    template<>
+    inline char lexical_cast<char>(std::string value)
+    {
+        if (value.size() != 1)
+            throw bad_lexical_cast();
+        return value[0];
+    }
+    
+    template<>
+    inline unsigned char lexical_cast<unsigned char>(std::string value)
+    {
+        if (value.size() != 1)
+            throw bad_lexical_cast();
+        return value[0];
+    }
+    
+    template<typename T>
+    struct Type
+    {
+        Type() : m_count(0) {}
+        void convert(std::string name, T& t, Args& args)
+        {
+            if (!args.size())
+                throwRequiredMissing(name);
+            if (m_count)
+                throwMultipleNotAllowed(name);
+            std::string value = args[0];
+            args.pop_front();
+            if (value[0] == '=')
+            {
+                value = value.substr(1);
+            }
+            try
+            {
+                t = lexical_cast<T>(value);
+                m_count++;
+            }
+            catch (bad_lexical_cast& e)
+            {
+                throwFailedConversion(name);
+            }
+        }
+
+        std::string decorate()
+        {
+            return "arg";
+        }
+        
+        private:
+            int m_count;
+    };
+    
+    template<typename T>
+    struct Type<std::vector<T>>
+    {
+        void convert(std::string name, std::vector<T>& v, Args& args)
+        {
+            if (!args.size())
+                throwRequiredMissing(name);
+            std::string value = args[0];
+            args.pop_front();
+            if (value[0] == '=')
+            {
+                value = value.substr(1);
+            }
+            try
+            {
+                T t = lexical_cast<T>(value);
+                v.push_back(t);
+            }
+            catch (bad_lexical_cast& e)
+            {
+                throwFailedConversion(name);
+            }
+        }
+        
+        std::string decorate()
+        {
+            return "arg";
+        }
+    };
+    
+    template<>
+    struct Type<bool>
+    {
+        void convert(std::string name, bool& t, Args& args);
+        std::string decorate();
+    };
+
+    template<>
+    struct Type<Bool>
+    {
+    public:
+        Type();
+        void convert(std::string name, Bool& t, Args& args);
+        std::string decorate();
+        
+    private:
+        std::vector<std::string> m_trueValues, m_falseValues;
+    };
+
     class ArgParser
     {
     public:  
@@ -18,7 +176,7 @@ namespace CppArgParser
         
         template<typename T>
         void param(Name name, T& value, Name desc = Name());
-
+        
         bool fail_remaining();
 
         bool help(Name description);
@@ -67,6 +225,8 @@ namespace CppArgParser
 
 };// namespace CppArgParser
 
+std::istream& operator>>(std::istream& is, CppArgParser::Bool& v);
+        
 /*
 Copyright (c) 2013 Aaron Frantisak
 
