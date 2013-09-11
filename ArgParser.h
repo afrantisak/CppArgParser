@@ -11,13 +11,9 @@
 namespace CppArgParser
 {
     
-    struct Bool
-    {
-        Bool() : m_b(false) {} // HACK?
-        Bool(bool b) : m_b(b) {}
-        bool m_b;
-    };
-    
+    typedef std::string Name;
+    typedef std::deque<std::string> Args;
+        
     class bad_lexical_cast {};
 
     template<typename T>
@@ -61,14 +57,9 @@ namespace CppArgParser
         return value[0];
     }
     
-    typedef std::deque<std::string> Args;
-            
     void throwFailedConversion(std::string name);
     void throwRequiredMissing(std::string name);
     void throwMultipleNotAllowed(std::string name);
-    void throwUnknownParameter(std::string name);
-    
-    std::string demangle(const char* mangled);
     
     template<typename T>
     struct Type
@@ -146,6 +137,13 @@ namespace CppArgParser
         }
     };
 
+    struct Bool
+    {
+        Bool() : m_b(false) {} // HACK?
+        Bool(bool b) : m_b(b) {}
+        bool m_b;
+    };
+    
     template<>
     struct Type<Bool>
     {
@@ -163,7 +161,6 @@ namespace CppArgParser
 
     struct Parameter
     {
-        typedef std::string Name;
         Parameter(Name name, Name abbrev, Name desc, Name decorator)
         :   m_name(name), m_abbrev(abbrev), m_desc(desc), m_decorator(decorator)
         {
@@ -178,8 +175,6 @@ namespace CppArgParser
     class ArgParser
     {
     public:  
-        typedef std::string Name;
-        
         ArgParser(int argc, char* argv[]);
         
         template<typename T>
@@ -199,7 +194,6 @@ namespace CppArgParser
 
         bool m_bHelp;
 
-        typedef std::deque<std::string> Args;
         Args m_args;
     };
 
@@ -252,7 +246,9 @@ namespace CppArgParser
     {
         for (auto& arg : m_args)
         {
-            throwUnknownParameter(arg);
+            std::stringstream strm;
+            strm << "ArgParser unknown name " << "\"" << arg << "\"";
+            throw std::runtime_error(strm.str());
         }
     }
 
@@ -354,14 +350,6 @@ namespace CppArgParser
     {
         std::stringstream strm;
         strm << name << " does not allow multiple occurrences";
-        throw std::runtime_error(strm.str());
-    }
-
-    inline
-    void throwUnknownParameter(std::string name)
-    {
-        std::stringstream strm;
-        strm << "ArgParser unknown name " << "\"" << name << "\"";
         throw std::runtime_error(strm.str());
     }
 
