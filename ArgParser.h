@@ -172,6 +172,8 @@ namespace CppArgParser
         Name m_decorator;
     };
 
+    typedef std::vector<Parameter> Parameters;
+
     class ArgParser
     {
     public:  
@@ -182,20 +184,31 @@ namespace CppArgParser
         
         bool help(Name description, std::ostream& os = std::cout);
         
-        void print_help(Name description, std::ostream& os = std::cout);
+        void print_help(Name app_name, Name app_description, std::ostream& os = std::cout);
 
         bool fail_remaining();
 
     private:        
         Name m_name;
-        
-        typedef std::vector<Parameter> Parameters;
         Parameters m_parameters;
-
-        bool m_bHelp;
-
         Args m_args;
     };
+
+    inline 
+    ArgParser::ArgParser(int argc, char* argv[])
+    :   m_name(),
+        m_parameters(),
+        m_args()
+    {
+        for (int argn = 0; argn < argc; argn++)
+        {
+            m_args.push_back(argv[argn]);
+        }
+        
+        m_name = m_args.front();
+        m_name = m_name.substr(m_name.find_last_of("\\/") + 1);
+        m_args.pop_front();    
+    }
 
     template<typename T>
     void ArgParser::param(Name name, T& value, Name desc)
@@ -225,33 +238,6 @@ namespace CppArgParser
         m_args = args;
     }
 
-    inline 
-    ArgParser::ArgParser(int argc, char* argv[])
-    :   m_name(),
-        m_parameters(),
-        m_args()
-    {
-        for (int argn = 0; argn < argc; argn++)
-        {
-            m_args.push_back(argv[argn]);
-        }
-        
-        m_name = m_args.front();
-        m_name = m_name.substr(m_name.find_last_of("\\/") + 1);
-        m_args.pop_front();    
-    }
-
-    inline
-    bool ArgParser::fail_remaining()
-    {
-        for (auto& arg : m_args)
-        {
-            std::stringstream strm;
-            strm << "ArgParser unknown name " << "\"" << arg << "\"";
-            throw std::runtime_error(strm.str());
-        }
-    }
-
     inline
     bool ArgParser::help(Name description, std::ostream& os)
     {
@@ -259,7 +245,7 @@ namespace CppArgParser
         param("--help", bHelp, "show this help message");
         if (bHelp)
         {
-            print_help(description, os);
+            print_help(m_name, description, os);
             return true;
         }
 
@@ -269,12 +255,12 @@ namespace CppArgParser
     }
 
     inline
-    void ArgParser::print_help(Name description, std::ostream& os)
+    void ArgParser::print_help(Name app_name, Name app_description, std::ostream& os)
     {
         Parameters optional;
         Parameters required;
         
-        os << "Usage: " << m_name; 
+        os << "Usage: " << app_name; 
         for (auto param: m_parameters)
         {
             if (param.m_name.size() && param.m_name[0] == '-')
@@ -292,9 +278,9 @@ namespace CppArgParser
         os << std::endl;
         os << std::endl;
         
-        if (description.size())
+        if (app_description.size())
         {
-            os << description << std::endl;
+            os << app_description << std::endl;
             os << std::endl;
         }
 
@@ -326,6 +312,17 @@ namespace CppArgParser
                 os << "  " << std::left << std::setw(max + 8) << decorator << param.m_desc << std::endl;
             }
             os << std::endl;
+        }
+    }
+
+    inline
+    bool ArgParser::fail_remaining()
+    {
+        for (auto& arg : m_args)
+        {
+            std::stringstream strm;
+            strm << "ArgParser unknown name " << "\"" << arg << "\"";
+            throw std::runtime_error(strm.str());
         }
     }
 
