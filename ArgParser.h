@@ -185,13 +185,13 @@ namespace CppArgParser
         template<typename T>
         void param(Name name, T& value, Name desc = Name());
         
+        bool help(Name description, std::ostream& os = std::cout);
+        
+        void print_help(Name description, std::ostream& os = std::cout);
+
         bool fail_remaining();
 
-        bool help(Name description);
-        
     private:        
-        void print_help(Name description);
-
         Name m_name;
         
         typedef std::vector<Parameter> Parameters;
@@ -257,13 +257,13 @@ namespace CppArgParser
     }
 
     inline
-    bool ArgParser::help(Name description)
+    bool ArgParser::help(Name description, std::ostream& os)
     {
         bool bHelp = false;
         param("--help", bHelp, "show this help message");
         if (bHelp)
         {
-            print_help(description);
+            print_help(description, os);
             return true;
         }
 
@@ -273,12 +273,12 @@ namespace CppArgParser
     }
 
     inline
-    void ArgParser::print_help(Name description)
+    void ArgParser::print_help(Name description, std::ostream& os)
     {
         Parameters optional;
         Parameters required;
         
-        std::cout << "Usage: " << m_name; 
+        os << "Usage: " << m_name; 
         for (auto param: m_parameters)
         {
             if (param.m_name.size() && param.m_name[0] == '-')
@@ -287,33 +287,33 @@ namespace CppArgParser
             }
             else
             {
-                std::cout << " <" << param.m_name << ">";
+                os << " <" << param.m_name << ">";
                 required.push_back(param);
             }
         }        
         if (optional.size())
-            std::cout << " [options]";
-        std::cout << std::endl;
-        std::cout << std::endl;
+            os << " [options]";
+        os << std::endl;
+        os << std::endl;
         
         if (description.size())
         {
-            std::cout << description << std::endl;
-            std::cout << std::endl;
+            os << description << std::endl;
+            os << std::endl;
         }
 
         if (required.size())
         {
-            std::cout << "Required parameters:" << std::endl;
+            os << "Required parameters:" << std::endl;
             for (auto param: required)
             {
-                std::cout << "  " << param.m_name << ": " << param.m_desc << std::endl;
+                os << "  " << param.m_name << ": " << param.m_desc << std::endl;
             }
         }
 
         if (optional.size())
         {
-            std::cout << "Optional parameters:" << std::endl;
+            os << "Optional parameters:" << std::endl;
             int max = 0;
             for (auto param: optional)
             {
@@ -327,9 +327,9 @@ namespace CppArgParser
             {
                 std::string decorator = param.m_decorator;
                 decorator = param.m_name + " " + decorator;
-                std::cout << "  " << std::left << std::setw(max + 8) << decorator << param.m_desc << std::endl;
+                os << "  " << std::left << std::setw(max + 8) << decorator << param.m_desc << std::endl;
             }
-            std::cout << std::endl;
+            os << std::endl;
         }
     }
 
