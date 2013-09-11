@@ -57,9 +57,9 @@ namespace CppArgParser
         return value[0];
     }
     
-    void throwFailedConversion(std::string name);
-    void throwRequiredMissing(std::string name);
-    void throwMultipleNotAllowed(std::string name);
+    class failed_conversion {};
+    class required_missing {};
+    class too_many {};
     
     template<typename T>
     struct Type
@@ -68,24 +68,17 @@ namespace CppArgParser
         void convert(std::string name, T& t, Args& args)
         {
             if (!args.size())
-                throwRequiredMissing(name);
+                throw required_missing();
             if (m_count)
-                throwMultipleNotAllowed(name);
+                throw too_many();
             std::string value = args[0];
             args.pop_front();
             if (value[0] == '=')
             {
                 value = value.substr(1);
             }
-            try
-            {
-                t = lexical_cast<T>(value);
-                m_count++;
-            }
-            catch (bad_lexical_cast& e)
-            {
-                throwFailedConversion(name);
-            }
+            t = lexical_cast<T>(value);
+            m_count++;
         }
 
         std::string decorate()
@@ -103,22 +96,15 @@ namespace CppArgParser
         void convert(std::string name, std::vector<T>& v, Args& args)
         {
             if (!args.size())
-                throwRequiredMissing(name);
+                throw required_missing();
             std::string value = args[0];
             args.pop_front();
             if (value[0] == '=')
             {
                 value = value.substr(1);
             }
-            try
-            {
-                T t = lexical_cast<T>(value);
-                v.push_back(t);
-            }
-            catch (bad_lexical_cast& e)
-            {
-                throwFailedConversion(name);
-            }
+            T t = lexical_cast<T>(value);
+            v.push_back(t);
         }
         
         std::string decorate()
@@ -221,18 +207,45 @@ namespace CppArgParser
         size_t argCount = m_args.size();
         for (auto argIter = m_args.begin(); argIter != m_args.end(); ++argIter)
         {
-            std::string arg = *argIter;
-            if (arg == name)
+            try
             {
-                args.pop_front();
-                type.convert(name, value, args);
+                std::string arg = *argIter;
+                if (arg == name)
+                {
+                    args.pop_front();
+                    type.convert(name, value, args);
+                }
+                else if (arg.size() > name.size() 
+                    && arg.substr(0, name.size()) == name
+                    && arg[name.size()] == '=')
+                {
+                    args[0] = arg.substr(name.size());
+                    type.convert(name, value, args);
+                }
             }
-            else if (arg.size() > name.size() 
-                && arg.substr(0, name.size()) == name
-                && arg[name.size()] == '=')
+            catch (bad_lexical_cast&)
             {
-                args[0] = arg.substr(name.size());
-                type.convert(name, value, args);
+                std::stringstream strm;
+                strm << name << " failed conversion";
+                throw std::runtime_error(strm.str());
+            }
+            catch (failed_conversion&)
+            {
+                std::stringstream strm;
+                strm << name << " failed conversion";
+                throw std::runtime_error(strm.str());
+            }
+            catch (required_missing&)
+            {
+                std::stringstream strm;
+                strm << name << " is required";
+                throw std::runtime_error(strm.str());
+            }
+            catch (too_many&)
+            {
+                std::stringstream strm;
+                strm << name << " does not allow multiple occurrences";
+                throw std::runtime_error(strm.str());
             }
         }
         m_args = args;
@@ -327,30 +340,6 @@ namespace CppArgParser
     }
 
     inline
-    void throwFailedConversion(std::string name)
-    {
-        std::stringstream strm;
-        strm << name << " failed conversion";
-        throw std::runtime_error(strm.str());
-    }
-
-    inline
-    void throwRequiredMissing(std::string name)
-    {
-        std::stringstream strm;
-        strm << name << " is required";
-        throw std::runtime_error(strm.str());
-    }
-
-    inline
-    void throwMultipleNotAllowed(std::string name)
-    {
-        std::stringstream strm;
-        strm << name << " does not allow multiple occurrences";
-        throw std::runtime_error(strm.str());
-    }
-
-    inline
     void Type<bool>::convert(std::string name, bool& t, Args& args)
     {
         t = true;
@@ -398,7 +387,7 @@ namespace CppArgParser
                     return;
                 }
             }
-            throwFailedConversion(name);
+            throw failed_conversion();
         }
         else
         {
