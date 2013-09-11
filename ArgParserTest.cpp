@@ -3,6 +3,7 @@
 #include <iomanip>
 #include <string>
 #include <vector>
+#include <stdexcept>
 
 // list of built-in types we support
 struct ArgParserType
@@ -157,12 +158,18 @@ int main(int argc, char* argv[])
     {
         return n;
     }
+    catch (std::runtime_error& e)
+    {
+        if (e.what())
+            std::cerr << "exception: " << e.what() << "\n";
+        return 1;
+    }
     catch (std::exception& e)
     {
         if (e.what())
             std::cerr << "exception: " << e.what() << "\n";
         std::cerr << "Unhandled exception!" << std::endl;
-        return 127;
+        return 1;
     }
     
     return 0;
