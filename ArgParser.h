@@ -6,6 +6,7 @@
 #include <sstream>
 #include <iostream>
 #include <iomanip>
+#include <stdexcept>
 
 namespace CppArgParser
 {
@@ -335,33 +336,33 @@ namespace CppArgParser
     inline
     void throwFailedConversion(std::string name)
     {
-        std::cout << "ERROR: " << name << " failed conversion" << std::endl;
-        //if (valueStr.size())
-        //    std::cout << "from value \"" << valueStr << "\" ";
-        //std::cout << "to type \"" << demangle(param.m_type.name()) << "\" ";
-        throw 1;
+        std::stringstream strm;
+        strm << name << " failed conversion";
+        throw std::runtime_error(strm.str());
     }
 
     inline
     void throwRequiredMissing(std::string name)
     {
-        std::cout << "ERROR: " << name << " is required" << std::endl;
-        throw 1;
+        std::stringstream strm;
+        strm << name << " is required";
+        throw std::runtime_error(strm.str());
     }
 
     inline
     void throwMultipleNotAllowed(std::string name)
     {
-        std::cout << "ERROR: " << name << " does not allow multiple occurrences" << std::endl;
-        throw 1;
+        std::stringstream strm;
+        strm << name << " does not allow multiple occurrences";
+        throw std::runtime_error(strm.str());
     }
 
     inline
     void throwUnknownParameter(std::string name)
     {
-        std::cout << "ERROR: ArgParser unknown name ";
-        std::cout << "\"" << name << "\"" << std::endl;
-        throw 1;
+        std::stringstream strm;
+        strm << "ArgParser unknown name " << "\"" << name << "\"";
+        throw std::runtime_error(strm.str());
     }
 
     inline

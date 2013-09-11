@@ -161,7 +161,7 @@ int main(int argc, char* argv[])
     catch (std::runtime_error& e)
     {
         if (e.what())
-            std::cerr << "exception: " << e.what() << "\n";
+            std::cerr << "ERROR: " << e.what() << "\n";
         return 1;
     }
     catch (std::exception& e)
