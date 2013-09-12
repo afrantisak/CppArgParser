@@ -157,27 +157,28 @@ namespace CppArgParser
 
     class ArgParser
     {
-    public:  
-        ArgParser(int argc, char* argv[]);
+    public:
+        // default name is taken from argv[0]
+        ArgParser(int argc, char* argv[], Name app_name = std::string());
         
         template<typename T>
         void param(Name name, T& value, Name desc = Name());
         
         bool help(Name description, std::ostream& os = std::cout);
         
-        void print_help(Name app_name, Name app_description, std::ostream& os = std::cout);
+        void print_help(Name app_name, Name app_description, std::ostream& os);
 
         bool fail_remaining();
 
     private:        
-        Name m_name;
+        Name m_app_name;
         Parameters m_parameters;
         Args m_args;
     };
 
     inline 
-    ArgParser::ArgParser(int argc, char* argv[])
-    :   m_name(),
+    ArgParser::ArgParser(int argc, char* argv[], Name app_name)
+    :   m_app_name(app_name),
         m_parameters(),
         m_args()
     {
@@ -186,8 +187,11 @@ namespace CppArgParser
             m_args.push_back(argv[argn]);
         }
         
-        m_name = m_args.front();
-        m_name = m_name.substr(m_name.find_last_of("\\/") + 1);
+        if (!m_app_name.size())
+        {
+            m_app_name = m_args.front();
+            m_app_name = m_app_name.substr(m_app_name.find_last_of("\\/") + 1);
+        }
         m_args.pop_front();    
     }
 
@@ -195,12 +199,7 @@ namespace CppArgParser
     void ArgParser::param(Name name, T& value, Name desc)
     {
         ParamTraits<T> type;
-        Parameter param;
-        param.m_name = name;
-        param.m_abbrev = "";
-        param.m_desc = desc;
-        param.m_decorator = type.decorate();
-        m_parameters.push_back(param);
+        m_parameters.push_back(Parameter{ name, "", desc, type.decorate() });
 
         Args args = m_args;
         size_t argCount = m_args.size();
@@ -257,7 +256,7 @@ namespace CppArgParser
         param("--help", bHelp, "show this help message");
         if (bHelp)
         {
-            print_help(m_name, description, os);
+            print_help(m_app_name, description, os);
             return true;
         }
 

@@ -6,9 +6,9 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 project(CppArgParser)
 
-add_executable(ArgParserTest ArgParserTest.cpp)
+add_executable(ParserTest ParserTest.cpp)
 #TARGET_LINK_LIBRARIES(ArgParserTest boost_system boost_program_options)
-TARGET_LINK_LIBRARIES(ArgParserTest)
+TARGET_LINK_LIBRARIES(ParserTest)
 
 ADD_DEFINITIONS("-std=c++0x")
 ADD_DEFINITIONS("-g")

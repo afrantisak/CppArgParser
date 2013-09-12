@@ -1,6 +1,6 @@
 main:
     alias:
-        - app: ../{build}/bin/ArgParserTest
+        - app: ../{build}/bin/ParserTest
     cd: test
     tests:
         - help:       ref {app} --help

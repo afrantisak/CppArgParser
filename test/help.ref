@@ -1,4 +1,4 @@
-Usage: ArgParserTest [options]
+Usage: ParserTest [options]
 
 Test the CppArgParser
 
