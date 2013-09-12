@@ -62,9 +62,9 @@ namespace CppArgParser
     class too_many {};
     
     template<typename T>
-    struct Type
+    struct ParamTraits
     {
-        Type() : m_count(0) {}
+        ParamTraits() : m_count(0) {}
         void convert(std::string name, T& t, Args& args)
         {
             if (!args.size())
@@ -91,7 +91,7 @@ namespace CppArgParser
     };
     
     template<typename T>
-    struct Type<std::vector<T>>
+    struct ParamTraits<std::vector<T>>
     {
         void convert(std::string name, std::vector<T>& v, Args& args)
         {
@@ -114,7 +114,7 @@ namespace CppArgParser
     };
     
     template<>
-    struct Type<bool>
+    struct ParamTraits<bool>
     {
         void convert(std::string name, bool& t, Args& args);
         std::string decorate()
@@ -131,10 +131,10 @@ namespace CppArgParser
     };
     
     template<>
-    struct Type<Bool>
+    struct ParamTraits<Bool>
     {
     public:
-        Type();
+        ParamTraits();
         void convert(std::string name, Bool& t, Args& args);
         std::string decorate()
         {
@@ -147,11 +147,6 @@ namespace CppArgParser
 
     struct Parameter
     {
-        Parameter(Name name, Name abbrev, Name desc, Name decorator)
-        :   m_name(name), m_abbrev(abbrev), m_desc(desc), m_decorator(decorator)
-        {
-        }
-        
         Name m_name;
         Name m_abbrev;
         Name m_desc;
@@ -199,8 +194,12 @@ namespace CppArgParser
     template<typename T>
     void ArgParser::param(Name name, T& value, Name desc)
     {
-        Type<T> type;
-        Parameter param(name, "", desc, type.decorate());
+        ParamTraits<T> type;
+        Parameter param;
+        param.m_name = name;
+        param.m_abbrev = "";
+        param.m_desc = desc;
+        param.m_decorator = type.decorate();
         m_parameters.push_back(param);
 
         Args args = m_args;
@@ -340,14 +339,14 @@ namespace CppArgParser
     }
 
     inline
-    void Type<bool>::convert(std::string name, bool& t, Args& args)
+    void ParamTraits<bool>::convert(std::string name, bool& t, Args& args)
     {
         t = true;
         return;
     }
 
     inline
-    Type<CppArgParser::Bool>::Type()
+    ParamTraits<CppArgParser::Bool>::ParamTraits()
     {
         m_trueValues.push_back("1");
         m_trueValues.push_back("T");
@@ -362,7 +361,7 @@ namespace CppArgParser
     }
 
     inline
-    void Type<CppArgParser::Bool>::convert(std::string name, Bool& t, Args& args)
+    void ParamTraits<CppArgParser::Bool>::convert(std::string name, Bool& t, Args& args)
     {
         // bool requires the --arg=value syntax, otherwise if the flag is present, 
         // the value will be true.
