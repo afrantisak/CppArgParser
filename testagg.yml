@@ -1,63 +1,66 @@
 main:
     alias:
-        - app: ../{build}/bin/ParserTest
+        - ParserTest: ../{build}/bin/ParserTest
+        - AppNameTest: ../{build}/bin/AppNameTest
     cd: test
     tests:
-        - help:       ref {app} --help
-        - unknown:    ref {app} --unknown
-        - base:       ref {app}
-        - b:          ref {app} --b
-        - b_eq_empty: ref {app} --b=
-        - b_eq1:      ref {app} --b=1
-        - b_eq0:      ref {app} --b=0
-        - b_dup:      ref {app} --b --b
-        - c_missing:  ref {app} --c
-        - c:          ref {app} --c \xFF
-        - c_partial:  ref {app} --c \xFF --c
-        - c_dup:      ref {app} --c \xFF --c \xFF
-        - uc:         ref {app} --uc \xFF
-        - uc_big:     ref {app} --uc \x100
-        - s_neg:      ref {app} --s -32767
-        - s_neg_big:  ref {app} --s -32768
-        - s_pos:      ref {app} --s 32768
-        - s_pos_big:  ref {app} --s 32769
-        - s_badchar:  ref {app} --s 10a
-        - us:         ref {app} --us 65535
-        - us_big:     ref {app} --us 65536
-        - us_neg:     ref {app} --us -1
-        - us_zero:    ref {app} --us 0
-        - n_neg:      ref {app} --n -2147483648
-        - n_neg_big:  ref {app} --n -2147483649
-        - n_pos:      ref {app} --n 2147483647
-        - n_pos_big:  ref {app} --n 2147483648
-        - un:         ref {app} --un 4294967295
-        - un_big:     ref {app} --un 4294967296
-        - un_neg:     ref {app} --un -1
-        - un_zero:    ref {app} --un 0
-        - l_neg:      ref {app} --l -2147483648
-        - l_pos:      ref {app} --l 2147483647
-        - ul:         ref {app} --ul 4294967295
-        - ul_zero:    ref {app} --ul 0
-        - ll_neg:     ref {app} --ll -9223372036854775808
-        - ll_neg_big: ref {app} --ll -9223372036854775809
-        - ll_pos:     ref {app} --ll 9223372036854775807
-        - ll_pos_big: ref {app} --ll 9223372036854775808
-        - ull:        ref {app} --ull 18446744073709551615
-        - ull_big:    ref {app} --ull 18446744073709551616
-        - ull_neg:    ref {app} --ull -1
-        - ull_zero:   ref {app} --ull 0
-        - size:       ref {app} --size 4294967295
-        - str:        ref {app} --str "Hello World"
+        - help:       ref {ParserTest} --help
+        - unknown:    ref {ParserTest} --unknown
+        - base:       ref {ParserTest}
+        - b:          ref {ParserTest} --b
+        - b_eq_empty: ref {ParserTest} --b=
+        - b_eq1:      ref {ParserTest} --b=1
+        - b_eq0:      ref {ParserTest} --b=0
+        - b_dup:      ref {ParserTest} --b --b
+        - c_missing:  ref {ParserTest} --c
+        - c:          ref {ParserTest} --c \xFF
+        - c_partial:  ref {ParserTest} --c \xFF --c
+        - c_dup:      ref {ParserTest} --c \xFF --c \xFF
+        - uc:         ref {ParserTest} --uc \xFF
+        - uc_big:     ref {ParserTest} --uc \x100
+        - s_neg:      ref {ParserTest} --s -32767
+        - s_neg_big:  ref {ParserTest} --s -32768
+        - s_pos:      ref {ParserTest} --s 32768
+        - s_pos_big:  ref {ParserTest} --s 32769
+        - s_badchar:  ref {ParserTest} --s 10a
+        - us:         ref {ParserTest} --us 65535
+        - us_big:     ref {ParserTest} --us 65536
+        - us_neg:     ref {ParserTest} --us -1
+        - us_zero:    ref {ParserTest} --us 0
+        - n_neg:      ref {ParserTest} --n -2147483648
+        - n_neg_big:  ref {ParserTest} --n -2147483649
+        - n_pos:      ref {ParserTest} --n 2147483647
+        - n_pos_big:  ref {ParserTest} --n 2147483648
+        - un:         ref {ParserTest} --un 4294967295
+        - un_big:     ref {ParserTest} --un 4294967296
+        - un_neg:     ref {ParserTest} --un -1
+        - un_zero:    ref {ParserTest} --un 0
+        - l_neg:      ref {ParserTest} --l -2147483648
+        - l_pos:      ref {ParserTest} --l 2147483647
+        - ul:         ref {ParserTest} --ul 4294967295
+        - ul_zero:    ref {ParserTest} --ul 0
+        - ll_neg:     ref {ParserTest} --ll -9223372036854775808
+        - ll_neg_big: ref {ParserTest} --ll -9223372036854775809
+        - ll_pos:     ref {ParserTest} --ll 9223372036854775807
+        - ll_pos_big: ref {ParserTest} --ll 9223372036854775808
+        - ull:        ref {ParserTest} --ull 18446744073709551615
+        - ull_big:    ref {ParserTest} --ull 18446744073709551616
+        - ull_neg:    ref {ParserTest} --ull -1
+        - ull_zero:   ref {ParserTest} --ull 0
+        - size:       ref {ParserTest} --size 4294967295
+        - str:        ref {ParserTest} --str "Hello World"
         
-        - b_m1:       ref {app} --b_m 0
-        - b_m2:       ref {app} --b_m 0 --b_m 1
-        - n_m:        ref {app} --n_m 1 --n_m 2
-        - n_m_fail:   ref {app} --n_m --n_m 1 --n_m
-        - n_m_eq:     ref {app} --n_m=1 --n_m 2 --n_m=3 --n_m=4
-        - n_m_eqfail: ref {app} --n_m= --n_m=1 --n_m=
+        - b_m1:       ref {ParserTest} --b_m 0
+        - b_m2:       ref {ParserTest} --b_m 0 --b_m 1
+        - n_m:        ref {ParserTest} --n_m 1 --n_m 2
+        - n_m_fail:   ref {ParserTest} --n_m --n_m 1 --n_m
+        - n_m_eq:     ref {ParserTest} --n_m=1 --n_m 2 --n_m=3 --n_m=4
+        - n_m_eqfail: ref {ParserTest} --n_m= --n_m=1 --n_m=
         
         # these tests are different on 32/64 bit systems
-        #- l_neg_big:  ref {app} --l -2147483649
-        #- l_pos_big:  ref {app} --l 2147483648
-        #- ul_big:     ref {app} --ul 4294967296
-        #- ul_neg:     ref {app} --ul -1
+        #- l_neg_big:  ref {ParserTest} --l -2147483649
+        #- l_pos_big:  ref {ParserTest} --l 2147483648
+        #- ul_big:     ref {ParserTest} --ul 4294967296
+        #- ul_neg:     ref {ParserTest} --ul -1
+
+        - app_name_1:  ref {AppNameTest} --help
