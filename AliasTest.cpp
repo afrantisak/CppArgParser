@@ -17,8 +17,8 @@ int main(int argc, char* argv[])
         aliases.push_back("--al1");
         aliases.push_back("--al2");
         aliases.push_back("-a");
-        ArgParserType::N alias;
-        args.param(aliases, alias, "int (aliased)");
+        ArgParserType::N value;
+        args.param(value, aliases, "int (aliased)");
 
         // parse
         if (args.help("Test the CppArgParser"))
@@ -26,7 +26,7 @@ int main(int argc, char* argv[])
             return 1;
         };
 
-        dump("alias:  ", alias);
+        dump("alias:  ", value);
     }
     catch (std::runtime_error& e)
     {

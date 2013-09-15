@@ -43,34 +43,34 @@ int main(int argc, char* argv[])
         CppArgParser::ArgParser args(argc, argv);
 
         // configure single instance arguments
-        args.param("--b",      b,    "bool");
-        args.param("--c",      c,    "char");
-        args.param("--uc",     uc,   "unsigned char");
-        args.param("--s",      s,    "short");
-        args.param("--us",     us,   "unsigned short");
-        args.param("--n",      n,    "int");
-        args.param("--un",     un,   "unsigned int");
-        args.param("--l",      l,    "long");
-        args.param("--ul",     ul,   "unsigned long");
-        args.param("--ll",     ll,   "long long");
-        args.param("--ull",    ull,  "unsigned long long");
-        args.param("--size",   size, "size_t");
-        args.param("--str",    str,  "std::string");
+        args.param(b,    "--b",      "bool");
+        args.param(c,    "--c",      "char");
+        args.param(uc,   "--uc",     "unsigned char");
+        args.param(s,    "--s",      "short");
+        args.param(us,   "--us",     "unsigned short");
+        args.param(n,    "--n",      "int");
+        args.param(un,   "--un",     "unsigned int");
+        args.param(l,    "--l",      "long");
+        args.param(ul,   "--ul",     "unsigned long");
+        args.param(ll,   "--ll",     "long long");
+        args.param(ull,  "--ull",    "unsigned long long");
+        args.param(size, "--size",   "size_t");
+        args.param(str,  "--str",    "std::string");
 
         // configure multiple instance arguments
-        args.param("--b_m",      b_m,    "bool (multiple instances)");
-        args.param("--c_m",      c_m,    "char (multiple instances)");
-        args.param("--uc_m",     uc_m,   "unsigned char (multiple instances)");
-        args.param("--s_m",      s_m,    "short (multiple instances)");
-        args.param("--us_m",     us_m,   "unsigned short (multiple instances)");
-        args.param("--n_m",      n_m,    "int (multiple instances)");
-        args.param("--un_m",     un_m,   "unsigned int (multiple instances)");
-        args.param("--l_m",      l_m,    "long (multiple instances)");
-        args.param("--ul_m",     ul_m,   "unsigned long (multiple instances)");
-        args.param("--ll_m",     ll_m,   "long long (multiple instances)");
-        args.param("--ull_m",    ull_m,  "unsigned long long (multiple instances)");
-        args.param("--size_m",   size_m, "size_t (multiple instances)");
-        args.param("--str_m",    str_m,  "std::string (multiple instances)");
+        args.param(b_m,    "--b_m",      "bool (multiple instances)");
+        args.param(c_m,    "--c_m",      "char (multiple instances)");
+        args.param(uc_m,   "--uc_m",     "unsigned char (multiple instances)");
+        args.param(s_m,    "--s_m",      "short (multiple instances)");
+        args.param(us_m,   "--us_m",     "unsigned short (multiple instances)");
+        args.param(n_m,    "--n_m",      "int (multiple instances)");
+        args.param(un_m,   "--un_m",     "unsigned int (multiple instances)");
+        args.param(l_m,    "--l_m",      "long (multiple instances)");
+        args.param(ul_m,   "--ul_m",     "unsigned long (multiple instances)");
+        args.param(ll_m,   "--ll_m",     "long long (multiple instances)");
+        args.param(ull_m,  "--ull_m",    "unsigned long long (multiple instances)");
+        args.param(size_m, "--size_m",   "size_t (multiple instances)");
+        args.param(str_m,  "--str_m",    "std::string (multiple instances)");
         
         // parse
         if (args.help("Test the CppArgParser"))

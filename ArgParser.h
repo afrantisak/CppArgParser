@@ -176,10 +176,16 @@ namespace CppArgParser
         ArgParser(int argc, char* argv[], Name app_name = std::string());
         
         template<typename T>
-        void param(Name name, T& value, Name desc = Name());
+        void param(T& value, Name name, Name desc = Name());
         
         template<typename T>
-        void param(std::vector<Name> names, T& value, Name desc = Name());
+        void param(T& value, std::vector<Name> names, Name desc = Name());
+        
+        template<typename T>
+        T param(Name name, Name desc = Name());
+
+        template<typename T>
+        T param(std::vector<Name> names, Name desc = Name());
 
         bool help(Name description, std::ostream& os = std::cout);
         
@@ -213,15 +219,15 @@ namespace CppArgParser
     }
 
     template<typename T>
-    void ArgParser::param(Name name, T& value, Name desc)
+    void ArgParser::param(T& value, Name name, Name desc)
     {
         std::vector<Name> names;
         names.push_back(name);
-        param(names, value, desc);
+        param(value, names, desc);
     }
 
     template<typename T>
-    void ArgParser::param(std::vector<Name> names, T& value, Name desc)
+    void ArgParser::param(T& value, std::vector<Name> names, Name desc)
     {
         ParamTraits<T> type;
         Parameter param = { names, desc, type.decorate() };
@@ -286,11 +292,27 @@ namespace CppArgParser
         }
     }
 
+    template<typename T>
+    T param(Name name, Name desc = Name())
+    {
+        T t;
+        param(t, name, desc);
+        return t;
+    }
+
+    template<typename T>
+    T param(std::vector<Name> names, Name desc = Name())
+    {
+        T t;
+        param(t, names, desc);
+        return t;
+    }
+
     inline
     bool ArgParser::help(Name description, std::ostream& os)
     {
         bool bHelp = false;
-        param("--help", bHelp, "show this help message");
+        param(bHelp, "--help", "show this help message");
         if (bHelp)
         {
             print_help(m_app_name, description, os);
