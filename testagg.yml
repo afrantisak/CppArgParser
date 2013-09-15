@@ -1,7 +1,8 @@
 main:
     alias:
-        - ParserTest: ../{build}/bin/ParserTest
+        - ParserTest:  ../{build}/bin/ParserTest
         - AppNameTest: ../{build}/bin/AppNameTest
+        - AliasTest:   ../{build}/bin/AliasTest
     cd: test
     tests:
         - help:       ref {ParserTest} --help
@@ -62,5 +63,10 @@ main:
         #- l_pos_big:  ref {ParserTest} --l 2147483648
         #- ul_big:     ref {ParserTest} --ul 4294967296
         #- ul_neg:     ref {ParserTest} --ul -1
+
+        - alias1:      ref {AliasTest} --al1 1
+        - alias2:      ref {AliasTest} --al2 2
+        - alias3:      ref {AliasTest} -a 3
+        - aliasM_fail: ref {AliasTest} --al1 1 --al2 2
 
         - app_name_1:  ref {AppNameTest} --help

@@ -183,7 +183,9 @@ def recurse(data, tests, refop, timeout, options, defines):
     return aggregate, found, failures
     
 def parse(testfilename, tests, refop, timeout, line_numbers):
-    build = os.environ['CC']
+    build = 'build'
+    if 'CC' in os.environ and os.environ['CC']:
+        build = os.environ['CC']
     defines = { 'build': build }
     
     abspath = os.path.abspath(testfilename)

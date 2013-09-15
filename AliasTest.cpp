@@ -1,18 +1,32 @@
 #include "ArgParser.h"
 #include "Test.h"
 #include <iostream>
+#include <iomanip>
+#include <string>
+#include <vector>
 #include <stdexcept>
 
 int main(int argc, char* argv[])
 {
     try
     {
-        CppArgParser::ArgParser args(argc, argv, "Foo");
+        CppArgParser::ArgParser args(argc, argv);
 
-        if (args.help("Test the app name override"))
+        // configure an aliased argument
+        std::vector<std::string> aliases;
+        aliases.push_back("--al1");
+        aliases.push_back("--al2");
+        aliases.push_back("-a");
+        ArgParserType::N alias;
+        args.param(aliases, alias, "int (aliased)");
+
+        // parse
+        if (args.help("Test the CppArgParser"))
         {
             return 1;
         };
+
+        dump("alias:  ", alias);
     }
     catch (std::runtime_error& e)
     {

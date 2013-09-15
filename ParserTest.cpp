@@ -1,57 +1,10 @@
 #include "ArgParser.h"
+#include "Test.h"
 #include <iostream>
 #include <iomanip>
 #include <string>
 #include <vector>
 #include <stdexcept>
-
-// list of built-in types we support
-struct ArgParserType
-{
-    typedef CppArgParser::Bool B;
-    typedef char               C;
-    typedef unsigned char      UC;
-    typedef short              S;
-    typedef unsigned short     US;
-    typedef int                N;
-    typedef unsigned int       UN;
-    typedef long               L;
-    typedef unsigned long      UL;
-    typedef long long          LL;
-    typedef unsigned long long ULL;
-    typedef size_t             Size;
-    typedef std::string        Str;
-};
-
-template<typename T>
-void dump(std::string name, T t)
-{
-    std::cout << name << t << std::endl;
-}
-
-template<>
-void dump(std::string name, CppArgParser::Bool t)
-{
-    std::cout << name << t.m_b << std::endl;
-}
-
-template<typename T>
-void dump(std::string name, std::vector<T> t_m)
-{
-    std::cout << name;
-    for (auto t: t_m)
-        std::cout << t << ", ";
-    std::cout << std::endl;
-}
-
-template<>
-void dump(std::string name, std::vector<CppArgParser::Bool> t_m)
-{
-    std::cout << name;
-    for (auto t: t_m)
-        std::cout << t.m_b << ", ";
-    std::cout << std::endl;
-}
 
 int main(int argc, char* argv[])
 {
@@ -118,7 +71,7 @@ int main(int argc, char* argv[])
         args.param("--ull_m",    ull_m,  "unsigned long long (multiple instances)");
         args.param("--size_m",   size_m, "size_t (multiple instances)");
         args.param("--str_m",    str_m,  "std::string (multiple instances)");
-
+        
         // parse
         if (args.help("Test the CppArgParser"))
         {
@@ -153,10 +106,6 @@ int main(int argc, char* argv[])
         dump("ull_m:  ", ull_m);
         dump("size_m: ", size_m);
         dump("str_m:  ", str_m);
-    }
-    catch (int n)
-    {
-        return n;
     }
     catch (std::runtime_error& e)
     {

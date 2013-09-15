@@ -147,10 +147,24 @@ namespace CppArgParser
 
     struct Parameter
     {
-        Name m_name;
-        Name m_abbrev;
+        std::vector<Name> m_names;
         Name m_desc;
         Name m_decorator;
+        
+        std::string getName() const
+        {
+            std::string names;
+            
+            if (!m_names.size())
+                return names;
+
+            for (auto nameIter = m_names.begin(); nameIter != m_names.end() - 1; ++nameIter)
+            {
+                names += *nameIter + ", ";
+            }
+
+            return names + *m_names.rbegin();
+        }
     };
 
     typedef std::vector<Parameter> Parameters;
@@ -164,6 +178,9 @@ namespace CppArgParser
         template<typename T>
         void param(Name name, T& value, Name desc = Name());
         
+        template<typename T>
+        void param(std::vector<Name> names, T& value, Name desc = Name());
+
         bool help(Name description, std::ostream& os = std::cout);
         
         void print_help(Name app_name, Name app_description, std::ostream& os);
@@ -198,55 +215,75 @@ namespace CppArgParser
     template<typename T>
     void ArgParser::param(Name name, T& value, Name desc)
     {
-        ParamTraits<T> type;
-        m_parameters.push_back(Parameter{ name, "", desc, type.decorate() });
+        std::vector<Name> names;
+        names.push_back(name);
+        param(names, value, desc);
+    }
 
-        Args args = m_args;
-        size_t argCount = m_args.size();
-        for (auto argIter = m_args.begin(); argIter != m_args.end(); ++argIter)
+    template<typename T>
+    void ArgParser::param(std::vector<Name> names, T& value, Name desc)
+    {
+        ParamTraits<T> type;
+        Parameter param = { names, desc, type.decorate() };
+        m_parameters.push_back(param);
+
+        for (auto name : names)
         {
-            try
+            Args args = m_args;
+            size_t argCount = m_args.size();
+            for (auto argIter = m_args.begin(); argIter != m_args.end(); ++argIter)
             {
-                std::string arg = *argIter;
-                if (arg == name)
+                try
                 {
-                    args.pop_front();
-                    type.convert(name, value, args);
+                    std::string arg = *argIter;
+                    if (arg == name)
+                    {
+                        args.pop_front();
+                        type.convert(name, value, args);
+                    }
+                    else if (arg.size() > name.size() 
+                        && arg.substr(0, name.size()) == name
+                        && arg[name.size()] == '=')
+                    {
+                        args[0] = arg.substr(name.size());
+                        type.convert(name, value, args);
+                    }
                 }
-                else if (arg.size() > name.size() 
-                    && arg.substr(0, name.size()) == name
-                    && arg[name.size()] == '=')
+                catch (bad_lexical_cast&)
                 {
-                    args[0] = arg.substr(name.size());
-                    type.convert(name, value, args);
+                    std::stringstream strm;
+                    strm << name << " failed conversion";
+                    throw std::runtime_error(strm.str());
+                }
+                catch (failed_conversion&)
+                {
+                    std::stringstream strm;
+                    strm << name << " failed conversion";
+                    throw std::runtime_error(strm.str());
+                }
+                catch (required_missing&)
+                {
+                    std::stringstream strm;
+                    strm << name << " is required";
+                    throw std::runtime_error(strm.str());
+                }
+                catch (too_many&)
+                {
+                    std::stringstream strm;
+                    if (names.size() > 1)
+                    {
+                        strm << "(" << param.getName() << ")";
+                    }
+                    else
+                    {
+                        strm << name;
+                    }
+                    strm << " does not allow multiple occurrences";
+                    throw std::runtime_error(strm.str());
                 }
             }
-            catch (bad_lexical_cast&)
-            {
-                std::stringstream strm;
-                strm << name << " failed conversion";
-                throw std::runtime_error(strm.str());
-            }
-            catch (failed_conversion&)
-            {
-                std::stringstream strm;
-                strm << name << " failed conversion";
-                throw std::runtime_error(strm.str());
-            }
-            catch (required_missing&)
-            {
-                std::stringstream strm;
-                strm << name << " is required";
-                throw std::runtime_error(strm.str());
-            }
-            catch (too_many&)
-            {
-                std::stringstream strm;
-                strm << name << " does not allow multiple occurrences";
-                throw std::runtime_error(strm.str());
-            }
+            m_args = args;
         }
-        m_args = args;
     }
 
     inline
@@ -274,13 +311,14 @@ namespace CppArgParser
         os << "Usage: " << app_name; 
         for (auto param: m_parameters)
         {
-            if (param.m_name.size() && param.m_name[0] == '-')
+            auto name = param.getName();
+            if (name.size() && name[0] == '-')
             {
                 optional.push_back(param);
             }
             else
             {
-                os << " <" << param.m_name << ">";
+                os << " <" << name << ">";
                 required.push_back(param);
             }
         }        
@@ -300,7 +338,7 @@ namespace CppArgParser
             os << "Required parameters:" << std::endl;
             for (auto param: required)
             {
-                os << "  " << param.m_name << ": " << param.m_desc << std::endl;
+                os << "  " << param.getName() << ": " << param.m_desc << std::endl;
             }
         }
 
@@ -312,15 +350,15 @@ namespace CppArgParser
             {
                 // get the decorator (HACKY)
                 std::string decorator = param.m_decorator;
-                int cur = param.m_name.size() + 1 + decorator.size();
+                int cur = param.getName().size() + 1 + decorator.size();
                 if (max < cur)
                     max = cur;
             }
             for (auto param: optional)
             {
                 std::string decorator = param.m_decorator;
-                decorator = param.m_name + " " + decorator;
-                os << "  " << std::left << std::setw(max + 8) << decorator << param.m_desc << std::endl;
+                decorator = param.getName() + " " + decorator;
+                os << "  " << std::left << std::setw(max + 2) << decorator << param.m_desc << std::endl;
             }
             os << std::endl;
         }

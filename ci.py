@@ -23,10 +23,9 @@ def _mkdir(newdir):
 def main(options):            
     varName = 'CC'
 
-    if varName in os.environ:
+    buildDirname = 'build'
+    if 'CC' in os.environ and os.environ['CC']:
         buildDirname = os.environ['CC']
-    else:
-        buildDirname = 'build'
 
     originalDirname = os.getcwd()            
     _mkdir(buildDirname)
