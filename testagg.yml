@@ -64,9 +64,13 @@ main:
         #- ul_big:     ref {ParserTest} --ul 4294967296
         #- ul_neg:     ref {ParserTest} --ul -1
 
-        - alias1:      ref {AliasTest} --al1 1
-        - alias2:      ref {AliasTest} --al2 2
+        - alias1:      ref {AliasTest} --a1 1
+        - alias2:      ref {AliasTest} --a2 2
         - alias3:      ref {AliasTest} -a 3
-        - aliasM_fail: ref {AliasTest} --al1 1 --al2 2
+        - aliasM_fail: ref {AliasTest} --a1 1 --a2 2
+        - aliasB1:     ref {AliasTest} --b1 1
+        - aliasB2:     ref {AliasTest} --b2 2
+        - aliasB3:     ref {AliasTest} -b 3
+        - aliasBM:     ref {AliasTest} --b1 1 --b2 2
 
         - app_name_1:  ref {AppNameTest} --help

@@ -14,11 +14,19 @@ int main(int argc, char* argv[])
 
         // configure an aliased argument
         std::vector<std::string> aliases;
-        aliases.push_back("--al1");
-        aliases.push_back("--al2");
+        aliases.push_back("--a1");
+        aliases.push_back("--a2");
         aliases.push_back("-a");
-        ArgParserType::N value;
+        ArgParserType::N value = 0;
         args.param(value, aliases, "int (aliased)");
+        
+        // do the same thing but this time allow multiple instances
+        std::vector<std::string> aliasesB;
+        aliasesB.push_back("--b1");
+        aliasesB.push_back("--b2");
+        aliasesB.push_back("-b");
+        std::vector<ArgParserType::N> values;
+        args.param(values, aliasesB, "int (aliased vector)");
 
         // parse
         if (args.help("Test the CppArgParser"))
@@ -27,6 +35,7 @@ int main(int argc, char* argv[])
         };
 
         dump("alias:  ", value);
+        dump("aliasB:  ", values);
     }
     catch (std::runtime_error& e)
     {
