@@ -2,6 +2,7 @@ CppArgParser
 ============
 
 Python-style C++ Command Line Argument Parser
+[![Build Status](https://travis-ci.org/afrantisak/CppArgParser.png?branch=master)](https://travis-ci.org/afrantisak/CppArgParser)
 
 ### Simplifying Assumptions
 1. optional arguments always begin with `--`; ex: `foo --help` or `foo --count 1` or `foo --count=1`
