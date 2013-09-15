@@ -81,7 +81,7 @@ namespace CppArgParser
             m_count++;
         }
 
-        std::string decorate()
+        std::string value_description()
         {
             return "arg";
         }
@@ -107,7 +107,7 @@ namespace CppArgParser
             v.push_back(t);
         }
         
-        std::string decorate()
+        std::string value_description()
         {
             return "arg";
         }
@@ -117,7 +117,7 @@ namespace CppArgParser
     struct ParamTraits<bool>
     {
         void convert(std::string name, bool& t, Args& args);
-        std::string decorate()
+        std::string value_description()
         {
             return "";
         }
@@ -136,7 +136,7 @@ namespace CppArgParser
     public:
         ParamTraits();
         void convert(std::string name, Bool& t, Args& args);
-        std::string decorate()
+        std::string value_description()
         {
             return "[=arg(=1)]";
         }
@@ -230,7 +230,7 @@ namespace CppArgParser
     void ArgParser::param(T& value, std::vector<Name> names, Name desc)
     {
         ParamTraits<T> type;
-        Parameter param = { names, desc, type.decorate() };
+        Parameter param = { names, desc, type.value_description() };
         m_parameters.push_back(param);
 
         for (auto name : names)
