@@ -1,33 +1,33 @@
-Usage: ArgParserTest [options]
+Usage: ParserTest [options]
 
 Test the CppArgParser
 
 Optional parameters:
-  --help                show this help message
-  --b [=arg(=1)]        bool
-  --c arg               char
-  --uc arg              unsigned char
-  --s arg               short
-  --us arg              unsigned short
-  --n arg               int
-  --un arg              unsigned int
-  --l arg               long
-  --ul arg              unsigned long
-  --ll arg              long long
-  --ull arg             unsigned long long
-  --size arg            size_t
-  --str arg             std::string
-  --b_m arg             bool (multiple instances)
-  --c_m arg             char (multiple instances)
-  --uc_m arg            unsigned char (multiple instances)
-  --s_m arg             short (multiple instances)
-  --us_m arg            unsigned short (multiple instances)
-  --n_m arg             int (multiple instances)
-  --un_m arg            unsigned int (multiple instances)
-  --l_m arg             long (multiple instances)
-  --ul_m arg            unsigned long (multiple instances)
-  --ll_m arg            long long (multiple instances)
-  --ull_m arg           unsigned long long (multiple instances)
-  --size_m arg          size_t (multiple instances)
-  --str_m arg           std::string (multiple instances)
+  --b [=arg(=1)]  bool
+  --c arg         char
+  --uc arg        unsigned char
+  --s arg         short
+  --us arg        unsigned short
+  --n arg         int
+  --un arg        unsigned int
+  --l arg         long
+  --ul arg        unsigned long
+  --ll arg        long long
+  --ull arg       unsigned long long
+  --size arg      size_t
+  --str arg       std::string
+  --b_m arg       bool (multiple instances)
+  --c_m arg       char (multiple instances)
+  --uc_m arg      unsigned char (multiple instances)
+  --s_m arg       short (multiple instances)
+  --us_m arg      unsigned short (multiple instances)
+  --n_m arg       int (multiple instances)
+  --un_m arg      unsigned int (multiple instances)
+  --l_m arg       long (multiple instances)
+  --ul_m arg      unsigned long (multiple instances)
+  --ll_m arg      long long (multiple instances)
+  --ull_m arg     unsigned long long (multiple instances)
+  --size_m arg    size_t (multiple instances)
+  --str_m arg     std::string (multiple instances)
+  --help          show this help message
 

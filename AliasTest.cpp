@@ -1,25 +1,48 @@
 #include "ArgParser.h"
-#include "ArgParserImpl.h"
+#include "Test.h"
+#include <iostream>
+#include <iomanip>
+#include <string>
+#include <vector>
+#include <stdexcept>
 
-using namespace CppArgParser;
-
-ArgParser::ArgParser(Name description)
-    :   m_implPtr(new Private::ArgParserImpl(description))
-{    
-}
-
-ArgParser::~ArgParser()
+int main(int argc, char* argv[])
 {
-}
+    try
+    {
+        CppArgParser::ArgParser args(argc, argv);
 
-void ArgParser::parse(int argc, char* argv[])
-{
-    m_implPtr->parse(argc, argv);
-}
+        // configure an aliased argument
+        std::vector<std::string> aliases;
+        aliases.push_back("--al1");
+        aliases.push_back("--al2");
+        aliases.push_back("-a");
+        ArgParserType::N value;
+        args.param(value, aliases, "int (aliased)");
 
-void ArgParser::addImpl(Name name, void* valuePtr, std::type_index type, Name desc)
-{
-    m_implPtr->add(name, valuePtr, type, desc);
+        // parse
+        if (args.help("Test the CppArgParser"))
+        {
+            return 1;
+        };
+
+        dump("alias:  ", value);
+    }
+    catch (std::runtime_error& e)
+    {
+        if (e.what())
+            std::cerr << "ERROR: " << e.what() << "\n";
+        return 1;
+    }
+    catch (std::exception& e)
+    {
+        if (e.what())
+            std::cerr << "exception: " << e.what() << "\n";
+        std::cerr << "Unhandled exception!" << std::endl;
+        return 1;
+    }
+    
+    return 0;
 }
 
 /*
