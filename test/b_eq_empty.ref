@@ -1,1 +1,1 @@
-ERROR: ArgParser failed conversion to type "CppArgParser::Bool" for parameter "--b"
+ERROR: --b failed conversion

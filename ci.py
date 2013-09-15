@@ -23,10 +23,9 @@ def _mkdir(newdir):
 def main(options):            
     varName = 'CC'
 
-    if varName in os.environ:
+    buildDirname = 'build'
+    if 'CC' in os.environ and os.environ['CC']:
         buildDirname = os.environ['CC']
-    else:
-        buildDirname = 'build'
 
     originalDirname = os.getcwd()            
     _mkdir(buildDirname)
@@ -40,7 +39,9 @@ def main(options):
     
     formats = {'tests': ' '.join(options.tests), 'ref': options.ref }
 
-    return os.system(sys.executable + ' testagg.py {tests} --ref {ref}'.format(**formats))
+    ret = os.system(sys.executable + ' testagg.py {tests} --ref {ref}'.format(**formats))
+    ret = ret / 256
+    return ret
 
 if __name__ == "__main__":
     import argparse

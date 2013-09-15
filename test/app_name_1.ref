@@ -1,0 +1,7 @@
+Usage: Foo [options]
+
+Test the app name override
+
+Optional parameters:
+  --help   show this help message
+

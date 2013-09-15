@@ -1,47 +1,35 @@
-#pragma once
-#include <functional>
-#include <unordered_map>
+#include "ArgParser.h"
+#include "Test.h"
+#include <iostream>
+#include <stdexcept>
 
-template<typename Key, typename... Args>
-class MapSwitch
+int main(int argc, char* argv[])
 {
-public:
-    typedef std::function<void(const Args&... args)> Func;
-    
-    MapSwitch()
-        :   m_impl(),
-            m_default()
+    try
     {
-    }
-    
-    void add(Key key, Func func)
-    {
-        m_impl.insert(std::make_pair(key, func));
-    }
+        CppArgParser::ArgParser args(argc, argv, "Foo");
 
-    void def(Func func)
-    {
-        m_default = func;
-    }
-
-    void operator()(Key key, const Args&... args)
-    {
-        auto iFunc = m_impl.find(key);
-        if (iFunc != m_impl.end())
+        if (args.help("Test the app name override"))
         {
-            iFunc->second(args...);
-        }
-        else
-        {
-            m_default(args...);
-        }
+            return 1;
+        };
     }
-
-private:
-    typedef std::unordered_map<Key, Func> Impl;
-    Impl m_impl;
-    Func m_default;
-};
+    catch (std::runtime_error& e)
+    {
+        if (e.what())
+            std::cerr << "ERROR: " << e.what() << "\n";
+        return 1;
+    }
+    catch (std::exception& e)
+    {
+        if (e.what())
+            std::cerr << "exception: " << e.what() << "\n";
+        std::cerr << "Unhandled exception!" << std::endl;
+        return 1;
+    }
+    
+    return 0;
+}
 
 /*
 Copyright (c) 2013 Aaron Frantisak

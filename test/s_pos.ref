@@ -1,1 +1,1 @@
-ERROR: ArgParser failed conversion to type "short" for parameter "--s"
+ERROR: --s failed conversion

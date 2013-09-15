@@ -1,1 +1,1 @@
-ERROR: ArgParser failed conversion to type "unsigned long long" for parameter "--ull"
+ERROR: --ull failed conversion
