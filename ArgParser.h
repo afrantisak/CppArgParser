@@ -323,15 +323,8 @@ namespace CppArgParser
                     catch (too_many&)
                     {
                         std::stringstream strm;
-                        if (names.size() > 1)
-                        {
-                            strm << "(" << param.getName() << ")";
-                        }
-                        else
-                        {
-                            strm << name;
-                        }
-                        strm << " does not allow multiple occurrences";
+                        strm << Parameter::getName(names);
+                        strm << ": too many instances";
                         throw std::runtime_error(strm.str());
                     }
                 }
@@ -341,15 +334,8 @@ namespace CppArgParser
         catch (not_enough&)
         {
             std::stringstream strm;
-            if (names.size() > 1)
-            {
-                strm << "(" << Parameter::getName(names) << ")";
-            }
-            else
-            {
-                strm << names[0];
-            }
-            strm << " not enough occurrences";
+            strm << Parameter::getName(names);
+            strm << ": not enough instances";
             throw std::runtime_error(strm.str());
         }
     }

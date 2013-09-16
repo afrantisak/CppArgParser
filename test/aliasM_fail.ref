@@ -1,1 +1,1 @@
-ERROR: (--a1, --a2, -a) does not allow multiple occurrences
+ERROR: --a1, --a2, -a: too many instances
