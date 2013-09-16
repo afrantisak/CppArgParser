@@ -2,6 +2,7 @@
 #include <string>
 #include <memory>
 #include <deque>
+#include <array>
 #include <vector>
 #include <sstream>
 #include <iostream>
@@ -60,6 +61,7 @@ namespace CppArgParser
     class failed_conversion {};
     class required_missing {};
     class too_many {};
+    class not_enough {};
     
     template<typename T>
     struct ParamTraits
@@ -113,6 +115,45 @@ namespace CppArgParser
         }
     };
     
+    template<typename T, size_t N>
+    struct ParamTraits<std::array<T, N>>
+    {
+        ParamTraits()
+            : m_count(0)
+        {            
+        }
+        
+        ~ParamTraits()
+        {
+            if (m_count != N)
+            {
+                throw not_enough();
+            }
+        }
+        void convert(std::string name, std::array<T, N>& v, Args& args)
+        {
+            if (!args.size())
+                throw required_missing();
+            if (m_count == N)
+                throw too_many();
+            std::string value = args[0];
+            args.pop_front();
+            if (value[0] == '=')
+            {
+                value = value.substr(1);
+            }
+            T t = lexical_cast<T>(value);
+            v[m_count++] = t;
+        }
+        
+        std::string value_description()
+        {
+            return "arg";
+        }
+    private:
+        int m_count;
+    };
+    
     template<>
     struct ParamTraits<bool>
     {
@@ -153,17 +194,22 @@ namespace CppArgParser
         
         std::string getName() const
         {
-            std::string names;
+            return getName(m_names);
+        }
+        
+        static std::string getName(std::vector<Name> names)
+        {
+            std::string full;
             
-            if (!m_names.size())
-                return names;
+            if (!names.size())
+                return full;
 
-            for (auto nameIter = m_names.begin(); nameIter != m_names.end() - 1; ++nameIter)
+            for (auto nameIter = names.begin(); nameIter != names.end() - 1; ++nameIter)
             {
-                names += *nameIter + ", ";
+                full += *nameIter + ", ";
             }
 
-            return names + *m_names.rbegin();
+            return full + *names.rbegin();
         }
     };
 
@@ -229,66 +275,89 @@ namespace CppArgParser
     template<typename T>
     void ArgParser::param(T& value, std::vector<Name> names, Name desc)
     {
-        ParamTraits<T> type;
-        Parameter param = { names, desc, type.value_description() };
-        m_parameters.push_back(param);
-
-        for (auto name : names)
+        if (names.size() == 0)
         {
-            Args args = m_args;
-            size_t argCount = m_args.size();
-            for (auto argIter = m_args.begin(); argIter != m_args.end(); ++argIter)
+            std::stringstream strm;
+            strm << "every parameter must have a name";
+            throw std::runtime_error(strm.str());
+        }        
+        try
+        {
+            ParamTraits<T> type;
+            Parameter param = { names, desc, type.value_description() };
+            m_parameters.push_back(param);
+
+            for (auto name : names)
             {
-                try
+                Args args = m_args;
+                size_t argCount = m_args.size();
+                for (auto argIter = m_args.begin(); argIter != m_args.end(); ++argIter)
                 {
-                    std::string arg = *argIter;
-                    if (arg == name)
+                    try
                     {
-                        args.pop_front();
-                        type.convert(name, value, args);
+                        std::string arg = *argIter;
+                        if (arg == name)
+                        {
+                            args.pop_front();
+                            type.convert(name, value, args);
+                        }
+                        else if (arg.size() > name.size() 
+                            && arg.substr(0, name.size()) == name
+                            && arg[name.size()] == '=')
+                        {
+                            args[0] = arg.substr(name.size());
+                            type.convert(name, value, args);
+                        }
                     }
-                    else if (arg.size() > name.size() 
-                        && arg.substr(0, name.size()) == name
-                        && arg[name.size()] == '=')
+                    catch (bad_lexical_cast&)
                     {
-                        args[0] = arg.substr(name.size());
-                        type.convert(name, value, args);
+                        std::stringstream strm;
+                        strm << name << " failed conversion";
+                        throw std::runtime_error(strm.str());
                     }
-                }
-                catch (bad_lexical_cast&)
-                {
-                    std::stringstream strm;
-                    strm << name << " failed conversion";
-                    throw std::runtime_error(strm.str());
-                }
-                catch (failed_conversion&)
-                {
-                    std::stringstream strm;
-                    strm << name << " failed conversion";
-                    throw std::runtime_error(strm.str());
-                }
-                catch (required_missing&)
-                {
-                    std::stringstream strm;
-                    strm << name << " is required";
-                    throw std::runtime_error(strm.str());
-                }
-                catch (too_many&)
-                {
-                    std::stringstream strm;
-                    if (names.size() > 1)
+                    catch (failed_conversion&)
                     {
-                        strm << "(" << param.getName() << ")";
+                        std::stringstream strm;
+                        strm << name << " failed conversion";
+                        throw std::runtime_error(strm.str());
                     }
-                    else
+                    catch (required_missing&)
                     {
-                        strm << name;
+                        std::stringstream strm;
+                        strm << name << " is required";
+                        throw std::runtime_error(strm.str());
                     }
-                    strm << " does not allow multiple occurrences";
-                    throw std::runtime_error(strm.str());
+                    catch (too_many&)
+                    {
+                        std::stringstream strm;
+                        if (names.size() > 1)
+                        {
+                            strm << "(" << param.getName() << ")";
+                        }
+                        else
+                        {
+                            strm << name;
+                        }
+                        strm << " does not allow multiple occurrences";
+                        throw std::runtime_error(strm.str());
+                    }
                 }
+                m_args = args;
             }
-            m_args = args;
+        }
+        catch (not_enough&)
+        {
+            std::stringstream strm;
+            if (names.size() > 1)
+            {
+                strm << "(" << Parameter::getName(names) << ")";
+            }
+            else
+            {
+                strm << names[0];
+            }
+            strm << " not enough occurrences";
+            throw std::runtime_error(strm.str());
         }
     }
 

@@ -40,6 +40,15 @@ void dump(std::string name, std::vector<T> t_m)
     std::cout << std::endl;
 }
 
+template<typename T, size_t N>
+void dump(std::string name, std::array<T, N> t_m)
+{
+    std::cout << name;
+    for (auto t: t_m)
+        std::cout << t << ", ";
+    std::cout << std::endl;
+}
+
 template<>
 void dump(std::string name, std::vector<CppArgParser::Bool> t_m)
 {

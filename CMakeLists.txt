@@ -9,7 +9,7 @@ project(CppArgParser)
 add_executable(ParserTest ParserTest.cpp)
 add_executable(AppNameTest AppNameTest.cpp)
 add_executable(AliasTest AliasTest.cpp)
-#TARGET_LINK_LIBRARIES(ParserTest)
+add_executable(ArrayTest ArrayTest.cpp)
 
 ADD_DEFINITIONS("-std=c++0x")
 ADD_DEFINITIONS("-g")

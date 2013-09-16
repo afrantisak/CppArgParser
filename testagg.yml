@@ -3,6 +3,7 @@ main:
         - ParserTest:  ../{build}/bin/ParserTest
         - AppNameTest: ../{build}/bin/AppNameTest
         - AliasTest:   ../{build}/bin/AliasTest
+        - ArrayTest:   ../{build}/bin/ArrayTest
     cd: test
     tests:
         - help:       ref {ParserTest} --help
@@ -72,5 +73,9 @@ main:
         - aliasB2:     ref {AliasTest} --b2 2
         - aliasB3:     ref {AliasTest} -b 3
         - aliasBM:     ref {AliasTest} --b1 1 --b2 2
+        
+        - array1:      ref {ArrayTest} --a 1
+        - array2:      ref {ArrayTest} --a 1 --a 2
+        - array2_fail: ref {ArrayTest} --a 1 --a 2 --a 3
 
         - app_name_1:  ref {AppNameTest} --help
