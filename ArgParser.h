@@ -58,7 +58,6 @@ namespace CppArgParser
         return value[0];
     }
     
-    class failed_conversion {};
     class required_missing {};
     class too_many {};
     class not_enough {};
@@ -315,12 +314,6 @@ namespace CppArgParser
                         strm << name << " failed conversion";
                         throw std::runtime_error(strm.str());
                     }
-                    catch (failed_conversion&)
-                    {
-                        std::stringstream strm;
-                        strm << name << " failed conversion";
-                        throw std::runtime_error(strm.str());
-                    }
                     catch (required_missing&)
                     {
                         std::stringstream strm;
@@ -514,7 +507,7 @@ namespace CppArgParser
                     return;
                 }
             }
-            throw failed_conversion();
+            throw bad_lexical_cast();
         }
         else
         {
