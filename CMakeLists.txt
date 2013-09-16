@@ -10,6 +10,7 @@ add_executable(ParserTest ParserTest.cpp)
 add_executable(AppNameTest AppNameTest.cpp)
 add_executable(AliasTest AliasTest.cpp)
 add_executable(ArrayTest ArrayTest.cpp)
+add_executable(RequiredTest RequiredTest.cpp)
 
 ADD_DEFINITIONS("-std=c++0x")
 ADD_DEFINITIONS("-g")

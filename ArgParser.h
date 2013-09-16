@@ -297,6 +297,8 @@ namespace CppArgParser
                         std::string arg = *argIter;
                         if (arg == name)
                         {
+                            // "--param value" for optional params
+                            //   "param value" for required params (TODO: don't support this)
                             args.pop_front();
                             type.convert(name, value, args);
                         }
@@ -304,7 +306,17 @@ namespace CppArgParser
                             && arg.substr(0, name.size()) == name
                             && arg[name.size()] == '=')
                         {
+                            // "--opt-param=value" for optional params
+                            //       "param=value" for required params (TODO: maybe keep this?)
                             args[0] = arg.substr(name.size());
+                            type.convert(name, value, args);
+                        }
+                        else if (name.size() && name[0] != '-' 
+                            && args.size() && args[0].size()
+                            && args[0][0] != '-')
+                        {
+                            std::cout << "NAME: " << name << std::endl;
+                            // "value" (for required params)
                             type.convert(name, value, args);
                         }
                     }

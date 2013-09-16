@@ -4,6 +4,7 @@ main:
         - AppNameTest: ../{build}/bin/AppNameTest
         - AliasTest:   ../{build}/bin/AliasTest
         - ArrayTest:   ../{build}/bin/ArrayTest
+        - ReqdTest:    ../{build}/bin/RequiredTest
     cd: test
     tests:
         - help:       ref {ParserTest} --help
@@ -79,3 +80,8 @@ main:
         - array2_fail: ref {ArrayTest} --a 1 --a 2 --a 3
 
         - app_name_1:  ref {AppNameTest} --help
+        
+        - req_0:       ref {ReqdTest}
+        - req_1:       ref {ReqdTest} 1
+        - req_2:       ref {ReqdTest} 1 2
+        - req_3:       ref {ReqdTest} 1 2 3
