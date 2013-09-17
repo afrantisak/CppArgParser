@@ -82,6 +82,10 @@ namespace CppArgParser
             m_count++;
         }
 
+        void end()
+        {
+        }
+
         std::string value_description()
         {
             return "arg";
@@ -108,6 +112,10 @@ namespace CppArgParser
             v.push_back(t);
         }
         
+        void end()
+        {
+        }
+
         std::string value_description()
         {
             return "arg";
@@ -122,13 +130,6 @@ namespace CppArgParser
         {            
         }
         
-        ~ParamTraits()
-        {
-            if (m_count != N)
-            {
-                throw not_enough();
-            }
-        }
         void convert(std::string name, std::array<T, N>& v, Args& args)
         {
             if (!args.size())
@@ -145,10 +146,19 @@ namespace CppArgParser
             v[m_count++] = t;
         }
         
+        void end()
+        {
+            if (m_count != N)
+            {
+                throw not_enough();
+            }
+        }
+        
         std::string value_description()
         {
             return "arg";
         }
+        
     private:
         int m_count;
     };
@@ -160,6 +170,10 @@ namespace CppArgParser
         std::string value_description()
         {
             return "";
+        }
+        
+        void end()
+        {
         }
     };
 
@@ -179,6 +193,9 @@ namespace CppArgParser
         std::string value_description()
         {
             return "[=arg(=1)]";
+        }
+        void end()
+        {
         }
         
     private:
@@ -315,7 +332,6 @@ namespace CppArgParser
                             && args.size() && args[0].size()
                             && args[0][0] != '-')
                         {
-                            std::cout << "NAME: " << name << std::endl;
                             // "value" (for required params)
                             type.convert(name, value, args);
                         }
@@ -339,9 +355,17 @@ namespace CppArgParser
                         strm << ": too many instances";
                         throw std::runtime_error(strm.str());
                     }
+                    catch (not_enough&)
+                    {
+                        std::stringstream strm;
+                        strm << Parameter::getName(names);
+                        strm << ": not enough instances";
+                        throw std::runtime_error(strm.str());
+                    }
                 }
                 m_args = args;
             }
+            type.end();
         }
         catch (not_enough&)
         {

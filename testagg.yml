@@ -85,3 +85,9 @@ main:
         - req_1:       ref {ReqdTest} 1
         - req_2:       ref {ReqdTest} 1 2
         - req_3:       ref {ReqdTest} 1 2 3
+        - req_unsup1:  ref {ReqdTest} a 1
+        - req_unsup2:  ref {ReqdTest} a 1 a 2
+        - req_unsup3:  ref {ReqdTest} a 1 a 2 a 3
+        - req_equal1:  ref {ReqdTest} a=1
+        - req_equal2:  ref {ReqdTest} a=1 a=2
+        - req_equal3:  ref {ReqdTest} a=1 a=2 a=3
