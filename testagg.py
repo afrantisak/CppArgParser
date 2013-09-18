@@ -134,6 +134,7 @@ def test(name, instruction, cmd, refop, timeout, options):
     return ret
     
 def translate(value, defines):
+    value = value.replace('(', '{').replace(')', '}')
     value = value.decode('string_escape')
     if 'CC' in os.environ:
         value = value.format(**defines)
