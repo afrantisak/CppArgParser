@@ -1,95 +1,90 @@
 main:
     alias:
         - bin:         ../(build)/bin
-        - ParserTest:  (bin)/ParserTest
-        - AppNameTest: (bin)/AppNameTest
-        - AliasTest:   (bin)/AliasTest
-        - ArrayTest:   (bin)/ArrayTest
-        - ReqdTest:    (bin)/RequiredTest
     cd: test
     tests:
-        - help:       ref (ParserTest) --help
-        - unknown:    ref (ParserTest) --unknown
-        - base:       ref (ParserTest)
-        - b:          ref (ParserTest) --b
-        - b_eq_empty: ref (ParserTest) --b=
-        - b_eq1:      ref (ParserTest) --b=1
-        - b_eq0:      ref (ParserTest) --b=0
-        - b_dup:      ref (ParserTest) --b --b
-        - c_missing:  ref (ParserTest) --c
-        - c:          ref (ParserTest) --c \xFF
-        - c_partial:  ref (ParserTest) --c \xFF --c
-        - c_dup:      ref (ParserTest) --c \xFF --c \xFF
-        - uc:         ref (ParserTest) --uc \xFF
-        - uc_big:     ref (ParserTest) --uc \x100
-        - s_neg:      ref (ParserTest) --s -32767
-        - s_neg_big:  ref (ParserTest) --s -32768
-        - s_pos:      ref (ParserTest) --s 32768
-        - s_pos_big:  ref (ParserTest) --s 32769
-        - s_badchar:  ref (ParserTest) --s 10a
-        - us:         ref (ParserTest) --us 65535
-        - us_big:     ref (ParserTest) --us 65536
-        - us_neg:     ref (ParserTest) --us -1
-        - us_zero:    ref (ParserTest) --us 0
-        - n_neg:      ref (ParserTest) --n -2147483648
-        - n_neg_big:  ref (ParserTest) --n -2147483649
-        - n_pos:      ref (ParserTest) --n 2147483647
-        - n_pos_big:  ref (ParserTest) --n 2147483648
-        - un:         ref (ParserTest) --un 4294967295
-        - un_big:     ref (ParserTest) --un 4294967296
-        - un_neg:     ref (ParserTest) --un -1
-        - un_zero:    ref (ParserTest) --un 0
-        - l_neg:      ref (ParserTest) --l -2147483648
-        - l_pos:      ref (ParserTest) --l 2147483647
-        - ul:         ref (ParserTest) --ul 4294967295
-        - ul_zero:    ref (ParserTest) --ul 0
-        - ll_neg:     ref (ParserTest) --ll -9223372036854775808
-        - ll_neg_big: ref (ParserTest) --ll -9223372036854775809
-        - ll_pos:     ref (ParserTest) --ll 9223372036854775807
-        - ll_pos_big: ref (ParserTest) --ll 9223372036854775808
-        - ull:        ref (ParserTest) --ull 18446744073709551615
-        - ull_big:    ref (ParserTest) --ull 18446744073709551616
-        - ull_neg:    ref (ParserTest) --ull -1
-        - ull_zero:   ref (ParserTest) --ull 0
-        - size:       ref (ParserTest) --size 4294967295
-        - str:        ref (ParserTest) --str "Hello World"
+        - help:       ref (bin)/ParserTest --help
+        - unknown:    ref (bin)/ParserTest --unknown
+        - base:       ref (bin)/ParserTest
+        - b:          ref (bin)/ParserTest --b
+        - b_eq_empty: ref (bin)/ParserTest --b=
+        - b_eq1:      ref (bin)/ParserTest --b=1
+        - b_eq0:      ref (bin)/ParserTest --b=0
+        - b_dup:      ref (bin)/ParserTest --b --b
+        - c_missing:  ref (bin)/ParserTest --c
+        - c:          ref (bin)/ParserTest --c \xFF
+        - c_partial:  ref (bin)/ParserTest --c \xFF --c
+        - c_dup:      ref (bin)/ParserTest --c \xFF --c \xFF
+        - uc:         ref (bin)/ParserTest --uc \xFF
+        - uc_big:     ref (bin)/ParserTest --uc \x100
+        - s_neg:      ref (bin)/ParserTest --s -32767
+        - s_neg_big:  ref (bin)/ParserTest --s -32768
+        - s_pos:      ref (bin)/ParserTest --s 32768
+        - s_pos_big:  ref (bin)/ParserTest --s 32769
+        - s_badchar:  ref (bin)/ParserTest --s 10a
+        - us:         ref (bin)/ParserTest --us 65535
+        - us_big:     ref (bin)/ParserTest --us 65536
+        - us_neg:     ref (bin)/ParserTest --us -1
+        - us_zero:    ref (bin)/ParserTest --us 0
+        - n_neg:      ref (bin)/ParserTest --n -2147483648
+        - n_neg_big:  ref (bin)/ParserTest --n -2147483649
+        - n_pos:      ref (bin)/ParserTest --n 2147483647
+        - n_pos_big:  ref (bin)/ParserTest --n 2147483648
+        - un:         ref (bin)/ParserTest --un 4294967295
+        - un_big:     ref (bin)/ParserTest --un 4294967296
+        - un_neg:     ref (bin)/ParserTest --un -1
+        - un_zero:    ref (bin)/ParserTest --un 0
+        - l_neg:      ref (bin)/ParserTest --l -2147483648
+        - l_pos:      ref (bin)/ParserTest --l 2147483647
+        - ul:         ref (bin)/ParserTest --ul 4294967295
+        - ul_zero:    ref (bin)/ParserTest --ul 0
+        - ll_neg:     ref (bin)/ParserTest --ll -9223372036854775808
+        - ll_neg_big: ref (bin)/ParserTest --ll -9223372036854775809
+        - ll_pos:     ref (bin)/ParserTest --ll 9223372036854775807
+        - ll_pos_big: ref (bin)/ParserTest --ll 9223372036854775808
+        - ull:        ref (bin)/ParserTest --ull 18446744073709551615
+        - ull_big:    ref (bin)/ParserTest --ull 18446744073709551616
+        - ull_neg:    ref (bin)/ParserTest --ull -1
+        - ull_zero:   ref (bin)/ParserTest --ull 0
+        - size:       ref (bin)/ParserTest --size 4294967295
+        - str:        ref (bin)/ParserTest --str "Hello World"
         
-        - b_m1:       ref (ParserTest) --b_m 0
-        - b_m2:       ref (ParserTest) --b_m 0 --b_m 1
-        - n_m:        ref (ParserTest) --n_m 1 --n_m 2
-        - n_m_fail:   ref (ParserTest) --n_m --n_m 1 --n_m
-        - n_m_eq:     ref (ParserTest) --n_m=1 --n_m 2 --n_m=3 --n_m=4
-        - n_m_eqfail: ref (ParserTest) --n_m= --n_m=1 --n_m=
+        - b_m1:       ref (bin)/ParserTest --b_m 0
+        - b_m2:       ref (bin)/ParserTest --b_m 0 --b_m 1
+        - n_m:        ref (bin)/ParserTest --n_m 1 --n_m 2
+        - n_m_fail:   ref (bin)/ParserTest --n_m --n_m 1 --n_m
+        - n_m_eq:     ref (bin)/ParserTest --n_m=1 --n_m 2 --n_m=3 --n_m=4
+        - n_m_eqfail: ref (bin)/ParserTest --n_m= --n_m=1 --n_m=
         
         # these tests are different on 32/64 bit systems
-        #- l_neg_big:  ref (ParserTest) --l -2147483649
-        #- l_pos_big:  ref (ParserTest) --l 2147483648
-        #- ul_big:     ref (ParserTest) --ul 4294967296
-        #- ul_neg:     ref (ParserTest) --ul -1
+        #- l_neg_big:  ref (bin)/ParserTest --l -2147483649
+        #- l_pos_big:  ref (bin)/ParserTest --l 2147483648
+        #- ul_big:     ref (bin)/ParserTest --ul 4294967296
+        #- ul_neg:     ref (bin)/ParserTest --ul -1
 
-        - alias1:      ref (AliasTest) --a1 1
-        - alias2:      ref (AliasTest) --a2 2
-        - alias3:      ref (AliasTest) -a 3
-        - aliasM_fail: ref (AliasTest) --a1 1 --a2 2
-        - aliasB1:     ref (AliasTest) --b1 1
-        - aliasB2:     ref (AliasTest) --b2 2
-        - aliasB3:     ref (AliasTest) -b 3
-        - aliasBM:     ref (AliasTest) --b1 1 --b2 2
+        - alias1:      ref (bin)/AliasTest --a1 1
+        - alias2:      ref (bin)/AliasTest --a2 2
+        - alias3:      ref (bin)/AliasTest -a 3
+        - aliasM_fail: ref (bin)/AliasTest --a1 1 --a2 2
+        - aliasB1:     ref (bin)/AliasTest --b1 1
+        - aliasB2:     ref (bin)/AliasTest --b2 2
+        - aliasB3:     ref (bin)/AliasTest -b 3
+        - aliasBM:     ref (bin)/AliasTest --b1 1 --b2 2
         
-        - array1:      ref (ArrayTest) --a 1
-        - array2:      ref (ArrayTest) --a 1 --a 2
-        - array2_fail: ref (ArrayTest) --a 1 --a 2 --a 3
+        - array1:      ref (bin)/ArrayTest --a 1
+        - array2:      ref (bin)/ArrayTest --a 1 --a 2
+        - array2_fail: ref (bin)/ArrayTest --a 1 --a 2 --a 3
 
-        - app_name_1:  ref (AppNameTest) --help
+        - app_name_1:  ref (bin)/AppNameTest --help
         
-        - req_0:       ref (ReqdTest)
-        - req_1:       ref (ReqdTest) 1
-        - req_2:       ref (ReqdTest) 1 2
-        - req_3:       ref (ReqdTest) 1 2 3
-        - req_unsup1:  ref (ReqdTest) a 1
-        - req_unsup2:  ref (ReqdTest) a 1 a 2
-        - req_unsup3:  ref (ReqdTest) a 1 a 2 a 3
-        - req_equal1:  ref (ReqdTest) a=1
-        - req_equal2:  ref (ReqdTest) a=1 a=2
-        - req_equal3:  ref (ReqdTest) a=1 a=2 a=3
+        - req_0:       ref (bin)/RequiredTest
+        - req_1:       ref (bin)/RequiredTest 1
+        - req_2:       ref (bin)/RequiredTest 1 2
+        - req_3:       ref (bin)/RequiredTest 1 2 3
+        - req_unsup1:  ref (bin)/RequiredTest a 1
+        - req_unsup2:  ref (bin)/RequiredTest a 1 a 2
+        - req_unsup3:  ref (bin)/RequiredTest a 1 a 2 a 3
+        - req_equal1:  ref (bin)/RequiredTest a=1
+        - req_equal2:  ref (bin)/RequiredTest a=1 a=2
+        - req_equal3:  ref (bin)/RequiredTest a=1 a=2 a=3
 
