@@ -40,7 +40,7 @@ int main(int argc, char* argv[])
         std::vector<ArgParserType::Size> size_m;
         std::vector<ArgParserType::Str>  str_m;
 
-        CppArgParser::ArgParser args(argc, argv);
+        CppArgParser::ArgParser args(argc, argv, "Test the CppArgParser");
 
         // configure single instance arguments
         args.param(b,    "--b",      "bool");
@@ -73,7 +73,7 @@ int main(int argc, char* argv[])
         args.param(str_m,  "--str_m",    "std::string (multiple instances)");
         
         // parse
-        if (args.help("Test the CppArgParser"))
+        if (!args.valid())
         {
             return 1;
         };
@@ -110,13 +110,13 @@ int main(int argc, char* argv[])
     catch (std::runtime_error& e)
     {
         if (e.what())
-            std::cerr << "ERROR: " << e.what() << "\n";
+            std::cerr << "ERROR: " << e.what();
         return 1;
     }
     catch (std::exception& e)
     {
         if (e.what())
-            std::cerr << "exception: " << e.what() << "\n";
+            std::cerr << "exception: " << e.what();
         std::cerr << "Unhandled exception!" << std::endl;
         return 1;
     }

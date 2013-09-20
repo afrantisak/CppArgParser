@@ -10,7 +10,7 @@ int main(int argc, char* argv[])
 {
     try
     {
-        CppArgParser::ArgParser args(argc, argv);
+        CppArgParser::ArgParser args(argc, argv, "Test the CppArgParser");
 
         // configure an aliased argument
         std::vector<std::string> aliases;
@@ -29,7 +29,7 @@ int main(int argc, char* argv[])
         args.param(values, aliasesB, "int (aliased vector)");
 
         // parse
-        if (args.help("Test the CppArgParser"))
+        if (!args.valid())
         {
             return 1;
         };
@@ -40,13 +40,13 @@ int main(int argc, char* argv[])
     catch (std::runtime_error& e)
     {
         if (e.what())
-            std::cerr << "ERROR: " << e.what() << "\n";
+            std::cerr << "ERROR: " << e.what();
         return 1;
     }
     catch (std::exception& e)
     {
         if (e.what())
-            std::cerr << "exception: " << e.what() << "\n";
+            std::cerr << "exception: " << e.what();
         std::cerr << "Unhandled exception!" << std::endl;
         return 1;
     }

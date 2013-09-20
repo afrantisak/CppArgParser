@@ -61,6 +61,7 @@ namespace CppArgParser
     class required_missing {};
     class too_many {};
     class not_enough {};
+    class syntax_error {};
     
     template<typename T>
     struct ParamTraits
@@ -166,7 +167,12 @@ namespace CppArgParser
     template<>
     struct ParamTraits<bool>
     {
-        void convert(std::string name, bool& t, Args& args);
+        void convert(std::string name, bool& t, Args& args)
+        {
+            t = true;
+            return;
+        }
+        
         std::string value_description()
         {
             return "";
@@ -189,7 +195,41 @@ namespace CppArgParser
     {
     public:
         ParamTraits();
-        void convert(std::string name, Bool& t, Args& args);
+
+        void convert(std::string name, Bool& t, Args& args)
+        {
+            // "Bool" allows the --arg=value syntax.  without it, the value will be true.
+            // "bool" does not allow --arg=value
+            if (args.size() && args[0][0] == '=')
+            {
+                std::string value = args[0].substr(1);
+                for (auto valid: m_trueValues)
+                {
+                    if (value == valid)
+                    {
+                        args.pop_front();
+                        t = true;
+                        return;
+                    }
+                }
+                for (auto valid: m_falseValues)
+                {
+                    if (value == valid)
+                    {
+                        args.pop_front();
+                        t = false;
+                        return;
+                    }
+                }
+                throw bad_lexical_cast();
+            }
+            else
+            {
+                t = true;
+                return;
+            }
+        }
+
         std::string value_description()
         {
             return "[=arg(=1)]";
@@ -234,38 +274,48 @@ namespace CppArgParser
     class ArgParser
     {
     public:
-        // default name is taken from argv[0]
-        ArgParser(int argc, char* argv[], Name app_name = std::string());
+        // if you don't supply a name then it is taken from argv[0]
+        ArgParser(int argc, char* argv[], 
+                  Name app_description = std::string(), Name app_name = std::string(), 
+                  std::ostream& os = std::cout);
         
         template<typename T>
-        void param(T& value, Name name, Name desc = Name());
+        void param(T& value, Name name, Name desc = Name(), bool visible_in_help = true);
         
         template<typename T>
-        void param(T& value, std::vector<Name> names, Name desc = Name());
+        void param(T& value, std::vector<Name> names, Name desc = Name(), bool visible_in_help = true);
         
         template<typename T>
-        T param(Name name, Name desc = Name());
+        T param(Name name, Name desc = Name(), bool visible_in_help = true);
 
         template<typename T>
-        T param(std::vector<Name> names, Name desc = Name());
-
-        bool help(Name description, std::ostream& os = std::cout);
+        T param(std::vector<Name> names, Name desc = Name(), bool visible_in_help = true);
+        
+        bool valid();
         
         void print_help(Name app_name, Name app_description, std::ostream& os);
 
-        bool fail_remaining();
-
-    private:        
+    private:
+        Name m_app_description;
         Name m_app_name;
+        std::ostream& m_os;
+        std::stringstream m_errors;
         Parameters m_parameters;
         Args m_args;
+        bool m_help_requested;
+        bool m_valid;
     };
 
     inline 
-    ArgParser::ArgParser(int argc, char* argv[], Name app_name)
-    :   m_app_name(app_name),
+    ArgParser::ArgParser(int argc, char* argv[], Name app_description, Name app_name, std::ostream& os)
+    :   m_app_description(app_description),
+        m_app_name(app_name),
+        m_os(os),
+        m_errors(),
         m_parameters(),
-        m_args()
+        m_args(),
+        m_help_requested(false),
+        m_valid(true)
     {
         for (int argn = 0; argn < argc; argn++)
         {
@@ -277,31 +327,37 @@ namespace CppArgParser
             m_app_name = m_args.front();
             m_app_name = m_app_name.substr(m_app_name.find_last_of("\\/") + 1);
         }
-        m_args.pop_front();    
+        m_args.pop_front();
+        
+        param(m_help_requested, "--help", "show this help message", false);
     }
 
     template<typename T>
-    void ArgParser::param(T& value, Name name, Name desc)
+    void ArgParser::param(T& value, Name name, Name desc, bool visible_in_help)
     {
         std::vector<Name> names;
         names.push_back(name);
-        param(value, names, desc);
+        param(value, names, desc, visible_in_help);
     }
 
     template<typename T>
-    void ArgParser::param(T& value, std::vector<Name> names, Name desc)
+    void ArgParser::param(T& value, std::vector<Name> names, Name desc, bool visible_in_help)
     {
-        if (names.size() == 0)
+        if (!m_valid) 
+            return;
+        if (names.size() == 0) // TODO make sure all names are unique and non-empty
         {
-            std::stringstream strm;
-            strm << "every parameter must have a name";
-            throw std::runtime_error(strm.str());
+            m_errors << "every parameter must have a unique name" << std::endl;
+            m_valid = false;
         }        
         try
         {
             ParamTraits<T> type;
-            Parameter param = { names, desc, type.value_description() };
-            m_parameters.push_back(param);
+            if (visible_in_help)
+            {
+                Parameter param = { names, desc, type.value_description() };
+                m_parameters.push_back(param);
+            }
 
             for (auto name : names)
             {
@@ -309,6 +365,8 @@ namespace CppArgParser
                 size_t argCount = m_args.size();
                 for (auto argIter = m_args.begin(); argIter != m_args.end(); ++argIter)
                 {
+                    if (!m_valid) 
+                        break;
                     try
                     {
                         std::string arg = *argIter;
@@ -338,29 +396,28 @@ namespace CppArgParser
                     }
                     catch (bad_lexical_cast&)
                     {
-                        std::stringstream strm;
-                        strm << name << " failed conversion";
-                        throw std::runtime_error(strm.str());
+                        m_errors << name << " failed conversion" << std::endl;
+                        m_valid = false;
                     }
                     catch (required_missing&)
                     {
-                        std::stringstream strm;
-                        strm << name << " is required";
-                        throw std::runtime_error(strm.str());
+                        m_errors << name << " is required" << std::endl;
+                        m_valid = false;
                     }
                     catch (too_many&)
                     {
-                        std::stringstream strm;
-                        strm << Parameter::getName(names);
-                        strm << ": too many instances";
-                        throw std::runtime_error(strm.str());
+                        m_errors << Parameter::getName(names) << ": too many instances" << std::endl;
+                        m_valid = false;
                     }
                     catch (not_enough&)
                     {
-                        std::stringstream strm;
-                        strm << Parameter::getName(names);
-                        strm << ": not enough instances";
-                        throw std::runtime_error(strm.str());
+                        m_errors << Parameter::getName(names) << ": not enough instances" << std::endl;
+                        m_valid = false;
+                    }
+                    catch (syntax_error&)
+                    {
+                        m_errors << Parameter::getName(names) << ": syntax error" << std::endl;
+                        m_valid = false;
                     }
                 }
                 m_args = args;
@@ -369,43 +426,58 @@ namespace CppArgParser
         }
         catch (not_enough&)
         {
-            std::stringstream strm;
-            strm << Parameter::getName(names);
-            strm << ": not enough instances";
-            throw std::runtime_error(strm.str());
+            m_errors << Parameter::getName(names) << ": not enough instances" << std::endl;
+            m_valid = false;
         }
     }
 
     template<typename T>
-    T param(Name name, Name desc = Name())
+    T ArgParser::param(Name name, Name desc, bool visible_in_help)
     {
         T t;
-        param(t, name, desc);
+        param(t, name, desc, visible_in_help);
         return t;
     }
 
     template<typename T>
-    T param(std::vector<Name> names, Name desc = Name())
+    T ArgParser::param(std::vector<Name> names, Name desc, bool visible_in_help)
     {
         T t;
-        param(t, names, desc);
+        param(t, names, desc, visible_in_help);
         return t;
     }
 
     inline
-    bool ArgParser::help(Name description, std::ostream& os)
+    bool ArgParser::valid()
     {
-        bool bHelp = false;
-        param(bHelp, "--help", "show this help message");
-        if (bHelp)
+        if (m_help_requested)
         {
-            print_help(m_app_name, description, os);
-            return true;
+            param<bool>("--help", "show this help message", true);
+            print_help(m_app_name, m_app_description, m_os);
+            return false;
         }
 
-        fail_remaining();
+        for (auto& arg : m_args)
+        {
+            m_errors << "ArgParser unknown name " << "\"" << arg << "\"" << std::endl;
+            m_valid = false;
+        }
+        
+        if (!m_valid)
+        {
+            std::string errors = m_errors.str();
+            auto eol = errors.find('\n');
+//            errors += std::to_string((int)eol);
+            
+//--s: too many instances
+//ArgParser unknown name "2"
 
-        return false;
+            if (eol != std::string::npos)
+                errors = errors.substr(0, eol + 1);
+            throw std::runtime_error(errors);
+        }
+
+        return m_valid;
     }
 
     inline
@@ -471,24 +543,6 @@ namespace CppArgParser
     }
 
     inline
-    bool ArgParser::fail_remaining()
-    {
-        for (auto& arg : m_args)
-        {
-            std::stringstream strm;
-            strm << "ArgParser unknown name " << "\"" << arg << "\"";
-            throw std::runtime_error(strm.str());
-        }
-    }
-
-    inline
-    void ParamTraits<bool>::convert(std::string name, bool& t, Args& args)
-    {
-        t = true;
-        return;
-    }
-
-    inline
     ParamTraits<CppArgParser::Bool>::ParamTraits()
     {
         m_trueValues.push_back("1");
@@ -501,41 +555,6 @@ namespace CppArgParser
         m_falseValues.push_back("False");
         m_falseValues.push_back("N");
         m_falseValues.push_back("No");
-    }
-
-    inline
-    void ParamTraits<CppArgParser::Bool>::convert(std::string name, Bool& t, Args& args)
-    {
-        // bool requires the --arg=value syntax, otherwise if the flag is present, 
-        // the value will be true.
-        if (args.size() && args[0][0] == '=')
-        {
-            std::string value = args[0].substr(1);
-            for (auto valid: m_trueValues)
-            {
-                if (value == valid)
-                {
-                    args.pop_front();
-                    t = true;
-                    return;
-                }
-            }
-            for (auto valid: m_falseValues)
-            {
-                if (value == valid)
-                {
-                    args.pop_front();
-                    t = false;
-                    return;
-                }
-            }
-            throw bad_lexical_cast();
-        }
-        else
-        {
-            t = true;
-            return;
-        }
     }
 
 };// namespace CppArgParser
