@@ -1,0 +1,9 @@
+Usage: RequiredTest <a> <a> [options]
+
+Test the CppArgParser
+
+Required parameters:
+  a: two ints
+Optional parameters:
+  --help   show this help message
+

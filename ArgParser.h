@@ -60,6 +60,7 @@ namespace CppArgParser
     
     class required_missing {};
     class too_many {};
+    class too_many_required_silent {};
     class not_enough {};
     class syntax_error {};
     
@@ -92,6 +93,11 @@ namespace CppArgParser
             return "arg";
         }
         
+        size_t expected()
+        {
+            return 1;
+        }
+        
         private:
             int m_count;
     };
@@ -121,6 +127,11 @@ namespace CppArgParser
         {
             return "arg";
         }
+
+        size_t expected()
+        {
+            return -1;
+        }
     };
     
     template<typename T, size_t N>
@@ -135,8 +146,9 @@ namespace CppArgParser
         {
             if (!args.size())
                 throw required_missing();
+            //std::cout << "m_count: " << m_count << std::endl;
             if (m_count == N)
-                throw too_many();
+                throw too_many_required_silent();
             std::string value = args[0];
             args.pop_front();
             if (value[0] == '=')
@@ -160,6 +172,11 @@ namespace CppArgParser
             return "arg";
         }
         
+        size_t expected()
+        {
+            return N;
+        }
+        
     private:
         int m_count;
     };
@@ -180,6 +197,11 @@ namespace CppArgParser
         
         void end()
         {
+        }
+
+        size_t expected()
+        {
+            return 1;
         }
     };
 
@@ -234,8 +256,14 @@ namespace CppArgParser
         {
             return "[=arg(=1)]";
         }
+
         void end()
         {
+        }
+
+        size_t expected()
+        {
+            return 1;
         }
         
     private:
@@ -247,6 +275,7 @@ namespace CppArgParser
         std::vector<Name> m_names;
         Name m_desc;
         Name m_decorator;
+        size_t m_expected;
         
         std::string getName() const
         {
@@ -343,8 +372,6 @@ namespace CppArgParser
     template<typename T>
     void ArgParser::param(T& value, std::vector<Name> names, Name desc, bool visible_in_help)
     {
-        if (!m_valid) 
-            return;
         if (names.size() == 0) // TODO make sure all names are unique and non-empty
         {
             m_errors << "every parameter must have a unique name" << std::endl;
@@ -355,7 +382,7 @@ namespace CppArgParser
             ParamTraits<T> type;
             if (visible_in_help)
             {
-                Parameter param = { names, desc, type.value_description() };
+                Parameter param = { names, desc, type.value_description(), type.expected() };
                 m_parameters.push_back(param);
             }
 
@@ -363,13 +390,22 @@ namespace CppArgParser
             {
                 Args args = m_args;
                 size_t argCount = m_args.size();
+                bool done = false;
                 for (auto argIter = m_args.begin(); argIter != m_args.end(); ++argIter)
                 {
-                    if (!m_valid) 
+                    if (!m_valid || done) 
                         break;
+                    std::string arg;
                     try
                     {
-                        std::string arg = *argIter;
+                        arg = *argIter;
+                        //std::cout << "ARG: " << arg;
+                        //std::cout << "  args:[";
+                        //for (auto argIter2 = m_args.begin(); argIter2 != m_args.end(); ++argIter2)
+                        //{
+                        //    std::cout <<*argIter2 << ", ";
+                        //}
+                        //std::cout << "]" << std::endl;
                         if (arg == name)
                         {
                             // "--param value" for optional params
@@ -408,6 +444,24 @@ namespace CppArgParser
                     {
                         m_errors << Parameter::getName(names) << ": too many instances" << std::endl;
                         m_valid = false;
+                    }
+                    catch (too_many_required_silent&)
+                    {
+                        if (names[0][0] == '-')
+                        {
+                            m_errors << Parameter::getName(names) << ": too many instances" << std::endl;
+                            m_valid = false;
+                        }
+                        else
+                        {
+                            // give someone else a chance to look at this argument
+                            //args.push_front(arg);
+                            //std::cout << "BLAH" << std::endl;
+                            m_args = args;
+                            return;
+                            done = true;
+                            break;
+                        }
                     }
                     catch (not_enough&)
                     {
@@ -452,7 +506,6 @@ namespace CppArgParser
     {
         if (m_help_requested)
         {
-            param<bool>("--help", "show this help message", true);
             print_help(m_app_name, m_app_description, m_os);
             return false;
         }
@@ -465,13 +518,9 @@ namespace CppArgParser
         
         if (!m_valid)
         {
+            // show only the first error for now
             std::string errors = m_errors.str();
             auto eol = errors.find('\n');
-//            errors += std::to_string((int)eol);
-            
-//--s: too many instances
-//ArgParser unknown name "2"
-
             if (eol != std::string::npos)
                 errors = errors.substr(0, eol + 1);
             throw std::runtime_error(errors);
@@ -486,6 +535,11 @@ namespace CppArgParser
         Parameters optional;
         Parameters required;
         
+        std::vector<std::string> aliases;
+        aliases.push_back("--help");
+        Parameter param = {aliases, "show this help message", ""};
+        m_parameters.push_back(param);
+        
         os << "Usage: " << app_name; 
         for (auto param: m_parameters)
         {
@@ -497,6 +551,24 @@ namespace CppArgParser
             else
             {
                 os << " <" << name << ">";
+                if (param.m_expected > 1)
+                {
+                    if (param.m_expected < 4)
+                    {
+                        for (int i = 1; i < param.m_expected; ++i)
+                        {
+                            os << " <" << name << ">";
+                        }
+                    }
+                    else
+                    {
+                        os << "*";
+                        if (param.m_expected == -1)
+                            os << "n";
+                        else
+                            os << param.m_expected;
+                    }
+                }
                 required.push_back(param);
             }
         }        

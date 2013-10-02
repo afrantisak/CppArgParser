@@ -87,4 +87,13 @@ main:
         - req_equal1:  ref (bin)/RequiredTest a=1
         - req_equal2:  ref (bin)/RequiredTest a=1 a=2
         - req_equal3:  ref (bin)/RequiredTest a=1 a=2 a=3
-
+        - req_bad_help1: ref (bin)/RequiredTest a=1 --help
+        - req_bad_help2: ref (bin)/RequiredTest a=1 --help a=2
+        - req_bad_help3: ref (bin)/RequiredTest a=1 a=2 --help
+        - req_bad_help4: ref (bin)/RequiredTest --help a=1 a=2 --help
+        - req_bad_help5: ref (bin)/RequiredTest --help 1 2 --help
+        - req_bad_help6: ref (bin)/RequiredTest 1 2 --help
+        - req_bad_help7: ref (bin)/RequiredTest --help 1
+        - req_bad_help8: ref (bin)/RequiredTest 1 --help 2
+        - req_help4:     ref (bin)/RequiredTest4 a=1 --help
+        - reqN:          ref (bin)/RequiredTest4 1 2 3 4 10

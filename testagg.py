@@ -91,7 +91,8 @@ def test(name, instruction, cmd, refop, timeout, options):
     
     # capture stdout
     old_stdout = sys.stdout
-    sys.stdout = mystdout = cStringIO.StringIO()
+    mystdout = cStringIO.StringIO()
+    sys.stdout = mystdout
 
     ref = name + ".ref"
     if 'refdir' in options:

@@ -1,0 +1,10 @@
+Usage: RequiredTest4 <a>*4 <b>*n [options]
+
+Test the CppArgParser
+
+Required parameters:
+  a: four ints
+  b: N ints
+Optional parameters:
+  --help   show this help message
+
